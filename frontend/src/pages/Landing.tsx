@@ -17,6 +17,7 @@ import ChecklistIcon from "@mui/icons-material/Checklist";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import DescriptionIcon from "@mui/icons-material/Description";
 import { Link as RouterLink } from "react-router-dom";
 import backgroundLanding from "../assets/backgroundLanding.png";
 import Footer from "./Footer";
@@ -148,47 +149,91 @@ const Landing: React.FC = () => {
         </Slide>
 
         <Zoom in={true} timeout={1500}>
-          <Button
-            component={RouterLink}
-            to="/login"
-            variant="contained"
-            size="large"
-            endIcon={<ArrowForwardIcon />}
-            sx={{ 
-              px: { xs: 4, sm: 6 }, 
-              py: { xs: 1.5, sm: 2 }, 
-              borderRadius: 50, 
-              fontWeight: 700,
-              fontSize: { xs: "1rem", sm: "1.125rem" },
-              minWidth: { xs: "240px", sm: "280px" },
-              background: "linear-gradient(135deg, #1976d2 0%, #1565c0 100%)",
-              boxShadow: "0 8px 32px rgba(25, 118, 210, 0.3)",
-              textTransform: "none",
-              position: "relative",
-              zIndex: 2,
-              color: "white",
-              animation: "fadeInScale 1s ease-out 0.6s both",
-              "&:hover": {
-                background: "linear-gradient(135deg, #1565c0 0%, #1e88e5 100%)",
-                boxShadow: "0 12px 40px rgba(25, 118, 210, 0.5)",
-                transform: "translateY(-2px)",
+          <Box sx={{ display: "flex", gap: 3, flexDirection: { xs: "column", sm: "row" }, alignItems: "center" }}>
+            <Button
+              component={RouterLink}
+              to="/login"
+              variant="contained"
+              size="large"
+              endIcon={<ArrowForwardIcon />}
+              sx={{ 
+                px: { xs: 4, sm: 6 }, 
+                py: { xs: 1.5, sm: 2 }, 
+                borderRadius: 50, 
+                fontWeight: 700,
+                fontSize: { xs: "1rem", sm: "1.125rem" },
+                minWidth: { xs: "240px", sm: "280px" },
+                background: "linear-gradient(135deg, #1976d2 0%, #1565c0 100%)",
+                boxShadow: "0 8px 32px rgba(25, 118, 210, 0.3)",
+                textTransform: "none",
+                position: "relative",
+                zIndex: 2,
                 color: "white",
+                animation: "fadeInScale 1s ease-out 0.6s both",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #1565c0 0%, #1e88e5 100%)",
+                  boxShadow: "0 12px 40px rgba(25, 118, 210, 0.5)",
+                  transform: "translateY(-2px)",
+                  color: "white",
+                  "& .MuiSvgIcon-root": {
+                    color: "white",
+                  }
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                  color: "white",
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 "& .MuiSvgIcon-root": {
                   color: "white",
                 }
-              },
-              "&:active": {
-                transform: "translateY(0)",
+              }}
+            >
+              Get Started Today
+            </Button>
+            
+            <Button
+              component={RouterLink}
+              to="/documentation"
+              variant="outlined"
+              size="large"
+              endIcon={<DescriptionIcon />}
+              sx={{ 
+                px: { xs: 4, sm: 6 }, 
+                py: { xs: 1.5, sm: 2 }, 
+                borderRadius: 50, 
+                fontWeight: 700,
+                fontSize: { xs: "1rem", sm: "1.125rem" },
+                minWidth: { xs: "200px", sm: "240px" },
+                borderColor: "rgba(255,255,255,0.3)",
                 color: "white",
-              },
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              "& .MuiSvgIcon-root": {
-                color: "white",
-              }
-            }}
-          >
-            Get Started Today
-          </Button>
+                textTransform: "none",
+                position: "relative",
+                zIndex: 2,
+                backdropFilter: "blur(10px)",
+                background: "rgba(255,255,255,0.1)",
+                animation: "fadeInScale 1s ease-out 0.8s both",
+                "&:hover": {
+                  borderColor: "rgba(255,255,255,0.8)",
+                  background: "rgba(255,255,255,0.2)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 8px 32px rgba(255, 255, 255, 0.2)",
+                  "& .MuiSvgIcon-root": {
+                    color: "white",
+                  }
+                },
+                "&:active": {
+                  transform: "translateY(0)",
+                },
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "& .MuiSvgIcon-root": {
+                  color: "white",
+                }
+              }}
+            >
+              View Documentation
+            </Button>
+          </Box>
         </Zoom>
 
         {/* Floating particles animation */}

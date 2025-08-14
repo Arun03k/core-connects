@@ -15,6 +15,7 @@ import {
   Phone,
   LocationOn,
 } from "@mui/icons-material";
+import { Link as RouterLink } from "react-router-dom";
 
 const Footer: React.FC = () => {
   return (
@@ -221,6 +222,22 @@ const Footer: React.FC = () => {
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
               <Link
+                component={RouterLink}
+                to="/documentation"
+                sx={{
+                  color: "rgba(255,255,255,0.7)",
+                  textDecoration: "none",
+                  fontSize: "0.875rem",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    color: "#60a5fa",
+                    transform: "translateX(4px)",
+                  },
+                }}
+              >
+                Documentation
+              </Link>
+              <Link
                 href="https://github.com/Arun03k/core-connects/blob/main/README.md"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -235,7 +252,7 @@ const Footer: React.FC = () => {
                   },
                 }}
               >
-                Documentation
+                GitHub Docs
               </Link>
               {[
                 "API Reference",
