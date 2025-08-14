@@ -19,6 +19,7 @@ import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Link as RouterLink } from "react-router-dom";
 import backgroundLanding from "../assets/backgroundLanding.png";
+import Footer from "./Footer";
 
 const Landing: React.FC = () => {
   return (
@@ -163,18 +164,27 @@ const Landing: React.FC = () => {
               background: "linear-gradient(135deg, #1976d2 0%, #1565c0 100%)",
               boxShadow: "0 8px 32px rgba(25, 118, 210, 0.3)",
               textTransform: "none",
-              animation: "fadeInScale 1s ease-out 0.6s both, float 3s ease-in-out infinite 2s",
               position: "relative",
               zIndex: 2,
+              color: "white",
+              animation: "fadeInScale 1s ease-out 0.6s both",
               "&:hover": {
-                transform: "translateY(-2px) scale(1.02)",
-                boxShadow: "0 12px 40px rgba(25, 118, 210, 0.4)",
-                background: "linear-gradient(135deg, #1565c0 0%, #0d47a1 100%)",
+                background: "linear-gradient(135deg, #1565c0 0%, #1e88e5 100%)",
+                boxShadow: "0 12px 40px rgba(25, 118, 210, 0.5)",
+                transform: "translateY(-2px)",
+                color: "white",
+                "& .MuiSvgIcon-root": {
+                  color: "white",
+                }
               },
               "&:active": {
-                transform: "translateY(0) scale(0.98)",
+                transform: "translateY(0)",
+                color: "white",
               },
               transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              "& .MuiSvgIcon-root": {
+                color: "white",
+              }
             }}
           >
             Get Started Today
@@ -563,6 +573,9 @@ const Landing: React.FC = () => {
           </Grid>
         </Container>
       </Box>
+
+      {/* Footer */}
+      <Footer />
     </Box>
   );
 };
