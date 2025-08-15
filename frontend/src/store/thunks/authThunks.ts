@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import type { User } from '../slices/authSlice';
+import type { User, AuthTokens } from '../slices/authSlice';
 
 // API base URL - Use environment variable or fallback to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
@@ -11,16 +11,34 @@ export interface LoginCredentials {
 }
 
 export interface SignupCredentials {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
+  username?: string;
 }
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  tokens: AuthTokens;
+  emailSent?: boolean;
   message?: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  expiresIn: number;
+  tokenType: string;
+}
+
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
 }
 
 // Login thunk
@@ -46,7 +64,18 @@ export const loginUser = createAsyncThunk<
       }
 
       const data = await response.json();
-      return data;
+      
+      // Transform response to match expected format
+      return {
+        user: data.data.user,
+        tokens: {
+          accessToken: data.data.accessToken,
+          refreshToken: data.data.refreshToken,
+          expiresIn: data.data.expiresIn,
+          tokenType: data.data.tokenType
+        },
+        message: data.message
+      };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : 'Network error occurred'
@@ -71,7 +100,7 @@ export const signupUser = createAsyncThunk<
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...signupData } = credentials;
       
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -81,11 +110,23 @@ export const signupUser = createAsyncThunk<
 
       if (!response.ok) {
         const errorData = await response.json();
-        return rejectWithValue(errorData.message || 'Signup failed');
+        return rejectWithValue(errorData.message || 'Registration failed');
       }
 
       const data = await response.json();
-      return data;
+      
+      // Transform response to match expected format
+      return {
+        user: data.data.user,
+        tokens: {
+          accessToken: data.data.accessToken,
+          refreshToken: data.data.refreshToken,
+          expiresIn: data.data.expiresIn,
+          tokenType: data.data.tokenType
+        },
+        emailSent: data.data.emailSent,
+        message: data.message
+      };
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : 'Network error occurred'
@@ -103,16 +144,16 @@ export const logoutUser = createAsyncThunk<
   'auth/logout',
   async (_, { getState }) => {
     try {
-      const state = getState() as { auth: { token: string | null } };
-      const token = state.auth.token;
+      const state = getState() as { auth: { tokens: { refreshToken: string } | null } };
+      const refreshToken = state.auth.tokens?.refreshToken;
 
-      if (token) {
+      if (refreshToken) {
         await fetch(`${API_BASE_URL}/auth/logout`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ refreshToken }),
         });
       }
     } catch (error) {
@@ -131,17 +172,17 @@ export const verifyToken = createAsyncThunk<
   'auth/verify',
   async (_, { rejectWithValue, getState }) => {
     try {
-      const state = getState() as { auth: { token: string | null } };
-      const token = state.auth.token;
+      const state = getState() as { auth: { tokens: { accessToken: string } | null } };
+      const accessToken = state.auth.tokens?.accessToken;
 
-      if (!token) {
+      if (!accessToken) {
         return rejectWithValue('No token found');
       }
 
       const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
       });
@@ -151,10 +192,160 @@ export const verifyToken = createAsyncThunk<
       }
 
       const data = await response.json();
-      return data.user;
+      return data.data.user;
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : 'Token verification failed'
+      );
+    }
+  }
+);
+
+// Refresh token thunk
+export const refreshToken = createAsyncThunk<
+  RefreshTokenResponse,
+  void,
+  { rejectValue: string }
+>(
+  'auth/refresh',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const state = getState() as { auth: { tokens: { refreshToken: string } | null } };
+      const refreshTokenValue = state.auth.tokens?.refreshToken;
+
+      if (!refreshTokenValue) {
+        return rejectWithValue('No refresh token found');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      });
+
+      if (!response.ok) {
+        return rejectWithValue('Token refresh failed');
+      }
+
+      const data = await response.json();
+      return data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Token refresh failed'
+      );
+    }
+  }
+);
+
+// Forgot password thunk
+export const forgotPassword = createAsyncThunk<
+  void,
+  ForgotPasswordRequest,
+  { rejectValue: string }
+>(
+  'auth/forgotPassword',
+  async (request, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.message || 'Failed to send password reset email');
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Network error occurred'
+      );
+    }
+  }
+);
+
+// Reset password thunk
+export const resetPassword = createAsyncThunk<
+  void,
+  ResetPasswordRequest,
+  { rejectValue: string }
+>(
+  'auth/resetPassword',
+  async (request, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.message || 'Failed to reset password');
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Network error occurred'
+      );
+    }
+  }
+);
+
+// Verify email thunk
+export const verifyEmail = createAsyncThunk<
+  void,
+  string,
+  { rejectValue: string }
+>(
+  'auth/verifyEmail',
+  async (token, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-email/${token}`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.message || 'Email verification failed');
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Network error occurred'
+      );
+    }
+  }
+);
+
+// Resend verification thunk
+export const resendVerification = createAsyncThunk<
+  void,
+  string,
+  { rejectValue: string }
+>(
+  'auth/resendVerification',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.message || 'Failed to resend verification email');
+      }
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Network error occurred'
       );
     }
   }

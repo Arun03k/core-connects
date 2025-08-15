@@ -6,6 +6,8 @@ import Dashboard from "../pages/Dashboard";
 import AuthDemo from "../pages/AuthDemo";
 import Login from "../components/auth/Login";
 import Signup from "../components/auth/Signup";
+import ForgotPassword from "../components/auth/ForgotPassword";
+import ResetPassword from "../components/auth/ResetPassword";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 
 const AppRoutes: React.FC = () => {
@@ -16,6 +18,8 @@ const AppRoutes: React.FC = () => {
       <Route path="/documentation" element={<Documentation />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route 
         path="/dashboard" 
         element={

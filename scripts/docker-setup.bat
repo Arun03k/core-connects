@@ -81,7 +81,7 @@ set /p secret="Enter production SECRET_KEY (or press Enter for default): "
 if "%secret%"=="" set SECRET_KEY=production-secret-key-change-me
 if not "%secret%"=="" set SECRET_KEY=%secret%
 echo.
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f ..\config\docker-compose.prod.yml up -d
 echo.
 echo ✅ Production environment is starting!
 echo.
@@ -130,7 +130,7 @@ echo.
 echo Stopping all containers...
 echo.
 docker-compose down
-docker-compose -f docker-compose.prod.yml down
+docker-compose -f ..\config\docker-compose.prod.yml down
 echo.
 echo ✅ All containers stopped!
 goto end
@@ -164,7 +164,7 @@ if not "%confirm%"=="y" if not "%confirm%"=="Y" (
 echo.
 echo Cleaning up...
 docker-compose down --rmi all --volumes --remove-orphans
-docker-compose -f docker-compose.prod.yml down --rmi all --volumes --remove-orphans
+docker-compose -f ..\config\docker-compose.prod.yml down --rmi all --volumes --remove-orphans
 echo.
 echo ✅ Cleanup completed!
 goto end
