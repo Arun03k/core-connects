@@ -173,38 +173,42 @@ core-connect/
 
 The easiest way to run CoreConnect is using Docker. This method ensures consistent environments across all systems.
 
-#### Option 1: Interactive Setup (Windows)
+#### Development Mode (Hot Reload)
+For active development with live reloading:
+
 ```cmd
-dev-setup.bat
+# Start development environment with hot reload
+dev-start.bat
+# OR
+docker-compose -f docker-compose.dev.yml up --build
+
+# Stop development environment
+dev-stop.bat
+# OR
+docker-compose -f docker-compose.dev.yml down
 ```
-*Easy interactive menu for all development tasks*
 
-#### Option 2: Direct Commands
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Arun03k/core-connects.git
-   cd core-connects
-   ```
+**Development URLs:**
+- **Frontend**: http://localhost:5173 (Vite dev server with hot reload)
+- **Frontend Alt**: http://localhost:80 (mapped to dev server)
+- **Backend API**: http://localhost:5000 (Flask with auto-reload)
+- **Health Check**: http://localhost:5000/health
 
-2. **Start the full application**
-   ```bash
-   docker-compose up -d
-   ```
+#### Production Mode
+For production-like testing:
 
-3. **Access the application**
-   - **Frontend**: http://localhost:80
-   - **Backend API**: http://localhost:5000
-   - **Health Check**: http://localhost:5000/health
+```cmd
+# Option 1: Interactive Setup (Windows)
+dev-setup.bat
 
-4. **View application logs**
-   ```bash
-   docker-compose logs -f
-   ```
+# Option 2: Direct Commands
+docker-compose up -d
+```
 
-5. **Stop the application**
-   ```bash
-   docker-compose down
-   ```
+**Production URLs:**
+- **Frontend**: http://localhost:80 (Nginx production build)
+- **Backend API**: http://localhost:5000
+- **Health Check**: http://localhost:5000/health
 
 ### 🛠️ Development with Docker
 

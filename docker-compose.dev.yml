@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Backend service with hot reload
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: coreconnect-backend-dev
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - SECRET_KEY=docker-development-secret-key
+      - PORT=5000
+      - API_VERSION=v1
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+      - /app/.venv
+    restart: unless-stopped
+    command: python app.py
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Frontend service with hot reload (Vite dev server)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: coreconnect-frontend-dev
+    ports:
+      - "5173:5173"  # Vite default dev port
+      - "80:5173"     # Alternative port mapping
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:5000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/dist
+    depends_on:
+      - backend
+    restart: unless-stopped
+    command: npm run dev -- --host 0.0.0.0 --port 5173
+    stdin_open: true
+    tty: true
+
+  # Development database (optional)
+  # Uncomment when you need a database
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: coreconnect-db-dev
+  #   environment:
+  #     POSTGRES_DB: coreconnect_dev
+  #     POSTGRES_USER: coreconnect
+  #     POSTGRES_PASSWORD: password
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_dev_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   postgres_dev_data:
