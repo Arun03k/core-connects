@@ -708,7 +708,7 @@ const Documentation: React.FC = () => {
                         Windows Users (Interactive Setup):
                       </Typography>
                       <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#e3f2fd", borderRadius: 2, border: "2px solid #1976d2", overflow: "auto" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", wordBreak: "break-all" }}>
+                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", overflowWrap: "break-word" }}>
                           git clone https://github.com/Arun03k/core-connects.git<br/>
                           cd core-connects<br/>
                           dev-setup.bat
