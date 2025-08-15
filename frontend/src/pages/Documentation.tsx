@@ -76,77 +76,102 @@ const Documentation: React.FC = () => {
     { name: "Docker", version: "Latest", color: "#2496ed", icon: "🐳" },
     { name: "Material-UI", version: "7.3.1", color: "#1976d2", icon: "🎨" },
     { name: "Vite", version: "7.1.2", color: "#646cff", icon: "⚡" },
+    { name: "Redux Toolkit", version: "2.8.2", color: "#764abc", icon: "🏪" },
+    { name: "React Router", version: "7.8.0", color: "#CA4245", icon: "🛣️" },
   ];
 
   const features = [
     {
-      icon: <Group sx={{ color: "#1976d2" }} />,
+      icon: <Code sx={{ color: "#1976d2" }} />,
+      title: "Landing Page",
+      description: "Modern, responsive landing page with professional animations and Material-UI components",
+      status: "completed",
+    },
+    {
+      icon: <Description sx={{ color: "#1976d2" }} />,
+      title: "Interactive Documentation",
+      description: "Comprehensive documentation system with tabbed navigation and responsive design",
+      status: "completed",
+    },
+    {
+      icon: <DeviceHub sx={{ color: "#1976d2" }} />,
+      title: "Docker Containerization",
+      description: "Complete containerization with development and production environments",
+      status: "completed",
+    },
+    {
+      icon: <Security sx={{ color: "#1976d2" }} />,
+      title: "Authentication Framework",
+      description: "Redux-based auth state management, protected routes, and JWT token handling",
+      status: "completed",
+    },
+    {
+      icon: <Build sx={{ color: "#1976d2" }} />,
+      title: "Component Library",
+      description: "Reusable TypeScript components with Material-UI theming and validation",
+      status: "completed",
+    },
+    {
+      icon: <Speed sx={{ color: "#1976d2" }} />,
+      title: "CI/CD Pipeline",
+      description: "Automated GitHub Actions pipeline with testing, security scanning, and deployment",
+      status: "completed",
+    },
+    {
+      icon: <Group sx={{ color: "#f57c00" }} />,
       title: "Employee Management",
       description: "Comprehensive HR tools for managing profiles, roles, and departments",
       status: "planned",
     },
     {
-      icon: <Schedule sx={{ color: "#1976d2" }} />,
+      icon: <Schedule sx={{ color: "#f57c00" }} />,
       title: "Time Tracking",
-      description: "Log working hours with intuitive interface and productivity insights",
+      description: "Intuitive time tracking interface with productivity insights and reporting",
       status: "planned",
     },
     {
-      icon: <Assignment sx={{ color: "#1976d2" }} />,
+      icon: <Assignment sx={{ color: "#f57c00" }} />,
       title: "Leave Management",
       description: "Self-service leave requests with automated approval workflows",
       status: "planned",
-    },
-    {
-      icon: <Code sx={{ color: "#1976d2" }} />,
-      title: "Landing Page",
-      description: "Modern, responsive landing page with animations",
-      status: "completed",
-    },
-    {
-      icon: <Description sx={{ color: "#1976d2" }} />,
-      title: "Documentation",
-      description: "Interactive documentation with comprehensive guides",
-      status: "completed",
-    },
-    {
-      icon: <DeviceHub sx={{ color: "#1976d2" }} />,
-      title: "Docker Setup",
-      description: "Containerized development and deployment with CI/CD pipeline",
-      status: "completed",
     },
   ];
 
   const roadmapPhases = [
     {
-      phase: "Phase 1 (Current)",
+      phase: "Phase 1 (Completed ✅)",
       items: [
-        { task: "Landing page design", completed: true },
-        { task: "Responsive layout", completed: true },
-        { task: "Component architecture", completed: true },
-        { task: "Animation system", completed: true },
-        { task: "Documentation page", completed: true },
-        { task: "Docker containerization", completed: true },
-        { task: "CI/CD pipeline", completed: true },
+        { task: "Modern responsive landing page", completed: true },
+        { task: "Interactive documentation system", completed: true },
+        { task: "Component architecture with TypeScript", completed: true },
+        { task: "Animation system with Material-UI", completed: true },
+        { task: "Docker containerization (dev + prod)", completed: true },
+        { task: "CI/CD pipeline with GitHub Actions", completed: true },
+        { task: "Authentication framework (frontend)", completed: true },
+        { task: "Redux state management setup", completed: true },
+        { task: "Protected routes system", completed: true },
       ],
     },
     {
-      phase: "Phase 2 (Next)",
+      phase: "Phase 2 (In Progress 🔄)",
       items: [
-        { task: "Authentication system", completed: false },
-        { task: "Employee dashboard", completed: false },
+        { task: "Complete authentication backend integration", completed: false },
+        { task: "User dashboard with profile management", completed: false },
+        { task: "Database integration (PostgreSQL)", completed: false },
+        { task: "JWT token authentication API", completed: false },
+        { task: "Form validation and error handling", completed: false },
+        { task: "User session management", completed: false },
+      ],
+    },
+    {
+      phase: "Phase 3 (Planned ⏳)",
+      items: [
+        { task: "Employee management module", completed: false },
         { task: "Time tracking interface", completed: false },
         { task: "Leave management system", completed: false },
-        { task: "Database integration", completed: false },
-      ],
-    },
-    {
-      phase: "Phase 3 (Future)",
-      items: [
         { task: "Task management module", completed: false },
-        { task: "Reporting & analytics", completed: false },
-        { task: "Mobile app integration", completed: false },
-        { task: "Advanced API features", completed: false },
+        { task: "Reporting & analytics dashboard", completed: false },
+        { task: "Email notifications system", completed: false },
       ],
     },
   ];
@@ -368,9 +393,14 @@ const Documentation: React.FC = () => {
                     What is CoreConnect?
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
-                    CoreConnect is a modern, comprehensive workforce management platform designed to empower both HR teams and employees. 
-                    Built with cutting-edge technologies like React 19, TypeScript, Flask, and containerized with Docker, it provides powerful 
-                    tools for managing the entire employee lifecycle from onboarding to daily operations.
+                    CoreConnect is a modern, comprehensive workforce management platform built with cutting-edge technologies. 
+                    Currently featuring a complete authentication framework, Docker containerization, and CI/CD pipeline, 
+                    CoreConnect provides a solid foundation for enterprise HR management solutions.
+                  </Typography>
+                  <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
+                    The platform uses React 19 with TypeScript for type-safe frontend development, Flask 3.0 for the robust backend API, 
+                    and is fully containerized with Docker for consistent deployment across environments. Our automated CI/CD pipeline 
+                    ensures code quality through testing, security scanning, and automated deployments.
                   </Typography>
                   <Typography variant="h6" gutterBottom sx={{ color: "#1565c0", mt: 4, fontWeight: 600 }}>
                     Key Benefits
@@ -378,23 +408,27 @@ const Documentation: React.FC = () => {
                   <List>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Streamlined HR processes" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Modern React 19 with TypeScript for type safety" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Enhanced employee productivity" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Complete authentication framework with Redux" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Real-time insights and analytics" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Docker containerization with dev/prod environments" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Docker containerization for consistent environments" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="CI/CD pipeline with automated testing & deployment" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="CI/CD pipeline with automated testing" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Interactive documentation and component library" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Responsive design with Material-UI components" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                   </List>
                 </CardContent>
@@ -415,20 +449,24 @@ const Documentation: React.FC = () => {
                   </Typography>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Pages</Typography>
+                      <Chip label="8+" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Components</Typography>
                       <Chip label="15+" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Features</Typography>
-                      <Chip label="6" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                      <Chip label="6 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Responsive</Typography>
                       <Chip label="100%" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Typography sx={{ fontWeight: 500 }}>Backend API</Typography>
-                      <Chip label="Flask" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                      <Typography sx={{ fontWeight: 500 }}>State Management</Typography>
+                      <Chip label="Redux Toolkit" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Container</Typography>
@@ -546,7 +584,7 @@ const Documentation: React.FC = () => {
                     </Box>
                     <Box>
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
-                        All Platforms (Direct Commands):
+                        All Platforms (Production Mode):
                       </Typography>
                       <Paper sx={{ p: 3, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
                         <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "1.1rem" }}>
@@ -558,13 +596,27 @@ const Documentation: React.FC = () => {
                     </Box>
                     <Box>
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
+                        Development Mode (Hot Reload):
+                      </Typography>
+                      <Paper sx={{ p: 3, background: "#fff3e0", borderRadius: 2, fontFamily: "monospace", border: "2px solid #ff9800" }}>
+                        <code style={{ color: "#f57c00", fontWeight: 600, fontSize: "1.1rem" }}>
+                          docker-compose -f docker-compose.dev.yml up --build<br/>
+                          # OR<br/>
+                          dev-start.bat
+                        </code>
+                      </Paper>
+                    </Box>
+                    <Box>
+                      <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
                         Access Your Application:
                       </Typography>
                       <Paper sx={{ p: 3, background: "#e8f5e8", borderRadius: 2, border: "2px solid #4caf50" }}>
                         <Typography component="div" sx={{ fontFamily: "monospace", fontWeight: 600, color: "#2e7d32" }}>
                           🌐 Frontend: <a href="http://localhost:80" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:80</a><br/>
                           🔧 Backend: <a href="http://localhost:5000" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000</a><br/>
-                          ❤️ Health: <a href="http://localhost:5000/health" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/health</a>
+                          ❤️ Health: <a href="http://localhost:5000/health" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/health</a><br/>
+                          🧪 API Test: <a href="http://localhost:5000/api/test" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/api/test</a><br/>
+                          📱 Dev Server: <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5173</a> (dev mode only)
                         </Typography>
                       </Paper>
                     </Box>
@@ -724,12 +776,14 @@ const Documentation: React.FC = () => {
                         </Box>
                       </Box>
                       <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.6 }}>
-                        {tech.name === "React" && "Modern React with latest features and hooks"}
-                        {tech.name === "TypeScript" && "Type-safe development with full IntelliSense"}
-                        {tech.name === "Flask" && "Python web framework for robust backend API"}
-                        {tech.name === "Docker" && "Containerization for consistent development environments"}
-                        {tech.name === "Material-UI" && "Comprehensive component library with theming"}
-                        {tech.name === "Vite" && "Lightning-fast build tool and development server"}
+                        {tech.name === "React" && "Modern React with latest features, hooks, and concurrent rendering"}
+                        {tech.name === "TypeScript" && "Type-safe development with full IntelliSense and compile-time error checking"}
+                        {tech.name === "Flask" && "Lightweight Python web framework for robust RESTful API development"}
+                        {tech.name === "Docker" && "Containerization for consistent development and production environments"}
+                        {tech.name === "Material-UI" && "Comprehensive component library with theming and responsive design"}
+                        {tech.name === "Vite" && "Lightning-fast build tool with HMR and optimized production builds"}
+                        {tech.name === "Redux Toolkit" && "Modern Redux with simplified state management and built-in best practices"}
+                        {tech.name === "React Router" && "Declarative client-side routing with protected routes and navigation guards"}
                       </Typography>
                     </CardContent>
                   </Card>
