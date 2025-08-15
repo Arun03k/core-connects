@@ -2,47 +2,63 @@
 
 ![CoreConnect Banner](src/assets/backgroundLanding.png)
 
+## 🚀 Live Demo
+
+**🌐 Production Website**: https://core-connect-iqcmjox77-arun03ks-projects.vercel.app
+**📊 Project Dashboard**: https://vercel.com/arun03ks-projects/core-connect
+**🔗 GitHub Repository**: https://github.com/Arun03k/core-connects
+
 ## 🚀 Overview
 
 CoreConnect is a modern, comprehensive workforce management platform designed to empower both HR teams and employees with powerful tools for managing the entire employee lifecycle. From onboarding to daily operations, CoreConnect streamlines processes and enhances productivity across your organization.
 
+**✅ NOW LIVE ON VERCEL** - The application has been successfully deployed and is fully functional with both frontend and backend services running on Vercel's serverless platform.
+
 ## ✨ Current Features (Completed)
 
-### 🌐 Landing Page
+### 🌐 Landing Page ✅
 - Modern, responsive design with animated components
 - Professional hero section with gradient backgrounds
 - Interactive feature cards with hover effects
 - Mobile-first design principles
 - Performance-optimized loading animations
 
-### 📚 Documentation System
+### 📚 Documentation System ✅
 - Interactive documentation with tabbed navigation
 - Comprehensive setup guides (Docker & manual)
 - Technology stack overview
 - Feature roadmap with progress tracking
 - Responsive design with smooth animations
 
-### 🔐 Authentication Framework
+### 🔐 Authentication Framework ✅
 - Complete Redux authentication state management
 - Login and signup component architecture
 - Protected route system with authentication guards
 - JWT token handling and persistence
 - Form validation and error handling
 
-### 🐳 Docker Containerization
+### 🐳 Docker Containerization ✅
 - Production-ready Docker containers
 - Multi-stage builds for optimized images
 - Development and production environments
 - Health checks and monitoring
 - Automated CI/CD pipeline integration
 
-### 🎨 Component Library
+### ☁️ **Vercel Deployment ✅ NEW!**
+- **Full-stack serverless deployment** on Vercel platform
+- **Frontend**: React + Vite static site deployment
+- **Backend**: Flask Python serverless functions
+- **Production optimized** builds with CDN distribution
+- **Environment variables** configured for production security
+- **Automatic HTTPS** and custom domain support ready
+
+### 🎨 Component Library ✅
 - Reusable UI components (Button, InputField)
 - Material-UI integration with custom theming
 - TypeScript interfaces and type safety
 - Consistent styling with Emotion CSS-in-JS
 
-### 🚀 Development Infrastructure
+### 🚀 Development Infrastructure ✅
 - Hot reload development environment
 - ESLint and TypeScript configuration
 - Automated testing setup (backend with pytest)
@@ -102,6 +118,8 @@ CoreConnect is a modern, comprehensive workforce management platform designed to
 - **Docker Compose** - Multi-container orchestration
 - **GitHub Actions** - CI/CD pipeline automation
 - **Nginx** - Web server and reverse proxy (production)
+- **Vercel** - Serverless deployment platform (production)
+- **Vercel CLI** - Deployment and project management
 
 ### Development Tools
 - **ESLint 9.33.0** - Code linting and quality
@@ -228,11 +246,19 @@ core-connect/
 
 ## 🚀 Getting Started
 
+### 🌐 **Try It Live First!**
+Visit the live application at: **https://core-connect-iqcmjox77-arun03ks-projects.vercel.app**
+- ✅ Fully functional frontend
+- ✅ Backend API endpoints
+- ✅ Authentication system
+- ✅ Responsive design on all devices
+
 ### Prerequisites
 - **Docker Desktop** (recommended) - For containerized development
 - **Node.js (v20+)** - Only if running frontend locally
 - **Python 3.11+** - Only if running backend locally
 - **Git** - Version control
+- **Vercel Account** - For deployment (optional)
 
 ### 🐳 Quick Start with Docker (Recommended)
 
@@ -363,7 +389,34 @@ python app.py
 
 For detailed Docker and deployment information, see:
 - **[DOCKER.md](./DOCKER.md)** - Complete Docker & CI/CD guide
+- **[DEPLOYMENT-SUCCESS.md](./DEPLOYMENT-SUCCESS.md)** - Vercel deployment guide
 - **[Backend README](./backend/README.md)** - Backend-specific documentation
+
+### 🌐 **Vercel Deployment** (Production)
+
+The application is deployed on Vercel with the following configuration:
+- **Frontend**: Static site deployment with CDN optimization
+- **Backend**: Serverless Python functions
+- **Environment**: Production-optimized with security configurations
+- **SSL**: Automatic HTTPS with custom domain support
+
+#### Deploy Your Own Copy:
+```bash
+# Clone and deploy to your Vercel account
+git clone https://github.com/Arun03k/core-connects.git
+cd core-connects
+npm install -g vercel  # Install Vercel CLI
+vercel login           # Login to your account
+vercel --prod          # Deploy to production
+```
+
+#### Environment Variables (Vercel Dashboard):
+Set these in your Vercel project settings:
+```
+SECRET_KEY=your-secure-secret-key-32-chars-minimum
+FLASK_ENV=production
+API_VERSION=v1
+```
 
 ## 📱 Responsive Design
 
@@ -462,6 +515,8 @@ CoreConnect is fully responsive and optimized for:
 - ✅ Routing system with protected routes
 - ✅ Redux state management setup
 - ✅ Health monitoring and logging
+- ✅ **Vercel deployment with serverless backend**
+- ✅ **Production environment with HTTPS**
 
 ### Phase 2 (In Progress 🔄)
 - 🔄 Complete authentication implementation (backend integration)
@@ -480,6 +535,8 @@ CoreConnect is fully responsive and optimized for:
 - ⏳ Email notifications system
 - ⏳ Mobile responsiveness enhancements
 - ⏳ Advanced API features
+- ⏳ Custom domain and branding
+- ⏳ Multi-tenant architecture
 
 ## 👥 Team
 

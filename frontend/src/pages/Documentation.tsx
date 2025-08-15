@@ -37,9 +37,7 @@ import {
   Description,
   Build,
   DeviceHub,
-  ArrowBack,
 } from "@mui/icons-material";
-import { Link as RouterLink } from "react-router-dom";
 import backgroundLanding from "../assets/backgroundLanding.png";
 import Footer from "./Footer";
 
@@ -118,6 +116,12 @@ const Documentation: React.FC = () => {
       status: "completed",
     },
     {
+      icon: <Rocket sx={{ color: "#1976d2" }} />,
+      title: "Vercel Deployment",
+      description: "Production deployment on Vercel with serverless functions and CDN optimization",
+      status: "completed",
+    },
+    {
       icon: <Group sx={{ color: "#f57c00" }} />,
       title: "Employee Management",
       description: "Comprehensive HR tools for managing profiles, roles, and departments",
@@ -150,6 +154,8 @@ const Documentation: React.FC = () => {
         { task: "Authentication framework (frontend)", completed: true },
         { task: "Redux state management setup", completed: true },
         { task: "Protected routes system", completed: true },
+        { task: "Vercel deployment with serverless backend", completed: true },
+        { task: "Production environment with HTTPS", completed: true },
       ],
     },
     {
@@ -264,10 +270,39 @@ const Documentation: React.FC = () => {
             
             <Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: 3, flexDirection: { xs: "column", sm: "row" }, alignItems: "center" }}>
               <Button
-                component={RouterLink}
-                to="/"
+                component="a"
+                href="/"
                 variant="outlined"
-                startIcon={<ArrowBack />}
+                sx={{
+                  px: { xs: 4, sm: 6 }, 
+                  py: { xs: 1.5, sm: 2 }, 
+                  borderRadius: 50, 
+                  fontWeight: 700,
+                  fontSize: { xs: "1rem", sm: "1.125rem" },
+                  minWidth: { xs: "200px", sm: "240px" },
+                  borderColor: "rgba(255,255,255,0.3)",
+                  color: "white",
+                  textTransform: "none",
+                  backdropFilter: "blur(10px)",
+                  background: "rgba(255,255,255,0.1)",
+                  animation: "fadeInScale 1s ease-out 0.3s both",
+                  "&:hover": {
+                    borderColor: "rgba(255,255,255,0.8)",
+                    background: "rgba(255,255,255,0.2)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 32px rgba(255, 255, 255, 0.2)",
+                  },
+                }}
+              >
+                ← Back to Home
+              </Button>
+              
+              <Button
+                component="a"
+                href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app"
+                target="_blank"
+                variant="outlined"
+                startIcon={<Rocket />}
                 sx={{
                   px: { xs: 4, sm: 6 }, 
                   py: { xs: 1.5, sm: 2 }, 
@@ -299,7 +334,7 @@ const Documentation: React.FC = () => {
                   },
                 }}
               >
-                Back to Home
+                🌐 Live Demo
               </Button>
               
               <Button
@@ -392,15 +427,24 @@ const Documentation: React.FC = () => {
                   <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700 }}>
                     What is CoreConnect?
                   </Typography>
+                  <Box sx={{ mb: 3, p: 3, background: "linear-gradient(135deg, #e3f2fd, #f3e5f5)", borderRadius: 2, border: "2px solid #1976d2" }}>
+                    <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 700, mb: 1 }}>
+                      🌐 Now Live on Vercel!
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#1565c0", fontWeight: 600 }}>
+                      Experience the full application at: <a href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "none" }}>core-connect-iqcmjox77-arun03ks-projects.vercel.app</a>
+                    </Typography>
+                  </Box>
                   <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
                     CoreConnect is a modern, comprehensive workforce management platform built with cutting-edge technologies. 
-                    Currently featuring a complete authentication framework, Docker containerization, and CI/CD pipeline, 
-                    CoreConnect provides a solid foundation for enterprise HR management solutions.
+                    Now successfully deployed on <strong>Vercel's serverless platform</strong>, featuring a complete authentication framework, 
+                    Docker containerization, and CI/CD pipeline. CoreConnect provides a solid foundation for enterprise HR management solutions.
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
                     The platform uses React 19 with TypeScript for type-safe frontend development, Flask 3.0 for the robust backend API, 
                     and is fully containerized with Docker for consistent deployment across environments. Our automated CI/CD pipeline 
-                    ensures code quality through testing, security scanning, and automated deployments.
+                    ensures code quality through testing, security scanning, and automated deployments. The production deployment leverages 
+                    <strong> Vercel's serverless functions</strong> for the backend and <strong>CDN distribution</strong> for the frontend.
                   </Typography>
                   <Typography variant="h6" gutterBottom sx={{ color: "#1565c0", mt: 4, fontWeight: 600 }}>
                     Key Benefits
@@ -413,6 +457,10 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText primary="Complete authentication framework with Redux" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Production deployment on Vercel with serverless backend" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
@@ -458,7 +506,15 @@ const Documentation: React.FC = () => {
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Features</Typography>
-                      <Chip label="6 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                      <Chip label="7 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Deployment</Typography>
+                      <Chip label="✅ Live" size="small" sx={{ background: "rgba(76,175,80,0.9)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Platform</Typography>
+                      <Chip label="Vercel" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Responsive</Typography>
@@ -494,7 +550,23 @@ const Documentation: React.FC = () => {
           >
             <CardContent sx={{ p: 4 }}>
               <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4 }}>
-                🐳 Docker Setup Guide (Recommended)
+                � Getting Started
+              </Typography>
+              
+              <Box sx={{ mb: 4, p: 3, background: "linear-gradient(135deg, #e8f5e8, #f1f8e9)", borderRadius: 3, border: "2px solid #4caf50" }}>
+                <Typography variant="h6" sx={{ color: "#2e7d32", fontWeight: 700, mb: 2 }}>
+                  🌐 Try the Live Application First!
+                </Typography>
+                <Typography variant="body1" sx={{ color: "#388e3c", mb: 2, fontWeight: 500 }}>
+                  Visit our production deployment: <a href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", fontWeight: 600, textDecoration: "none" }}>core-connect-iqcmjox77-arun03ks-projects.vercel.app</a>
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#2e7d32" }}>
+                  ✅ Fully functional frontend • ✅ Backend API endpoints • ✅ Authentication system • ✅ Mobile responsive
+                </Typography>
+              </Box>
+              
+              <Typography variant="h5" gutterBottom sx={{ color: "#1976d2", fontWeight: 600, mb: 3 }}>
+                🐳 Local Development Setup
               </Typography>
               
               <Accordion
@@ -620,6 +692,52 @@ const Documentation: React.FC = () => {
                         </Typography>
                       </Paper>
                     </Box>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion
+                expanded={expandedAccordion === "vercel-deploy"}
+                onChange={handleAccordionChange("vercel-deploy")}
+                sx={{ 
+                  background: "linear-gradient(145deg, #e3f2fd 0%, #e8f5e8 100%)",
+                  boxShadow: "0 4px 16px rgba(25,118,210,0.15)",
+                  borderRadius: 2,
+                  mb: 2,
+                  "&:before": { display: "none" },
+                  border: "2px solid #1976d2"
+                }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#1976d2" }} />}>
+                  <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
+                    🚀 Deploy to Vercel (Your Own Copy)
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
+                      Quick Deploy (CLI Method):
+                    </Typography>
+                    <Paper sx={{ p: 3, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
+                      <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "1rem" }}>
+                        git clone https://github.com/Arun03k/core-connects.git<br/>
+                        cd core-connects<br/>
+                        npm install -g vercel<br/>
+                        vercel login<br/>
+                        vercel --prod
+                      </code>
+                    </Paper>
+                    
+                    <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
+                      Environment Variables (Required):
+                    </Typography>
+                    <Paper sx={{ p: 3, background: "#fff3e0", borderRadius: 2, border: "1px solid #ff9800" }}>
+                      <Typography component="div" sx={{ fontFamily: "monospace", fontSize: "0.9rem", color: "#f57c00" }}>
+                        SECRET_KEY=your-secure-32-char-key<br/>
+                        FLASK_ENV=production<br/>
+                        API_VERSION=v1
+                      </Typography>
+                    </Paper>
                   </Box>
                 </AccordionDetails>
               </Accordion>
