@@ -610,7 +610,8 @@ const Documentation: React.FC = () => {
           >
             <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
               <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
-                🚀 Getting Started
+                <Rocket sx={{ verticalAlign: "middle", mr: 1 }} fontSize="inherit" />
+                Getting Started
               </Typography>
               
               <Box sx={{ mb: 4, p: { xs: 2, sm: 3 }, background: "linear-gradient(135deg, #e8f5e8, #f1f8e9)", borderRadius: 3, border: "2px solid #4caf50" }}>
