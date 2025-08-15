@@ -7,6 +7,7 @@ import bcrypt
 import re
 from typing import Optional, Dict, Any
 from utils.database import get_db
+from utils.password_utils import PasswordValidator
 
 class User:
     """User model for MongoDB operations"""
@@ -50,8 +51,14 @@ class User:
             if not self.validate_email(email):
                 raise ValueError("Invalid email format")
             
-            if len(password) < 6:
-                raise ValueError("Password must be at least 6 characters long")
+            if len(password) < 8:
+                raise ValueError("Password must be at least 8 characters long")
+
+            # Use enhanced password validation
+            password_validator = PasswordValidator()
+            is_valid, password_errors = password_validator.validate_password_strength(password)
+            if not is_valid:
+                raise ValueError(f"Password validation failed: {'; '.join(password_errors)}")
             
             # Check if user already exists
             existing_email_user = self.find_by_email(email)

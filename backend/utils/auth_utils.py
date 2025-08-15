@@ -7,43 +7,18 @@ from flask import current_app
 from functools import wraps
 from typing import Dict, Any, Optional
 
+
 def generate_token(user_id: str, email: str) -> str:
-    """Generate JWT access token"""
-    try:
-        payload = {
-            'user_id': str(user_id),
-            'email': email,
-            'iat': datetime.now(timezone.utc),
-            'exp': datetime.now(timezone.utc) + timedelta(seconds=current_app.config['JWT_ACCESS_TOKEN_EXPIRES'])
-        }
-        
-        token = jwt.encode(
-            payload,
-            current_app.config['JWT_SECRET_KEY'],
-            algorithm='HS256'
-        )
-        
-        return token
-        
-    except Exception as e:
-        raise Exception(f"Failed to generate token: {str(e)}")
+    """Generate JWT access token (legacy function for compatibility)"""
+    from services.token_service import TokenService
+    access_token, _ = TokenService.generate_tokens(user_id, email)
+    return access_token
+
 
 def verify_token(token: str) -> Optional[Dict[str, Any]]:
-    """Verify JWT token and return payload"""
-    try:
-        payload = jwt.decode(
-            token,
-            current_app.config['JWT_SECRET_KEY'],
-            algorithms=['HS256']
-        )
-        return payload
-        
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
-        return None
-    except Exception:
-        return None
+    """Verify JWT token and return payload (legacy function for compatibility)"""
+    from services.token_service import TokenService
+    return TokenService.verify_token(token, 'access')
 
 def token_required(f):
     """Decorator to require valid JWT token"""

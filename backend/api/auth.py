@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
-from models.user import User
-from utils.auth_utils import generate_token, token_required
-from bson import ObjectId
+from services.auth_service import AuthService
+from utils.auth_utils import token_required
 import logging
 
 logger = logging.getLogger(__name__)
@@ -9,157 +8,149 @@ logger = logging.getLogger(__name__)
 # Create blueprint for auth routes
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
-def serialize_user(user_dict):
-    """Convert MongoDB document to JSON serializable format"""
-    if user_dict and '_id' in user_dict:
-        user_dict['id'] = str(user_dict['_id'])
-        user_dict.pop('_id', None)
-    user_dict.pop('password_hash', None)  # Never return password hash
-    return user_dict
-
 @auth_bp.route('/login', methods=['POST'])
 def login():
-    """Login endpoint with MongoDB authentication"""
-    try:
-        data = request.get_json()
-        
-        if not data or 'email' not in data or 'password' not in data:
-            return jsonify({
-                'error': 'Email and password are required',
-                'status': 'error'
-            }), 400
-        
-        email = data['email'].strip()
-        password = data['password']
-        
-        if not email or not password:
-            return jsonify({
-                'error': 'Email and password cannot be empty',
-                'status': 'error'
-            }), 400
-        
-        # Authenticate user
-        user_model = User()
-        user = user_model.authenticate(email, password)
-        
-        if not user:
-            return jsonify({
-                'error': 'Invalid email or password',
-                'status': 'error'
-            }), 401
-        
-        if not user.get('is_active'):
-            return jsonify({
-                'error': 'Account is deactivated',
-                'status': 'error'
-            }), 401
-        
-        # Generate JWT token
-        token = generate_token(str(user['_id']), user['email'])
-        
-        return jsonify({
-            'message': 'Login successful',
-            'status': 'success',
-            'token': token,
-            'user': serialize_user(user.copy())
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Login error: {str(e)}")
-        return jsonify({
-            'error': 'An error occurred during login',
-            'status': 'error'
-        }), 500
-
-@auth_bp.route('/register', methods=['POST'])
-@auth_bp.route('/signup', methods=['POST'])  # Add signup alias for frontend compatibility
-def register():
-    """Registration endpoint with MongoDB user creation"""
+    """Login endpoint with JWT authentication"""
     try:
         data = request.get_json()
         
         if not data:
             return jsonify({
-                'error': 'Request data is required',
-                'status': 'error'
+                'status': 'error',
+                'message': 'Request body is required',
+                'errors': {'request': 'JSON data is required'}
             }), 400
         
-        # Required fields
-        email = data.get('email', '').strip()
-        password = data.get('password', '')
+        # Use AuthService for login
+        auth_service = AuthService()
+        result = auth_service.login_user(data)
         
-        if not email or not password:
-            return jsonify({
-                'error': 'Email and password are required',
-                'status': 'error'
-            }), 400
+        # Return appropriate status code based on result
+        if result['status'] == 'success':
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 401
         
-        # Optional fields
-        username = data.get('username', '').strip() or None
-        first_name = data.get('first_name', '').strip() or None
-        last_name = data.get('last_name', '').strip() or None
-        
-        # Create user
-        user_model = User()
-        user = user_model.create_user(
-            email=email,
-            password=password,
-            username=username,
-            first_name=first_name,
-            last_name=last_name
-        )
-        
-        # Generate JWT token
-        token = generate_token(str(user['_id']), user['email'])
-        
-        return jsonify({
-            'message': 'Registration successful',
-            'status': 'success',
-            'token': token,
-            'user': serialize_user(user.copy())
-        }), 201
-        
-    except ValueError as e:
-        return jsonify({
-            'error': str(e),
-            'status': 'error'
-        }), 400
     except Exception as e:
-        logger.error(f"Registration error: {str(e)}")
+        logger.error(f"Login endpoint error: {str(e)}")
         return jsonify({
-            'error': 'An error occurred during registration',
-            'status': 'error'
+            'status': 'error',
+            'message': 'An error occurred during login',
+            'errors': {'general': 'Internal server error'}
         }), 500
+
+@auth_bp.route('/register', methods=['POST'])
+@auth_bp.route('/signup', methods=['POST'])  # Add signup alias for frontend compatibility
+def register():
+    """Registration endpoint with enhanced validation"""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Request body is required',
+                'errors': {'request': 'JSON data is required'}
+            }), 400
+        
+        # Use AuthService for registration
+        auth_service = AuthService()
+        result = auth_service.register_user(data)
+        
+        # Return appropriate status code based on result
+        if result['status'] == 'success':
+            return jsonify(result), 201
+        else:
+            return jsonify(result), 400
+        
+    except Exception as e:
+        logger.error(f"Registration endpoint error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'An error occurred during registration',
+            'errors': {'general': 'Internal server error'}
+        }), 500
+
+@auth_bp.route('/refresh', methods=['POST'])
+def refresh_token():
+    """Refresh access token using refresh token"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'refreshToken' not in data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Refresh token is required',
+                'errors': {'token': 'Refresh token is required'}
+            }), 400
+        
+        refresh_token = data['refreshToken']
+        
+        # Use AuthService for token refresh
+        auth_service = AuthService()
+        result = auth_service.refresh_token(refresh_token)
+        
+        # Return appropriate status code based on result
+        if result['status'] == 'success':
+            return jsonify(result), 200
+        else:
+            return jsonify(result), 401
+        
+    except Exception as e:
+        logger.error(f"Token refresh endpoint error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'An error occurred during token refresh',
+            'errors': {'general': 'Internal server error'}
+        }), 500
+
 
 @auth_bp.route('/logout', methods=['POST'])
 @token_required
 def logout():
     """Logout endpoint"""
-    # In a stateless JWT setup, logout is handled client-side by removing the token
-    # For additional security, you could maintain a blacklist of tokens
-    return jsonify({
-        'message': 'Logout successful',
-        'status': 'success'
-    }), 200
+    try:
+        # Use AuthService for logout
+        auth_service = AuthService()
+        result = auth_service.logout_user(None)  # Token validation already done by decorator
+        
+        return jsonify(result), 200
+        
+    except Exception as e:
+        logger.error(f"Logout endpoint error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'An error occurred during logout',
+            'errors': {'general': 'Internal server error'}
+        }), 500
+
 
 @auth_bp.route('/verify', methods=['GET'])
 @token_required
 def verify():
     """Token verification endpoint"""
     try:
+        # Get user from request context (set by token_required decorator)
         user = request.current_user
         
+        # Use AuthService for user serialization
+        auth_service = AuthService()
+        serialized_user = auth_service._serialize_user(user)
+        
         return jsonify({
-            'message': 'Token is valid',
             'status': 'success',
-            'user': serialize_user(user.copy())
+            'message': 'Token is valid',
+            'data': {
+                'user': serialized_user
+            }
         }), 200
         
     except Exception as e:
         logger.error(f"Token verification error: {str(e)}")
         return jsonify({
-            'error': 'Token verification failed',
-            'status': 'error'
+            'status': 'error',
+            'message': 'Token verification failed',
+            'errors': {'general': 'Verification failed'}
         }), 500
 
 @auth_bp.route('/profile', methods=['GET'])
