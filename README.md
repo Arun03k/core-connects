@@ -5,7 +5,7 @@
 [![React](https://img.shields.io/badge/React-19.1.1-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-red?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
 
-## � Quick Start
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/Arun03k/core-connects.git
