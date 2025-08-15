@@ -37,9 +37,11 @@ import {
   Description,
   Build,
   DeviceHub,
+  Api as ApiIcon,
 } from "@mui/icons-material";
 import backgroundLanding from "../assets/backgroundLanding.png";
 import Footer from "./Footer";
+import { Api } from "../components";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -459,6 +461,16 @@ const Documentation: React.FC = () => {
               <Tab 
                 icon={<Description />} 
                 label="Roadmap" 
+                sx={{ 
+                  "& .MuiTab-iconWrapper": { 
+                    marginBottom: { xs: "4px", sm: "6px" },
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" }
+                  } 
+                }} 
+              />
+              <Tab 
+                icon={<ApiIcon />} 
+                label="API Docs" 
                 sx={{ 
                   "& .MuiTab-iconWrapper": { 
                     marginBottom: { xs: "4px", sm: "6px" },
@@ -1090,6 +1102,11 @@ const Documentation: React.FC = () => {
               </Grid>
             ))}
           </Grid>
+        </TabPanel>
+
+        <TabPanel value={tabValue} index={5}>
+          {/* API Documentation */}
+          <Api />
         </TabPanel>
 
         {/* Back to Top Button */}
