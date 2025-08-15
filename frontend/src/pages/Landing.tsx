@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -18,29 +18,16 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DescriptionIcon from "@mui/icons-material/Description";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import backgroundLanding from "../assets/backgroundLanding.png";
 import Footer from "./Footer";
-import Login from "./Login";
-
-interface User {
-  id: number;
-  email: string;
-  fullName: string;
-  provider?: string;
-}
 
 const Landing: React.FC = () => {
-  const [loginOpen, setLoginOpen] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLoginSuccess = (user: User) => {
-    console.log("Login successful:", user);
-    // Here you would typically handle the successful login
-    // e.g., redirect to dashboard, update global state, etc.
+  const handleGetStarted = () => {
+    navigate('/login');
   };
-
-  const openLogin = () => setLoginOpen(true);
-  const closeLogin = () => setLoginOpen(false);
 
   return (
     <Box 
@@ -170,7 +157,7 @@ const Landing: React.FC = () => {
         <Zoom in={true} timeout={1500}>
           <Box sx={{ display: "flex", gap: 3, flexDirection: { xs: "column", sm: "row" }, alignItems: "center" }}>
             <Button
-              onClick={openLogin}
+              onClick={handleGetStarted}
               variant="contained"
               size="large"
               endIcon={<ArrowForwardIcon />}
@@ -639,13 +626,6 @@ const Landing: React.FC = () => {
 
       {/* Footer */}
       <Footer />
-
-      {/* Login Dialog */}
-      <Login 
-        open={loginOpen}
-        onClose={closeLogin}
-        onSuccess={handleLoginSuccess}
-      />
     </Box>
   );
 };
