@@ -50,7 +50,7 @@ interface TabPanelProps {
 const TabPanel: React.FC<TabPanelProps> = ({ children, value, index }) => {
   return (
     <div hidden={value !== index}>
-      {value === index && <Box sx={{ py: 4 }}>{children}</Box>}
+      {value === index && <Box sx={{ py: { xs: 2, sm: 4 } }}>{children}</Box>}
     </div>
   );
 };
@@ -200,16 +200,16 @@ const Documentation: React.FC = () => {
       <Box
         sx={{
           position: "relative",
-          width: "100vw",
-          minHeight: "60vh",
+          width: "100%",
+          minHeight: { xs: "50vh", sm: "55vh", md: "60vh" },
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           textAlign: "center",
           color: "#fff",
-          px: { xs: 3, sm: 4, md: 6, lg: 8 },
-          py: { xs: 6, sm: 8, md: 10 },
+          px: { xs: 2, sm: 3, md: 4, lg: 6, xl: 8 },
+          py: { xs: 4, sm: 6, md: 8, lg: 10 },
           backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.4) 100%), url(${backgroundLanding})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -243,7 +243,7 @@ const Documentation: React.FC = () => {
               variant="h1"
               sx={{
                 fontWeight: 800,
-                fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" },
+                fontSize: { xs: "2rem", sm: "2.5rem", md: "3.5rem", lg: "4rem" },
                 mb: 2,
                 background: "linear-gradient(90deg, #1976d2, #1565c0)",
                 backgroundClip: "text",
@@ -262,24 +262,26 @@ const Documentation: React.FC = () => {
                 mx: "auto",
                 lineHeight: 1.6,
                 fontWeight: 300,
+                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
                 animation: "slideInUp 1s ease-out 0.2s both",
+                px: { xs: 1, sm: 0 },
               }}
             >
               Complete documentation for the workforce management platform
             </Typography>
             
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: 3, flexDirection: { xs: "column", sm: "row" }, alignItems: "center" }}>
+            <Box sx={{ mt: 4, display: "flex", justifyContent: "center", gap: { xs: 2, sm: 3 }, flexDirection: { xs: "column", sm: "row" }, alignItems: "center", px: { xs: 1, sm: 0 } }}>
               <Button
                 component="a"
                 href="/"
                 variant="outlined"
                 sx={{
-                  px: { xs: 4, sm: 6 }, 
+                  px: { xs: 3, sm: 4, md: 6 }, 
                   py: { xs: 1.5, sm: 2 }, 
                   borderRadius: 50, 
                   fontWeight: 700,
-                  fontSize: { xs: "1rem", sm: "1.125rem" },
-                  minWidth: { xs: "200px", sm: "240px" },
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.125rem" },
+                  minWidth: { xs: "180px", sm: "200px", md: "240px" },
                   borderColor: "rgba(255,255,255,0.3)",
                   color: "white",
                   textTransform: "none",
@@ -304,12 +306,12 @@ const Documentation: React.FC = () => {
                 variant="outlined"
                 startIcon={<Rocket />}
                 sx={{
-                  px: { xs: 4, sm: 6 }, 
+                  px: { xs: 3, sm: 4, md: 6 }, 
                   py: { xs: 1.5, sm: 2 }, 
                   borderRadius: 50, 
                   fontWeight: 700,
-                  fontSize: { xs: "1rem", sm: "1.125rem" },
-                  minWidth: { xs: "200px", sm: "240px" },
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.125rem" },
+                  minWidth: { xs: "180px", sm: "200px", md: "240px" },
                   borderColor: "rgba(255,255,255,0.3)",
                   color: "white",
                   textTransform: "none",
@@ -343,12 +345,12 @@ const Documentation: React.FC = () => {
                 href="https://github.com/Arun03k/core-connects"
                 target="_blank"
                 sx={{
-                  px: { xs: 4, sm: 6 }, 
+                  px: { xs: 3, sm: 4, md: 6 }, 
                   py: { xs: 1.5, sm: 2 }, 
                   borderRadius: 50, 
                   fontWeight: 700,
-                  fontSize: { xs: "1rem", sm: "1.125rem" },
-                  minWidth: { xs: "200px", sm: "240px" },
+                  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.125rem" },
+                  minWidth: { xs: "180px", sm: "200px", md: "240px" },
                   background: "linear-gradient(135deg, #1976d2 0%, #1565c0 100%)",
                   boxShadow: "0 8px 32px rgba(25, 118, 210, 0.3)",
                   textTransform: "none",
@@ -369,7 +371,7 @@ const Documentation: React.FC = () => {
       </Box>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6 }, px: { xs: 2, sm: 3 } }}>
         {/* Navigation Tabs */}
         <Slide in direction="up" timeout={1000}>
           <Paper
@@ -378,19 +380,23 @@ const Documentation: React.FC = () => {
               background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
               boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
               borderRadius: 3,
+              overflow: "hidden",
             }}
           >
             <Tabs
               value={tabValue}
               onChange={handleTabChange}
-              centered
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
               sx={{
                 "& .MuiTab-root": {
                   color: "#666",
                   fontWeight: 600,
                   textTransform: "none",
-                  fontSize: "1rem",
-                  py: 3,
+                  fontSize: { xs: "0.8rem", sm: "0.9rem", md: "1rem" },
+                  py: { xs: 2, sm: 3 },
+                  minHeight: { xs: "auto", sm: "72px" },
                   "&.Mui-selected": {
                     color: "#1976d2",
                   },
@@ -399,13 +405,67 @@ const Documentation: React.FC = () => {
                   backgroundColor: "#1976d2",
                   height: 3,
                 },
+                "& .MuiTabs-scrollButtons": {
+                  "&.Mui-disabled": {
+                    opacity: 0.3,
+                  },
+                },
+                // Center tabs on larger screens
+                "& .MuiTabs-flexContainer": {
+                  justifyContent: { xs: "flex-start", md: "center" },
+                },
               }}
             >
-              <Tab icon={<Rocket />} label="Overview" />
-              <Tab icon={<Build />} label="Setup" />
-              <Tab icon={<Code />} label="Tech Stack" />
-              <Tab icon={<DeviceHub />} label="Features" />
-              <Tab icon={<Description />} label="Roadmap" />
+              <Tab 
+                icon={<Rocket />} 
+                label="Overview" 
+                sx={{ 
+                  "& .MuiTab-iconWrapper": { 
+                    marginBottom: { xs: "4px", sm: "6px" },
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" }
+                  } 
+                }} 
+              />
+              <Tab 
+                icon={<Build />} 
+                label="Setup" 
+                sx={{ 
+                  "& .MuiTab-iconWrapper": { 
+                    marginBottom: { xs: "4px", sm: "6px" },
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" }
+                  } 
+                }} 
+              />
+              <Tab 
+                icon={<Code />} 
+                label="Tech Stack" 
+                sx={{ 
+                  "& .MuiTab-iconWrapper": { 
+                    marginBottom: { xs: "4px", sm: "6px" },
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" }
+                  } 
+                }} 
+              />
+              <Tab 
+                icon={<DeviceHub />} 
+                label="Features" 
+                sx={{ 
+                  "& .MuiTab-iconWrapper": { 
+                    marginBottom: { xs: "4px", sm: "6px" },
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" }
+                  } 
+                }} 
+              />
+              <Tab 
+                icon={<Description />} 
+                label="Roadmap" 
+                sx={{ 
+                  "& .MuiTab-iconWrapper": { 
+                    marginBottom: { xs: "4px", sm: "6px" },
+                    fontSize: { xs: "1.2rem", sm: "1.5rem" }
+                  } 
+                }} 
+              />
             </Tabs>
           </Paper>
         </Slide>
@@ -423,8 +483,8 @@ const Documentation: React.FC = () => {
                   mb: 3,
                 }}
               >
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700 }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                  <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
                     What is CoreConnect?
                   </Typography>
                   <Box sx={{ mb: 3, p: 3, background: "linear-gradient(135deg, #e3f2fd, #f3e5f5)", borderRadius: 2, border: "2px solid #1976d2" }}>
@@ -491,8 +551,8 @@ const Documentation: React.FC = () => {
                   borderRadius: 3,
                 }}
               >
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                     Project Stats
                   </Typography>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -548,24 +608,25 @@ const Documentation: React.FC = () => {
               borderRadius: 3,
             }}
           >
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4 }}>
-                � Getting Started
+            <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+              <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
+                <Rocket sx={{ verticalAlign: "middle", mr: 1 }} fontSize="inherit" />
+                Getting Started
               </Typography>
               
-              <Box sx={{ mb: 4, p: 3, background: "linear-gradient(135deg, #e8f5e8, #f1f8e9)", borderRadius: 3, border: "2px solid #4caf50" }}>
-                <Typography variant="h6" sx={{ color: "#2e7d32", fontWeight: 700, mb: 2 }}>
+              <Box sx={{ mb: 4, p: { xs: 2, sm: 3 }, background: "linear-gradient(135deg, #e8f5e8, #f1f8e9)", borderRadius: 3, border: "2px solid #4caf50" }}>
+                <Typography variant="h6" sx={{ color: "#2e7d32", fontWeight: 700, mb: 2, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                   🌐 Try the Live Application First!
                 </Typography>
-                <Typography variant="body1" sx={{ color: "#388e3c", mb: 2, fontWeight: 500 }}>
+                <Typography variant="body1" sx={{ color: "#388e3c", mb: 2, fontWeight: 500, fontSize: { xs: "0.9rem", sm: "1rem" }, wordBreak: "break-word" }}>
                   Visit our production deployment: <a href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", fontWeight: 600, textDecoration: "none" }}>core-connect-iqcmjox77-arun03ks-projects.vercel.app</a>
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#2e7d32" }}>
+                <Typography variant="body2" sx={{ color: "#2e7d32", fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   ✅ Fully functional frontend • ✅ Backend API endpoints • ✅ Authentication system • ✅ Mobile responsive
                 </Typography>
               </Box>
               
-              <Typography variant="h5" gutterBottom sx={{ color: "#1976d2", fontWeight: 600, mb: 3 }}>
+              <Typography variant="h5" gutterBottom sx={{ color: "#1976d2", fontWeight: 600, mb: 3, fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
                 🐳 Local Development Setup
               </Typography>
               
@@ -581,7 +642,7 @@ const Documentation: React.FC = () => {
                 }}
               >
                 <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#1976d2" }} />}>
-                  <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                     1. Prerequisites
                   </Typography>
                 </AccordionSummary>
@@ -646,8 +707,8 @@ const Documentation: React.FC = () => {
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
                         Windows Users (Interactive Setup):
                       </Typography>
-                      <Paper sx={{ p: 3, background: "#e3f2fd", borderRadius: 2, border: "2px solid #1976d2" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "1.1rem" }}>
+                      <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#e3f2fd", borderRadius: 2, border: "2px solid #1976d2", overflow: "auto" }}>
+                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", overflowWrap: "break-word" }}>
                           git clone https://github.com/Arun03k/core-connects.git<br/>
                           cd core-connects<br/>
                           dev-setup.bat
@@ -658,8 +719,8 @@ const Documentation: React.FC = () => {
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
                         All Platforms (Production Mode):
                       </Typography>
-                      <Paper sx={{ p: 3, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "1.1rem" }}>
+                      <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace", overflow: "auto" }}>
+                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", wordBreak: "break-all" }}>
                           git clone https://github.com/Arun03k/core-connects.git<br/>
                           cd core-connects<br/>
                           docker-compose up -d
@@ -670,8 +731,8 @@ const Documentation: React.FC = () => {
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
                         Development Mode (Hot Reload):
                       </Typography>
-                      <Paper sx={{ p: 3, background: "#fff3e0", borderRadius: 2, fontFamily: "monospace", border: "2px solid #ff9800" }}>
-                        <code style={{ color: "#f57c00", fontWeight: 600, fontSize: "1.1rem" }}>
+                      <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#fff3e0", borderRadius: 2, fontFamily: "monospace", border: "2px solid #ff9800", overflow: "auto" }}>
+                        <code style={{ color: "#f57c00", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", wordBreak: "break-all" }}>
                           docker-compose -f docker-compose.dev.yml up --build<br/>
                           # OR<br/>
                           dev-start.bat
@@ -682,8 +743,8 @@ const Documentation: React.FC = () => {
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
                         Access Your Application:
                       </Typography>
-                      <Paper sx={{ p: 3, background: "#e8f5e8", borderRadius: 2, border: "2px solid #4caf50" }}>
-                        <Typography component="div" sx={{ fontFamily: "monospace", fontWeight: 600, color: "#2e7d32" }}>
+                      <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#e8f5e8", borderRadius: 2, border: "2px solid #4caf50", overflow: "auto" }}>
+                        <Typography component="div" sx={{ fontFamily: "monospace", fontWeight: 600, color: "#2e7d32", fontSize: "clamp(0.8rem, 2.5vw, 1rem)" }}>
                           🌐 Frontend: <a href="http://localhost:80" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:80</a><br/>
                           🔧 Backend: <a href="http://localhost:5000" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000</a><br/>
                           ❤️ Health: <a href="http://localhost:5000/health" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/health</a><br/>
@@ -859,10 +920,10 @@ const Documentation: React.FC = () => {
 
         <TabPanel value={tabValue} index={2}>
           {/* Tech Stack */}
-          <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, textAlign: "center" }}>
+          <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, textAlign: "center", fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
             Technology Stack
           </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {techStack.map((tech, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={tech.name}>
                 <Fade in timeout={800 + index * 200}>
@@ -874,26 +935,26 @@ const Documentation: React.FC = () => {
                       height: "100%",
                       transition: "all 0.3s ease",
                       "&:hover": {
-                        transform: "translateY(-8px)",
+                        transform: { xs: "none", sm: "translateY(-8px)" },
                         boxShadow: "0 16px 48px rgba(0,0,0,0.15)",
                       },
                     }}
                   >
-                    <CardContent sx={{ p: 4 }}>
-                      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                        <Typography variant="h4" sx={{ mr: 2 }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                      <Box sx={{ display: "flex", alignItems: "center", mb: 2, flexDirection: { xs: "column", sm: "row" }, textAlign: { xs: "center", sm: "left" } }}>
+                        <Typography variant="h4" sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 }, fontSize: { xs: "2rem", sm: "2.5rem" } }}>
                           {tech.icon}
                         </Typography>
                         <Box>
-                          <Typography variant="h6" sx={{ color: tech.color, fontWeight: 700 }}>
+                          <Typography variant="h6" sx={{ color: tech.color, fontWeight: 700, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                             {tech.name}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: "#666", fontWeight: 600 }}>
+                          <Typography variant="body2" sx={{ color: "#666", fontWeight: 600, fontSize: { xs: "0.75rem", sm: "0.875rem" } }}>
                             v{tech.version}
                           </Typography>
                         </Box>
                       </Box>
-                      <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.6 }}>
+                      <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.6, fontSize: { xs: "0.8rem", sm: "0.875rem" }, textAlign: { xs: "center", sm: "left" } }}>
                         {tech.name === "React" && "Modern React with latest features, hooks, and concurrent rendering"}
                         {tech.name === "TypeScript" && "Type-safe development with full IntelliSense and compile-time error checking"}
                         {tech.name === "Flask" && "Lightweight Python web framework for robust RESTful API development"}
@@ -913,10 +974,10 @@ const Documentation: React.FC = () => {
 
         <TabPanel value={tabValue} index={3}>
           {/* Features */}
-          <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, textAlign: "center" }}>
+          <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, textAlign: "center", fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
             Platform Features
           </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {features.map((feature, index) => (
               <Grid size={{ xs: 12, sm: 6 }} key={feature.title}>
                 <Slide in direction="up" timeout={800 + index * 200}>
@@ -929,19 +990,19 @@ const Documentation: React.FC = () => {
                       border: feature.status === "completed" ? "2px solid #1976d2" : "2px solid rgba(0,0,0,0.05)",
                       transition: "all 0.3s ease",
                       "&:hover": {
-                        transform: "translateY(-4px)",
+                        transform: { xs: "none", sm: "translateY(-4px)" },
                         boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
                       },
                     }}
                   >
-                    <CardContent sx={{ p: 4 }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
                       <Box sx={{ display: "flex", alignItems: "flex-start", mb: 2 }}>
-                        <Box sx={{ mr: 2 }}>
+                        <Box sx={{ mr: 2, minWidth: "24px" }}>
                           {feature.icon}
                         </Box>
                         <Box sx={{ flex: 1 }}>
-                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                            <Typography variant="h6" sx={{ color: "#333", fontWeight: 700 }}>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 1, flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 0 } }}>
+                            <Typography variant="h6" sx={{ color: "#333", fontWeight: 700, fontSize: { xs: "1rem", sm: "1.25rem" } }}>
                               {feature.title}
                             </Typography>
                             <Chip
@@ -952,10 +1013,11 @@ const Documentation: React.FC = () => {
                                 color: feature.status === "completed" ? "white" : "#666",
                                 fontWeight: 600,
                                 textTransform: "capitalize",
+                                fontSize: { xs: "0.7rem", sm: "0.75rem" },
                               }}
                             />
                           </Box>
-                          <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.6 }}>
+                          <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.6, fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                             {feature.description}
                           </Typography>
                         </Box>
@@ -970,10 +1032,10 @@ const Documentation: React.FC = () => {
 
         <TabPanel value={tabValue} index={4}>
           {/* Roadmap */}
-          <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, textAlign: "center" }}>
+          <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4, textAlign: "center", fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}>
             Development Roadmap
           </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={{ xs: 2, sm: 3 }}>
             {roadmapPhases.map((phase, phaseIndex) => (
               <Grid size={{ xs: 12, md: 4 }} key={phase.phase}>
                 <Fade in timeout={1000 + phaseIndex * 300}>
@@ -986,7 +1048,7 @@ const Documentation: React.FC = () => {
                       border: phaseIndex === 0 ? "2px solid #1976d2" : "2px solid rgba(0,0,0,0.05)",
                     }}
                   >
-                    <CardContent sx={{ p: 4 }}>
+                    <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
                       <Typography
                         variant="h6"
                         sx={{
@@ -994,6 +1056,7 @@ const Documentation: React.FC = () => {
                           mb: 3,
                           fontWeight: 700,
                           textAlign: "center",
+                          fontSize: { xs: "1rem", sm: "1.25rem" },
                         }}
                       >
                         {phase.phase}
@@ -1012,7 +1075,7 @@ const Documentation: React.FC = () => {
                               primary={item.task}
                               sx={{
                                 "& .MuiListItemText-primary": {
-                                  fontSize: "0.95rem",
+                                  fontSize: { xs: "0.8rem", sm: "0.95rem" },
                                   color: item.completed ? "#333" : "#666",
                                   fontWeight: item.completed ? 600 : 400,
                                 },
@@ -1035,12 +1098,13 @@ const Documentation: React.FC = () => {
             variant="contained"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             sx={{
-              px: 6,
-              py: 2,
+              px: { xs: 4, sm: 6 },
+              py: { xs: 1.5, sm: 2 },
               borderRadius: 50,
               background: "linear-gradient(135deg, #1976d2 0%, #1565c0 100%)",
               boxShadow: "0 8px 32px rgba(25, 118, 210, 0.3)",
               fontWeight: 700,
+              fontSize: { xs: "0.9rem", sm: "1rem" },
               textTransform: "none",
               "&:hover": {
                 background: "linear-gradient(135deg, #1565c0 0%, #1e88e5 100%)",
