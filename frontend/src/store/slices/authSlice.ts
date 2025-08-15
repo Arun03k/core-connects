@@ -1,16 +1,22 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { loginUser, signupUser, logoutUser, verifyToken } from '../thunks';
+import { loginUser, signupUser, logoutUser, verifyToken, refreshToken } from '../thunks';
 
 export interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  username?: string;
+  isVerified: boolean;
+  isActive: boolean;
   role?: string;
 }
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  tokenExpiresIn: number | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -18,8 +24,10 @@ export interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
-  isAuthenticated: !!localStorage.getItem('token'),
+  accessToken: localStorage.getItem('accessToken'),
+  refreshToken: localStorage.getItem('refreshToken'),
+  tokenExpiresIn: null,
+  isAuthenticated: !!localStorage.getItem('accessToken'),
   isLoading: false,
   error: null,
 };
@@ -34,6 +42,23 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+    setTokens: (state, action: PayloadAction<{ accessToken: string; refreshToken: string; expiresIn: number }>) => {
+      state.accessToken = action.payload.accessToken;
+      state.refreshToken = action.payload.refreshToken;
+      state.tokenExpiresIn = action.payload.expiresIn;
+      state.isAuthenticated = true;
+      localStorage.setItem('accessToken', action.payload.accessToken);
+      localStorage.setItem('refreshToken', action.payload.refreshToken);
+    },
+    clearTokens: (state) => {
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.tokenExpiresIn = null;
+      state.isAuthenticated = false;
+      state.user = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    },
   },
   extraReducers: (builder) => {
     // Login
@@ -46,17 +71,23 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        state.tokenExpiresIn = action.payload.expiresIn;
         state.error = null;
-        localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('accessToken', action.payload.accessToken);
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
-        state.token = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.tokenExpiresIn = null;
         state.error = action.payload as string;
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       });
 
     // Signup
@@ -69,17 +100,23 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        state.tokenExpiresIn = action.payload.expiresIn;
         state.error = null;
-        localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('accessToken', action.payload.accessToken);
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
-        state.token = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.tokenExpiresIn = null;
         state.error = action.payload as string;
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       });
 
     // Logout
@@ -91,9 +128,12 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
-        state.token = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.tokenExpiresIn = null;
         state.error = null;
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       })
       .addCase(logoutUser.rejected, (state) => {
         state.isLoading = false;
@@ -114,12 +154,42 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
-        state.token = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.tokenExpiresIn = null;
         state.error = null;
-        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+      });
+
+    // Refresh token
+    builder
+      .addCase(refreshToken.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        state.tokenExpiresIn = action.payload.expiresIn;
+        state.isAuthenticated = true;
+        state.error = null;
+        localStorage.setItem('accessToken', action.payload.accessToken);
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+      })
+      .addCase(refreshToken.rejected, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.tokenExpiresIn = null;
+        state.error = null;
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       });
   },
 });
 
-export const { clearError, setLoading } = authSlice.actions;
+export const { clearError, setLoading, setTokens, clearTokens } = authSlice.actions;
 export default authSlice.reducer;

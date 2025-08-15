@@ -270,14 +270,16 @@ const getPasswordStrengthText = (strength: number): string => {
 
 const Signup: React.FC = () => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
   });
 
   const [formErrors, setFormErrors] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -307,14 +309,22 @@ const Signup: React.FC = () => {
   }, [formData.password]);
 
   const validateForm = () => {
-    const errors = { name: '', email: '', password: '', confirmPassword: '' };
+    const errors = { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' };
     let isValid = true;
 
-    if (!formData.name.trim()) {
-      errors.name = 'Name is required';
+    if (!formData.firstName.trim()) {
+      errors.firstName = 'First name is required';
       isValid = false;
-    } else if (formData.name.trim().length < 2) {
-      errors.name = 'Name must be at least 2 characters';
+    } else if (formData.firstName.trim().length < 2) {
+      errors.firstName = 'First name must be at least 2 characters';
+      isValid = false;
+    }
+
+    if (!formData.lastName.trim()) {
+      errors.lastName = 'Last name is required';
+      isValid = false;
+    } else if (formData.lastName.trim().length < 2) {
+      errors.lastName = 'Last name must be at least 2 characters';
       isValid = false;
     }
 
@@ -393,15 +403,29 @@ const Signup: React.FC = () => {
 
         <Form onSubmit={handleSubmit}>
           <InputField
-            id="name"
-            name="name"
+            id="firstName"
+            name="firstName"
             type="text"
-            label="Full Name"
-            placeholder="Enter your full name"
-            value={formData.name}
+            label="First Name"
+            placeholder="Enter your first name"
+            value={formData.firstName}
             onChange={handleInputChange}
-            error={formErrors.name}
-            autoComplete="name"
+            error={formErrors.firstName}
+            autoComplete="given-name"
+            required
+            startIcon={<PersonIcon />}
+          />
+
+          <InputField
+            id="lastName"
+            name="lastName"
+            type="text"
+            label="Last Name"
+            placeholder="Enter your last name"
+            value={formData.lastName}
+            onChange={handleInputChange}
+            error={formErrors.lastName}
+            autoComplete="family-name"
             required
             startIcon={<PersonIcon />}
           />

@@ -11,7 +11,8 @@ export interface LoginCredentials {
 }
 
 export interface SignupCredentials {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   confirmPassword: string;
@@ -19,8 +20,16 @@ export interface SignupCredentials {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
   message?: string;
+}
+
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }
 
 // Login thunk
@@ -46,7 +55,11 @@ export const loginUser = createAsyncThunk<
       }
 
       const data = await response.json();
-      return data;
+      // Handle new response format
+      if (data.status === 'success' && data.data) {
+        return data.data;
+      }
+      return rejectWithValue(data.message || 'Login failed');
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : 'Network error occurred'
@@ -85,7 +98,11 @@ export const signupUser = createAsyncThunk<
       }
 
       const data = await response.json();
-      return data;
+      // Handle new response format
+      if (data.status === 'success' && data.data) {
+        return data.data;
+      }
+      return rejectWithValue(data.message || 'Signup failed');
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : 'Network error occurred'
@@ -103,8 +120,8 @@ export const logoutUser = createAsyncThunk<
   'auth/logout',
   async (_, { getState }) => {
     try {
-      const state = getState() as { auth: { token: string | null } };
-      const token = state.auth.token;
+      const state = getState() as { auth: { accessToken: string | null } };
+      const token = state.auth.accessToken;
 
       if (token) {
         await fetch(`${API_BASE_URL}/auth/logout`, {
@@ -131,8 +148,8 @@ export const verifyToken = createAsyncThunk<
   'auth/verify',
   async (_, { rejectWithValue, getState }) => {
     try {
-      const state = getState() as { auth: { token: string | null } };
-      const token = state.auth.token;
+      const state = getState() as { auth: { accessToken: string | null } };
+      const token = state.auth.accessToken;
 
       if (!token) {
         return rejectWithValue('No token found');
@@ -151,10 +168,57 @@ export const verifyToken = createAsyncThunk<
       }
 
       const data = await response.json();
-      return data.user;
+      // Handle new response format
+      if (data.status === 'success' && data.data) {
+        return data.data.user;
+      }
+      return rejectWithValue('Token verification failed');
     } catch (error) {
       return rejectWithValue(
         error instanceof Error ? error.message : 'Token verification failed'
+      );
+    }
+  }
+);
+
+// Refresh token thunk
+export const refreshToken = createAsyncThunk<
+  RefreshTokenResponse,
+  void,
+  { rejectValue: string }
+>(
+  'auth/refresh',
+  async (_, { rejectWithValue, getState }) => {
+    try {
+      const state = getState() as { auth: { refreshToken: string | null } };
+      const refreshTokenValue = state.auth.refreshToken;
+
+      if (!refreshTokenValue) {
+        return rejectWithValue('No refresh token found');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        return rejectWithValue(errorData.message || 'Token refresh failed');
+      }
+
+      const data = await response.json();
+      // Handle new response format
+      if (data.status === 'success' && data.data) {
+        return data.data;
+      }
+      return rejectWithValue(data.message || 'Token refresh failed');
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : 'Token refresh failed'
       );
     }
   }
