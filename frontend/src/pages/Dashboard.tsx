@@ -64,7 +64,7 @@ const Dashboard: React.FC = () => {
     <DashboardContainer>
       <Header>
         <WelcomeText>
-          <h1>Welcome back, {user?.name || 'User'}!</h1>
+          <h1>Welcome back, {user?.firstName || user?.username || 'User'}!</h1>
           <p>Here's what's happening with your team today.</p>
         </WelcomeText>
         <Button variant="outline" onClick={handleLogout}>

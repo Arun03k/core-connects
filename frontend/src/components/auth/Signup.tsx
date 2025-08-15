@@ -364,7 +364,16 @@ const Signup: React.FC = () => {
     }
 
     try {
-      await dispatch(signupUser(formData)).unwrap();
+      // Convert formData to match SignupCredentials interface
+      const signupData = {
+        firstName: formData.name.split(' ')[0] || formData.name,
+        lastName: formData.name.split(' ').slice(1).join(' ') || '',
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      };
+      
+      await dispatch(signupUser(signupData)).unwrap();
       // Navigation will be handled by the useEffect watching isAuthenticated
     } catch (error) {
       console.error('Signup failed:', error);

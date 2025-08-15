@@ -17,10 +17,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // This is a simplified version - the actual implementation would use the hooks
   const contextValue: AuthContextValue = {
     user: null,
-    token: null,
+    tokens: null,
     isAuthenticated: false,
     isLoading: false,
     error: null,
+    emailVerificationSent: false,
+    passwordResetSent: false,
     login: async () => {},
     signup: async () => {},
     logout: async () => {},
