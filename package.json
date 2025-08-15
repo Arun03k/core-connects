@@ -2,5 +2,9 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
     "react-redux": "^9.2.0"
+  },
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "vercel-build": "cd frontend && npm install && npm run build"
   }
 }

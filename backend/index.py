@@ -32,14 +32,16 @@ def home():
     return jsonify({
         'message': 'CoreConnect API is running',
         'status': 'success',
-        'version': '1.0.0'
+        'version': '1.0.0',
+        'environment': os.getenv('FLASK_ENV', 'production')
     })
 
 @app.route('/health')
 def health_check():
     return jsonify({
         'status': 'healthy',
-        'timestamp': '2025-08-15T00:00:00Z'
+        'timestamp': '2025-08-15T00:00:00Z',
+        'environment': os.getenv('FLASK_ENV', 'production')
     })
 
 # API routes
@@ -47,16 +49,15 @@ def health_check():
 def api_test():
     return jsonify({
         'message': 'API endpoint is working',
-        'data': 'Hello from Flask backend!'
+        'data': 'Hello from Flask backend!',
+        'environment': os.getenv('FLASK_ENV', 'production')
     })
 
-# Export the Flask app for Vercel
+# Vercel serverless function handler
 # This is the entry point that Vercel will use
-if __name__ != '__main__':
-    # For Vercel deployment
-    from werkzeug.middleware.proxy_fix import ProxyFix
-    app.wsgi_app = ProxyFix(app.wsgi_app)
+app.wsgi_app = app.wsgi_app
 
+# For local development
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     debug_mode = os.getenv('FLASK_ENV') == 'development' or os.getenv('FLASK_DEBUG') == '1'

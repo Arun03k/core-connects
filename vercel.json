@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "frontend/package.json",
+      "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "frontend/dist"
@@ -10,30 +10,19 @@
     },
     {
       "src": "backend/index.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.9",
+        "maxDuration": 30
+      }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/index.py"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "frontend/dist/index.html"
+      "source": "/api/(.*)",
+      "destination": "/backend/index.py"
     }
   ],
-  "functions": {
-    "backend/index.py": {
-      "runtime": "python3.9"
-    }
-  },
-  "env": {
-    "FLASK_ENV": "production"
-  },
   "headers": [
     {
       "source": "/api/(.*)",
