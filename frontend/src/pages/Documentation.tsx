@@ -72,9 +72,10 @@ const Documentation: React.FC = () => {
   const techStack = [
     { name: "React", version: "19.1.1", color: "#61dafb", icon: "⚛️" },
     { name: "TypeScript", version: "5.8.3", color: "#3178c6", icon: "📘" },
+    { name: "Flask", version: "3.0.0", color: "#000000", icon: "🐍" },
+    { name: "Docker", version: "Latest", color: "#2496ed", icon: "🐳" },
     { name: "Material-UI", version: "7.3.1", color: "#1976d2", icon: "🎨" },
     { name: "Vite", version: "7.1.2", color: "#646cff", icon: "⚡" },
-    { name: "React Router", version: "7.8.0", color: "#ca4245", icon: "🛣️" },
   ];
 
   const features = [
@@ -108,6 +109,12 @@ const Documentation: React.FC = () => {
       description: "Interactive documentation with comprehensive guides",
       status: "completed",
     },
+    {
+      icon: <DeviceHub sx={{ color: "#1976d2" }} />,
+      title: "Docker Setup",
+      description: "Containerized development and deployment with CI/CD pipeline",
+      status: "completed",
+    },
   ];
 
   const roadmapPhases = [
@@ -119,6 +126,8 @@ const Documentation: React.FC = () => {
         { task: "Component architecture", completed: true },
         { task: "Animation system", completed: true },
         { task: "Documentation page", completed: true },
+        { task: "Docker containerization", completed: true },
+        { task: "CI/CD pipeline", completed: true },
       ],
     },
     {
@@ -128,6 +137,7 @@ const Documentation: React.FC = () => {
         { task: "Employee dashboard", completed: false },
         { task: "Time tracking interface", completed: false },
         { task: "Leave management system", completed: false },
+        { task: "Database integration", completed: false },
       ],
     },
     {
@@ -136,7 +146,7 @@ const Documentation: React.FC = () => {
         { task: "Task management module", completed: false },
         { task: "Reporting & analytics", completed: false },
         { task: "Mobile app integration", completed: false },
-        { task: "API development", completed: false },
+        { task: "Advanced API features", completed: false },
       ],
     },
   ];
@@ -359,8 +369,8 @@ const Documentation: React.FC = () => {
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
                     CoreConnect is a modern, comprehensive workforce management platform designed to empower both HR teams and employees. 
-                    Built with cutting-edge technologies like React 19, TypeScript, and Material-UI, it provides powerful tools for managing 
-                    the entire employee lifecycle from onboarding to daily operations.
+                    Built with cutting-edge technologies like React 19, TypeScript, Flask, and containerized with Docker, it provides powerful 
+                    tools for managing the entire employee lifecycle from onboarding to daily operations.
                   </Typography>
                   <Typography variant="h6" gutterBottom sx={{ color: "#1565c0", mt: 4, fontWeight: 600 }}>
                     Key Benefits
@@ -380,7 +390,11 @@ const Documentation: React.FC = () => {
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Mobile-responsive design" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Docker containerization for consistent environments" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="CI/CD pipeline with automated testing" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                   </List>
                 </CardContent>
@@ -413,8 +427,16 @@ const Documentation: React.FC = () => {
                       <Chip label="100%" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <Typography sx={{ fontWeight: 500 }}>TypeScript</Typography>
-                      <Chip label="Full" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                      <Typography sx={{ fontWeight: 500 }}>Backend API</Typography>
+                      <Chip label="Flask" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Container</Typography>
+                      <Chip label="Docker" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>CI/CD</Typography>
+                      <Chip label="GitHub Actions" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                   </Box>
                 </CardContent>
@@ -434,7 +456,7 @@ const Documentation: React.FC = () => {
           >
             <CardContent sx={{ p: 4 }}>
               <Typography variant="h4" gutterBottom sx={{ color: "#1976d2", fontWeight: 700, mb: 4 }}>
-                Quick Start Guide
+                🐳 Docker Setup Guide (Recommended)
               </Typography>
               
               <Accordion
@@ -458,19 +480,8 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText 
-                        primary="Node.js (v16 or higher)" 
-                        secondary="Download from nodejs.org"
-                        sx={{ 
-                          "& .MuiListItemText-primary": { color: "#333", fontWeight: 500 },
-                          "& .MuiListItemText-secondary": { color: "#666" }
-                        }}
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText 
-                        primary="npm or yarn package manager" 
-                        secondary="Comes with Node.js installation"
+                        primary="Docker Desktop" 
+                        secondary="Download from docker.com - includes Docker Compose"
                         sx={{ 
                           "& .MuiListItemText-primary": { color: "#333", fontWeight: 500 },
                           "& .MuiListItemText-secondary": { color: "#666" }
@@ -488,13 +499,24 @@ const Documentation: React.FC = () => {
                         }}
                       />
                     </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText 
+                        primary="4GB RAM minimum" 
+                        secondary="8GB recommended for smooth Docker performance"
+                        sx={{ 
+                          "& .MuiListItemText-primary": { color: "#333", fontWeight: 500 },
+                          "& .MuiListItemText-secondary": { color: "#666" }
+                        }}
+                      />
+                    </ListItem>
                   </List>
                 </AccordionDetails>
               </Accordion>
 
               <Accordion
-                expanded={expandedAccordion === "installation"}
-                onChange={handleAccordionChange("installation")}
+                expanded={expandedAccordion === "docker-setup"}
+                onChange={handleAccordionChange("docker-setup")}
                 sx={{ 
                   background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
@@ -505,49 +527,45 @@ const Documentation: React.FC = () => {
               >
                 <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#1976d2" }} />}>
                   <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
-                    2. Installation Steps
+                    2. Quick Start (30 seconds!)
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
                     <Box>
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
-                        Clone the repository:
+                        Windows Users (Interactive Setup):
                       </Typography>
-                      <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600 }}>
-                          git clone https://github.com/Arun03k/core-connects.git
+                      <Paper sx={{ p: 3, background: "#e3f2fd", borderRadius: 2, border: "2px solid #1976d2" }}>
+                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "1.1rem" }}>
+                          git clone https://github.com/Arun03k/core-connects.git<br/>
+                          cd core-connects<br/>
+                          dev-setup.bat
                         </code>
                       </Paper>
                     </Box>
                     <Box>
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
-                        Navigate to project directory:
+                        All Platforms (Direct Commands):
                       </Typography>
-                      <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600 }}>
-                          cd core-connects/frontend
+                      <Paper sx={{ p: 3, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
+                        <code style={{ color: "#1976d2", fontWeight: 600, fontSize: "1.1rem" }}>
+                          git clone https://github.com/Arun03k/core-connects.git<br/>
+                          cd core-connects<br/>
+                          docker-compose up -d
                         </code>
                       </Paper>
                     </Box>
                     <Box>
                       <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
-                        Install dependencies:
+                        Access Your Application:
                       </Typography>
-                      <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600 }}>
-                          npm install
-                        </code>
-                      </Paper>
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle1" sx={{ color: "#1976d2", mb: 1, fontWeight: 600 }}>
-                        Start development server:
-                      </Typography>
-                      <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 2, fontFamily: "monospace" }}>
-                        <code style={{ color: "#1976d2", fontWeight: 600 }}>
-                          npm run dev
-                        </code>
+                      <Paper sx={{ p: 3, background: "#e8f5e8", borderRadius: 2, border: "2px solid #4caf50" }}>
+                        <Typography component="div" sx={{ fontFamily: "monospace", fontWeight: 600, color: "#2e7d32" }}>
+                          🌐 Frontend: <a href="http://localhost:80" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:80</a><br/>
+                          🔧 Backend: <a href="http://localhost:5000" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000</a><br/>
+                          ❤️ Health: <a href="http://localhost:5000/health" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/health</a>
+                        </Typography>
                       </Paper>
                     </Box>
                   </Box>
@@ -555,18 +573,19 @@ const Documentation: React.FC = () => {
               </Accordion>
 
               <Accordion
-                expanded={expandedAccordion === "scripts"}
-                onChange={handleAccordionChange("scripts")}
+                expanded={expandedAccordion === "docker-commands"}
+                onChange={handleAccordionChange("docker-commands")}
                 sx={{ 
                   background: "linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)",
                   boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
                   borderRadius: 2,
+                  mb: 2,
                   "&:before": { display: "none" },
                 }}
               >
                 <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#1976d2" }} />}>
                   <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
-                    3. Available Scripts
+                    3. Docker Commands
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -574,19 +593,8 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><PlayArrow sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText 
-                        primary="npm run dev" 
-                        secondary="Start development server with hot reload"
-                        sx={{ 
-                          "& .MuiListItemText-primary": { color: "#333", fontWeight: 500, fontFamily: "monospace" },
-                          "& .MuiListItemText-secondary": { color: "#666" }
-                        }}
-                      />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemIcon><Build sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText 
-                        primary="npm run build" 
-                        secondary="Build optimized production bundle"
+                        primary="docker-compose up -d" 
+                        secondary="Start all services in background"
                         sx={{ 
                           "& .MuiListItemText-primary": { color: "#333", fontWeight: 500, fontFamily: "monospace" },
                           "& .MuiListItemText-secondary": { color: "#666" }
@@ -596,8 +604,8 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><Speed sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText 
-                        primary="npm run preview" 
-                        secondary="Preview production build locally"
+                        primary="docker-compose logs -f" 
+                        secondary="View real-time logs from all services"
                         sx={{ 
                           "& .MuiListItemText-primary": { color: "#333", fontWeight: 500, fontFamily: "monospace" },
                           "& .MuiListItemText-secondary": { color: "#666" }
@@ -607,8 +615,19 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><Security sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText 
-                        primary="npm run lint" 
-                        secondary="Run ESLint for code quality checks"
+                        primary="docker-compose exec backend python -m pytest" 
+                        secondary="Run backend tests inside container"
+                        sx={{ 
+                          "& .MuiListItemText-primary": { color: "#333", fontWeight: 500, fontFamily: "monospace" },
+                          "& .MuiListItemText-secondary": { color: "#666" }
+                        }}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><Build sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText 
+                        primary="docker-compose down" 
+                        secondary="Stop and remove all containers"
                         sx={{ 
                           "& .MuiListItemText-primary": { color: "#333", fontWeight: 500, fontFamily: "monospace" },
                           "& .MuiListItemText-secondary": { color: "#666" }
@@ -616,6 +635,52 @@ const Documentation: React.FC = () => {
                       />
                     </ListItem>
                   </List>
+                </AccordionDetails>
+              </Accordion>
+
+              <Accordion
+                expanded={expandedAccordion === "manual-setup"}
+                onChange={handleAccordionChange("manual-setup")}
+                sx={{ 
+                  background: "linear-gradient(145deg, #fff8e1 0%, #fff3c4 100%)",
+                  boxShadow: "0 4px 16px rgba(255,193,7,0.2)",
+                  borderRadius: 2,
+                  "&:before": { display: "none" },
+                }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#f57c00" }} />}>
+                  <Typography variant="h6" sx={{ color: "#f57c00", fontWeight: 600 }}>
+                    ⚠️ Manual Setup (Fallback Option)
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Box sx={{ mb: 2, p: 2, background: "rgba(255,193,7,0.1)", borderRadius: 1, border: "1px solid #ffb74d" }}>
+                    <Typography variant="body2" sx={{ color: "#f57c00", fontWeight: 600 }}>
+                      Note: Manual setup is only recommended if Docker cannot be used. Docker provides a much better development experience.
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <Typography variant="subtitle2" sx={{ color: "#333", fontWeight: 600 }}>
+                      Frontend Setup:
+                    </Typography>
+                    <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 1, fontFamily: "monospace", fontSize: "0.9rem" }}>
+                      <code>
+                        cd frontend<br/>
+                        npm install<br/>
+                        npm run dev
+                      </code>
+                    </Paper>
+                    <Typography variant="subtitle2" sx={{ color: "#333", fontWeight: 600 }}>
+                      Backend Setup:
+                    </Typography>
+                    <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 1, fontFamily: "monospace", fontSize: "0.9rem" }}>
+                      <code>
+                        cd backend<br/>
+                        pip install -r requirements.txt<br/>
+                        python app.py
+                      </code>
+                    </Paper>
+                  </Box>
                 </AccordionDetails>
               </Accordion>
             </CardContent>
@@ -661,9 +726,10 @@ const Documentation: React.FC = () => {
                       <Typography variant="body2" sx={{ color: "#555", lineHeight: 1.6 }}>
                         {tech.name === "React" && "Modern React with latest features and hooks"}
                         {tech.name === "TypeScript" && "Type-safe development with full IntelliSense"}
+                        {tech.name === "Flask" && "Python web framework for robust backend API"}
+                        {tech.name === "Docker" && "Containerization for consistent development environments"}
                         {tech.name === "Material-UI" && "Comprehensive component library with theming"}
                         {tech.name === "Vite" && "Lightning-fast build tool and development server"}
-                        {tech.name === "React Router" && "Client-side routing with modern navigation"}
                       </Typography>
                     </CardContent>
                   </Card>

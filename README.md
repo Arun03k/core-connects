@@ -53,10 +53,24 @@ CoreConnect is a modern, comprehensive workforce management platform designed to
 - **Material-UI 7.3.1** - Modern component library
 - **Emotion** - CSS-in-JS styling solution
 
+### Backend
+- **Flask 3.0.0** - Modern Python web framework
+- **Flask-CORS 4.0.0** - Cross-origin resource sharing
+- **Python-dotenv 1.0.0** - Environment variable management
+- **Werkzeug 3.0.1** - WSGI utility library
+
+### DevOps & Deployment
+- **Docker** - Containerization platform
+- **Docker Compose** - Multi-container orchestration
+- **GitHub Actions** - CI/CD pipeline automation
+- **Nginx** - Web server and reverse proxy
+
 ### Development Tools
 - **ESLint 9.33.0** - Code linting and quality
 - **TypeScript ESLint** - TypeScript-specific linting
 - **Vite React Plugin** - React integration for Vite
+- **Flake8** - Python code linting
+- **Pytest** - Python testing framework
 
 ### Routing & Navigation
 - **React Router DOM 7.8.0** - Client-side routing
@@ -72,29 +86,59 @@ CoreConnect is a modern, comprehensive workforce management platform designed to
 
 ```
 core-connect/
-├── public/
-│   └── vite.svg                    # Vite logo
-├── src/
-│   ├── assets/
-│   │   ├── backgroundLanding.png   # Hero background image
-│   │   └── react.svg              # React logo
-│   ├── pages/
-│   │   ├── Landing.tsx            # Main landing page
-│   │   └── Footer.tsx             # Footer component
-│   ├── App.css                    # Global app styles
-│   ├── App.tsx                    # Main app component
-│   ├── index.css                  # Global CSS reset & styles
-│   ├── main.tsx                   # App entry point
-│   └── vite-env.d.ts             # Vite type declarations
-├── .gitignore                     # Git ignore rules
-├── eslint.config.js              # ESLint configuration
-├── index.html                    # HTML template
-├── package.json                  # Dependencies & scripts
-├── tsconfig.app.json            # TypeScript app config
-├── tsconfig.json                # TypeScript main config
-├── tsconfig.node.json           # TypeScript Node config
-├── vite.config.ts               # Vite configuration
-└── README.md                    # This documentation
+├── frontend/                       # React frontend application
+│   ├── public/
+│   │   └── vite.svg                # Vite logo
+│   ├── src/
+│   │   ├── assets/
+│   │   │   ├── backgroundLanding.png   # Hero background image
+│   │   │   └── react.svg              # React logo
+│   │   ├── pages/
+│   │   │   ├── Landing.tsx            # Main landing page
+│   │   │   └── Footer.tsx             # Footer component
+│   │   ├── routes/
+│   │   │   └── AppRoutes.tsx          # Application routing
+│   │   ├── App.css                    # Global app styles
+│   │   ├── App.tsx                    # Main app component
+│   │   ├── index.css                  # Global CSS reset & styles
+│   │   ├── main.tsx                   # App entry point
+│   │   └── vite-env.d.ts             # Vite type declarations
+│   ├── Dockerfile                     # Frontend container config
+│   ├── nginx.conf                     # Nginx configuration
+│   ├── .dockerignore                  # Docker ignore rules
+│   ├── eslint.config.js              # ESLint configuration
+│   ├── index.html                    # HTML template
+│   ├── package.json                  # Dependencies & scripts
+│   ├── tsconfig.app.json            # TypeScript app config
+│   ├── tsconfig.json                # TypeScript main config
+│   ├── tsconfig.node.json           # TypeScript Node config
+│   └── vite.config.ts               # Vite configuration
+├── backend/                          # Flask backend API
+│   ├── api/
+│   │   ├── __init__.py              # API module init
+│   │   └── auth.py                  # Authentication routes
+│   ├── models/
+│   │   └── __init__.py              # Models module init
+│   ├── utils/
+│   │   └── __init__.py              # Utilities module init
+│   ├── app.py                       # Main Flask application
+│   ├── config.py                    # Configuration settings
+│   ├── requirements.txt             # Python dependencies
+│   ├── test_app.py                  # Test suite
+│   ├── Dockerfile                   # Backend container config
+│   ├── .dockerignore               # Docker ignore rules
+│   ├── .env.example                # Environment template
+│   ├── .gitignore                  # Git ignore rules
+│   └── README.md                   # Backend documentation
+├── .github/workflows/              # CI/CD pipeline configurations
+│   ├── ci-cd.yml                  # Main CI/CD pipeline
+│   ├── dependency-updates.yml     # Dependency management
+│   └── security.yml               # Security scanning
+├── docker-compose.yml             # Development docker setup
+├── docker-compose.prod.yml        # Production docker setup
+├── dev-setup.bat                  # Development helper script (Windows)
+├── DOCKER.md                      # Docker & CI/CD documentation
+└── README.md                      # This documentation
 ```
 
 ## 🎨 Design Philosophy
@@ -120,44 +164,121 @@ core-connect/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn package manager
-- Git for version control
+- **Docker Desktop** (recommended) - For containerized development
+- **Node.js (v20+)** - Only if running frontend locally
+- **Python 3.11+** - Only if running backend locally
+- **Git** - Version control
 
-### Installation
+### 🐳 Quick Start with Docker (Recommended)
 
+The easiest way to run CoreConnect is using Docker. This method ensures consistent environments across all systems.
+
+#### Option 1: Interactive Setup (Windows)
+```cmd
+dev-setup.bat
+```
+*Easy interactive menu for all development tasks*
+
+#### Option 2: Direct Commands
 1. **Clone the repository**
    ```bash
    git clone https://github.com/Arun03k/core-connects.git
-   cd core-connect
+   cd core-connects
    ```
 
-2. **Install dependencies**
+2. **Start the full application**
    ```bash
-   npm install
+   docker-compose up -d
    ```
 
-3. **Start development server**
+3. **Access the application**
+   - **Frontend**: http://localhost:80
+   - **Backend API**: http://localhost:5000
+   - **Health Check**: http://localhost:5000/health
+
+4. **View application logs**
    ```bash
-   npm run dev
+   docker-compose logs -f
    ```
 
-4. **Build for production**
+5. **Stop the application**
    ```bash
-   npm run build
+   docker-compose down
    ```
 
-5. **Preview production build**
-   ```bash
-   npm run preview
-   ```
+### 🛠️ Development with Docker
 
-### Available Scripts
+#### Frontend Development
+```bash
+# Start only frontend (with backend dependency)
+docker-compose up -d
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run lint` - Run ESLint
-- `npm run preview` - Preview production build
+# View frontend logs
+docker-compose logs -f frontend
+
+# Access frontend container
+docker-compose exec frontend sh
+```
+
+#### Backend Development
+```bash
+# Start only backend
+docker-compose up -d backend
+
+# View backend logs  
+docker-compose logs -f backend
+
+# Run backend tests
+docker-compose exec backend python -m pytest
+
+# Access backend container
+docker-compose exec backend sh
+```
+
+### 📋 Local Development (Alternative)
+
+⚠️ **Note**: This method requires manual setup and is only recommended if Docker cannot be used.
+
+#### Frontend Setup
+```bash
+cd frontend
+npm install
+npm run dev
+# Access at http://localhost:5173
+```
+
+#### Backend Setup
+```bash
+cd backend
+pip install -r requirements.txt
+copy .env.example .env  # Edit with your settings
+python app.py
+# Access at http://localhost:5000
+```
+
+### 🐳 Docker Commands Reference
+
+#### Basic Operations
+- `docker-compose up -d` - Start all services in background
+- `docker-compose down` - Stop and remove all containers
+- `docker-compose ps` - Show running containers
+- `docker-compose logs -f [service]` - Follow logs
+
+#### Development Commands
+- `docker-compose build` - Rebuild containers
+- `docker-compose build --no-cache` - Clean rebuild
+- `docker-compose exec [service] sh` - Access container shell
+- `docker-compose restart [service]` - Restart specific service
+
+#### Production Commands
+- `docker-compose -f docker-compose.prod.yml up -d` - Start production
+- `docker-compose -f docker-compose.prod.yml down` - Stop production
+
+### 📚 Additional Resources
+
+For detailed Docker and deployment information, see:
+- **[DOCKER.md](./DOCKER.md)** - Complete Docker & CI/CD guide
+- **[Backend README](./backend/README.md)** - Backend-specific documentation
 
 ## 📱 Responsive Design
 
