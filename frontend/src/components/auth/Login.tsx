@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { colors } from '../../theme/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loginUser } from '../../store/thunks/authThunks';
+import { loginUser, verifyEmail } from '../../store/thunks/authThunks';
 import { clearError } from '../../store/slices/authSlice';
 import InputField from '../common/InputField';
 import Button from '../common/Button';
@@ -157,6 +157,38 @@ const ErrorMessage = styled.div`
   text-align: center;
 `;
 
+const SuccessMessage = styled.div`
+  background-color: ${colors.success[50]};
+  color: ${colors.success[700]};
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid ${colors.success[200]};
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  text-align: center;
+`;
+
+const RememberMeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: ${colors.text.secondary};
+  font-size: 0.875rem;
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    margin: 0;
+    accent-color: ${colors.primary[500]};
+  }
+`;
+
 const SignupPrompt = styled.div`
   text-align: center;
   margin-top: 1.5rem;
@@ -214,21 +246,51 @@ const Login: React.FC = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState('');
 
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+
+  // Handle email verification on component mount
+  useEffect(() => {
+    const verifyToken = searchParams.get('verify');
+    if (verifyToken) {
+      dispatch(verifyEmail(verifyToken))
+        .unwrap()
+        .then(() => {
+          setVerificationMessage('Email verified successfully! You can now log in.');
+        })
+        .catch((error: string) => {
+          setVerificationMessage(`Verification failed: ${error}`);
+        });
+    }
+  }, [dispatch, searchParams]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      const redirectTo = searchParams.get('redirect') || '/dashboard';
+      navigate(redirectTo, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, searchParams]);
 
   useEffect(() => {
     // Clear error when component mounts
     dispatch(clearError());
   }, [dispatch]);
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const remembered = localStorage.getItem('rememberMe');
+    const lastEmail = localStorage.getItem('lastEmail');
+    
+    if (remembered === 'true' && lastEmail) {
+      setFormData(prev => ({ ...prev, email: lastEmail }));
+      setRememberMe(true);
+    }
+  }, []);
 
   const validateForm = () => {
     const errors = { email: '', password: '' };
@@ -273,6 +335,15 @@ const Login: React.FC = () => {
 
     try {
       await dispatch(loginUser(formData)).unwrap();
+      
+      // Handle remember me functionality
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+        localStorage.setItem('lastEmail', formData.email);
+      } else {
+        localStorage.removeItem('rememberMe');
+        localStorage.removeItem('lastEmail');
+      }
       // Navigation will be handled by the useEffect watching isAuthenticated
     } catch (error) {
       console.error('Login failed:', error);
@@ -296,6 +367,10 @@ const Login: React.FC = () => {
         
         <Title>Welcome back</Title>
         <Subtitle>Sign in to your account to continue your journey</Subtitle>
+
+        {verificationMessage && (
+          <SuccessMessage>{verificationMessage}</SuccessMessage>
+        )}
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -330,9 +405,21 @@ const Login: React.FC = () => {
             onEndIconClick={() => setShowPassword(!showPassword)}
           />
 
-          <ForgotPasswordLink to="/forgot-password">
-            Forgot your password?
-          </ForgotPasswordLink>
+          <RememberMeContainer>
+            <CheckboxLabel>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                disabled={isLoading}
+              />
+              Remember me
+            </CheckboxLabel>
+
+            <ForgotPasswordLink to="/forgot-password">
+              Forgot your password?
+            </ForgotPasswordLink>
+          </RememberMeContainer>
 
           <Button
             type="submit"

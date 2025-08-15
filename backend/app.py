@@ -4,7 +4,9 @@ import os
 from dotenv import load_dotenv
 from api.auth import auth_bp
 from config import config
-from utils.database import init_db, test_connection
+from core.database import init_database, db_manager
+from core.security import SecurityMiddleware
+from core.responses import APIResponse, ErrorResponses
 from models.user import User
 import logging
 
@@ -34,7 +36,7 @@ def create_app(config_name=None):
     
     # Initialize database
     try:
-        init_db(app)
+        init_database()
         logger.info("Database initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize database: {str(e)}")
@@ -42,31 +44,46 @@ def create_app(config_name=None):
     # Register blueprints
     app.register_blueprint(auth_bp)
     
+    # Add security middleware
+    @app.after_request
+    def add_security_headers(response):
+        """Add security headers to all responses."""
+        return SecurityMiddleware.add_security_headers(response)
+    
     # Basic health check endpoint
     @app.route('/')
     def home():
-        return jsonify({
-            'message': 'CoreConnect API is running',
-            'status': 'success',
-            'version': '1.0.0'
-        })
+        return APIResponse.success(
+            data={
+                'version': '1.0.0',
+                'api_name': 'CoreConnect API',
+                'documentation': '/docs',
+                'health_check': '/health'
+            },
+            message='CoreConnect API is running'
+        )
     
     @app.route('/health')
     def health_check():
-        db_status = test_connection()
-        return jsonify({
-            'status': 'healthy' if db_status else 'unhealthy',
-            'database': 'connected' if db_status else 'disconnected',
-            'timestamp': '2025-08-15T00:00:00Z'
-        }), 200 if db_status else 503
+        """Comprehensive health check endpoint."""
+        health_data = db_manager.health_check()
+        
+        return APIResponse.success(
+            data={
+                'api': 'healthy',
+                'database': health_data,
+                'version': '1.0.0'
+            },
+            message='Service is healthy' if health_data['connected'] else 'Service has issues'
+        ) if health_data['connected'] else ErrorResponses.service_unavailable("Database connection issues")
     
     # API routes
     @app.route('/api/test')
     def api_test():
-        return jsonify({
-            'message': 'API endpoint is working',
-            'data': 'Hello from Flask backend!'
-        })
+        return APIResponse.success(
+            data='Hello from Flask backend!',
+            message='API endpoint is working'
+        )
     
     @app.route('/api/stats')
     def api_stats():
@@ -75,16 +92,13 @@ def create_app(config_name=None):
             user_model = User()
             stats = user_model.get_user_stats()
             
-            return jsonify({
-                'status': 'success',
-                'stats': stats
-            })
+            return APIResponse.success(
+                data=stats,
+                message='Statistics retrieved successfully'
+            )
         except Exception as e:
             logger.error(f"Stats error: {str(e)}")
-            return jsonify({
-                'status': 'error',
-                'error': 'Failed to get statistics'
-            }), 500
+            return ErrorResponses.internal_error('Failed to get statistics')
     
     return app
 

@@ -3,10 +3,14 @@ Email service for sending authentication-related emails
 """
 from typing import Dict, Any, Optional
 import smtplib
-from email.mime.text import MimeText
-from email.mime.multipart import MimeMultipart
-from flask import current_app
 import logging
+try:
+    from email.mime.text import MIMEText as MimeText
+    from email.mime.multipart import MIMEMultipart as MimeMultipart
+except ImportError:
+    from email.mime.text import MimeText
+    from email.mime.multipart import MimeMultipart
+from flask import current_app
 
 logger = logging.getLogger(__name__)
 
