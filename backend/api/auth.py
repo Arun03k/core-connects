@@ -26,6 +26,7 @@ def login():
     })
 
 @auth_bp.route('/register', methods=['POST'])
+@auth_bp.route('/signup', methods=['POST'])  # Add signup alias for frontend compatibility
 def register():
     """Registration endpoint"""
     data = request.get_json()
@@ -53,4 +54,17 @@ def logout():
     return jsonify({
         'message': 'Logout successful',
         'status': 'success'
+    })
+
+@auth_bp.route('/verify', methods=['GET'])
+def verify():
+    """Token verification endpoint"""
+    # TODO: Implement actual token verification
+    return jsonify({
+        'message': 'Token is valid',
+        'status': 'success',
+        'user': {
+            'id': 1,
+            'email': 'user@example.com'
+        }
     })

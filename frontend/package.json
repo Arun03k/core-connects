@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "test": "echo \"No tests specified\" && exit 0",
     "test:coverage": "echo \"No tests specified\" && exit 0",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

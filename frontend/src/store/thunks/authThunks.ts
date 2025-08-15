@@ -1,8 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { User } from '../slices/authSlice';
 
-// API base URL - adjust this based on your backend configuration
-const API_BASE_URL = 'http://localhost:5000/api';
+// API base URL - Use environment variable or fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 
+                     (import.meta.env.MODE === 'development' ? 'http://localhost:5000/api' : '/api');
 
 export interface LoginCredentials {
   email: string;
