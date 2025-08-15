@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🚀 Getting Started Guide
+    url: https://github.com/Arun03k/core-connects/blob/main/README.md
+    about: Check out our comprehensive README for setup instructions
+  - name: 🐳 Docker Setup Guide
+    url: https://github.com/Arun03k/core-connects/blob/main/DOCKER.md
+    about: Complete Docker and CI/CD setup documentation
+  - name: 💬 Start a Discussion
+    url: https://github.com/Arun03k/core-connects/discussions
+    about: Ask questions, share ideas, or discuss implementation details
