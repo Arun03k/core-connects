@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
@@ -21,8 +21,27 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import { Link as RouterLink } from "react-router-dom";
 import backgroundLanding from "../assets/backgroundLanding.png";
 import Footer from "./Footer";
+import Login from "./Login";
+
+interface User {
+  id: number;
+  email: string;
+  fullName: string;
+  provider?: string;
+}
 
 const Landing: React.FC = () => {
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  const handleLoginSuccess = (user: User) => {
+    console.log("Login successful:", user);
+    // Here you would typically handle the successful login
+    // e.g., redirect to dashboard, update global state, etc.
+  };
+
+  const openLogin = () => setLoginOpen(true);
+  const closeLogin = () => setLoginOpen(false);
+
   return (
     <Box 
       sx={{ 
@@ -151,8 +170,7 @@ const Landing: React.FC = () => {
         <Zoom in={true} timeout={1500}>
           <Box sx={{ display: "flex", gap: 3, flexDirection: { xs: "column", sm: "row" }, alignItems: "center" }}>
             <Button
-              component={RouterLink}
-              to="/login"
+              onClick={openLogin}
               variant="contained"
               size="large"
               endIcon={<ArrowForwardIcon />}
@@ -621,6 +639,13 @@ const Landing: React.FC = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Login Dialog */}
+      <Login 
+        open={loginOpen}
+        onClose={closeLogin}
+        onSuccess={handleLoginSuccess}
+      />
     </Box>
   );
 };

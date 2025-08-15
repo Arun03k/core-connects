@@ -1,16 +1,8 @@
 import React from "react";
-import { ThemeProvider, CssBaseline, createTheme } from "@mui/material";
+import { ThemeProvider, CssBaseline } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
-
-const theme = createTheme({
-  palette: {
-    mode: "light",
-    primary: { main: "#7C4DFF" }, // nice purple
-    secondary: { main: "#3F51B5" }, // indigo
-  },
-  shape: { borderRadius: 12 },
-});
+import theme from "./theme";
 
 const App: React.FC = () => {
   return (

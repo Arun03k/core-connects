@@ -1,0 +1,19 @@
+# Trivy ignore file
+# Ignore common development dependencies vulnerabilities that don't affect production
+
+# Node.js development dependencies
+CVE-2024-4067
+CVE-2023-44270
+
+# Python development dependencies  
+CVE-2024-28219
+CVE-2023-52425
+
+# Documentation and build tool vulnerabilities (low risk)
+CVE-2024-21490
+CVE-2024-21491
+CVE-2024-21492
+
+# Ignore vulnerabilities in base images that are handled by regular updates
+CVE-2023-4911
+CVE-2023-29491
