@@ -74,29 +74,49 @@ jobs:
   # Create a status check that GitHub can use for branch protection
   deployment-readiness:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v4
     
     - name: Check Deployment Readiness
       run: |
-        echo "🔍 Checking deployment readiness for PR #${{ github.event.number }}"
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "🔍 Checking deployment readiness for PR #${{ github.event.number }}"
+        else
+          echo "🔍 Checking deployment readiness for main branch push"
+        fi
         
-        # Check if this PR would pass all deployment requirements
+        # Check if this change would pass all deployment requirements
         echo "Validating:"
         echo "  📝 Code changes review"
         echo "  🧪 Test requirements"
         echo "  🔒 Security requirements"
         echo "  🚀 Deployment requirements"
         
-        # You could add more sophisticated checks here
-        # For example, checking file changes, PR labels, etc.
+        # Check if render.yaml exists
+        if [ -f "render.yaml" ]; then
+          echo "✅ Render configuration found"
+        else
+          echo "❌ Render configuration missing"
+          exit 1
+        fi
         
-        echo "✅ PR is ready for deployment pipeline"
+        # Check if required directories exist
+        if [ -d "backend" ] && [ -d "frontend" ]; then
+          echo "✅ Project structure validated"
+        else
+          echo "❌ Project structure incomplete"
+          exit 1
+        fi
+        
+        echo "✅ Deployment readiness check passed"
     
     - name: Set Status Check
       run: |
         echo "Setting deployment readiness status check..."
-        # GitHub will automatically create a status check from this job
-        echo "✅ Deployment readiness check passed"
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "✅ PR is ready for deployment pipeline"
+        else
+          echo "✅ Main branch deployment readiness confirmed"
+        fi

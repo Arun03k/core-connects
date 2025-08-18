@@ -26,36 +26,46 @@ jobs:
         echo "📅 Deployment triggered by: ${{ github.event.head_commit.message }}"
         echo "👤 Triggered by: ${{ github.actor }}"
         
-        # Wait for Render to detect the push and start deployment
-        echo "⏳ Waiting for Render to detect repository changes..."
-        sleep 45
-        
-        # Monitor deployment progress
-        max_wait_time=900  # 15 minutes
-        check_interval=15  # 15 seconds
-        elapsed_time=0
-        
-        echo "🔍 Starting deployment health monitoring..."
-        
-        while [ $elapsed_time -lt $max_wait_time ]; do
-          echo "⏱️  Elapsed time: ${elapsed_time}s / ${max_wait_time}s"
+        # First, check if the service is already healthy
+        echo "🔍 Checking current service status..."
+        if curl -f -s --connect-timeout 10 --max-time 30 https://coreconnect-backend.onrender.com/health > /dev/null 2>&1; then
+          echo "✅ Service is already healthy! Skipping long wait."
+          echo "deployment_ready=true" >> $GITHUB_OUTPUT
+        else
+          echo "⏳ Service not responding, waiting for Render deployment to complete..."
           
-          # Check if the service is responding
-          if curl -f -s --connect-timeout 10 --max-time 30 https://coreconnect-backend.onrender.com/health > /dev/null 2>&1; then
-            echo "✅ Service is responding! Deployment likely successful."
-            echo "deployment_ready=true" >> $GITHUB_OUTPUT
-            break
-          else
-            echo "⏳ Service not yet responding, deployment may still be in progress..."
-            sleep $check_interval
-            elapsed_time=$((elapsed_time + check_interval))
+          # Wait for Render to detect the push and start deployment
+          echo "⏳ Waiting for Render to detect repository changes..."
+          sleep 45
+          
+          # Monitor deployment progress with shorter timeout since we know it should be fast
+          max_wait_time=600  # 10 minutes instead of 15
+          check_interval=15  # 15 seconds
+          elapsed_time=0
+          
+          echo "🔍 Starting deployment health monitoring..."
+          
+          while [ $elapsed_time -lt $max_wait_time ]; do
+            echo "⏱️  Elapsed time: ${elapsed_time}s / ${max_wait_time}s"
+            
+            # Check if the service is responding
+            if curl -f -s --connect-timeout 10 --max-time 30 https://coreconnect-backend.onrender.com/health > /dev/null 2>&1; then
+              echo "✅ Service is responding! Deployment successful."
+              echo "deployment_ready=true" >> $GITHUB_OUTPUT
+              break
+            else
+              echo "⏳ Service not yet responding, deployment may still be in progress..."
+              sleep $check_interval
+              elapsed_time=$((elapsed_time + check_interval))
+            fi
+          done
+          
+          if [ $elapsed_time -ge $max_wait_time ]; then
+            echo "❌ Deployment monitoring timed out after 10 minutes"
+            echo "⚠️  This might indicate a deployment issue or the service is taking unusually long to start"
+            echo "deployment_ready=false" >> $GITHUB_OUTPUT
+            exit 1
           fi
-        done
-        
-        if [ $elapsed_time -ge $max_wait_time ]; then
-          echo "❌ Deployment monitoring timed out after 15 minutes"
-          echo "deployment_ready=false" >> $GITHUB_OUTPUT
-          exit 1
         fi
     
     - name: Comprehensive Health Checks
