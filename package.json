@@ -7,6 +7,7 @@
     "build": "cd frontend && npm install && npm run build",
     "type-check": "cd frontend && npm run type-check",
     "lint:frontend": "cd frontend && npm run lint",
+    "fix-json": "cd frontend && npm run fix-json",
     "vercel-build": "cd frontend && npm install && npm run build"
   }
 }

@@ -1,0 +1,13 @@
+# Ignore node_modules files from JSON validation
+frontend/node_modules/**
+backend/node_modules/**
+node_modules/**
+**/node_modules/**
+
+# Ignore build artifacts
+frontend/dist/**
+backend/dist/**
+.vercel/**
+
+# Ignore TypeScript build info
+**/*.tsbuildinfo
