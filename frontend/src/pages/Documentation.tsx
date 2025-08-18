@@ -1040,6 +1040,63 @@ const Documentation: React.FC = () => {
                   </Box>
                 </AccordionDetails>
               </Accordion>
+
+              <Accordion
+                expanded={expandedAccordion === "project-structure"}
+                onChange={handleAccordionChange("project-structure")}
+                sx={{ 
+                  background: "linear-gradient(145deg, #e3f2fd 0%, #f3e5f5 100%)",
+                  boxShadow: "0 4px 16px rgba(25,118,210,0.1)",
+                  borderRadius: 2,
+                  mt: 2,
+                  "&:before": { display: "none" },
+                }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#1976d2" }} />}>
+                  <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
+                    📁 Project Structure Overview
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Typography variant="body1" paragraph sx={{ color: "#555" }}>
+                    CoreConnect is organized for easy navigation and development:
+                  </Typography>
+                  
+                  <Paper sx={{ p: 3, background: "#f8f9fa", borderRadius: 2, fontFamily: "monospace", fontSize: "0.8rem", overflow: "auto" }}>
+                    <Typography component="div" sx={{ color: "#333", lineHeight: 1.4 }}>
+                      core-connect/<br/>
+                      ├── 📚 docs/              # Documentation<br/>
+                      ├── 🔧 tools/             # Optional dev tools<br/>
+                      │   ├── code-quality/     # Optional formatting<br/>
+                      │   └── deployment/       # Deploy utilities<br/>
+                      ├── 🐍 backend/           # Flask API<br/>
+                      │   ├── config/           # Configuration<br/>
+                      │   ├── docker/           # Docker files<br/>
+                      │   └── deployment/       # Deploy configs<br/>
+                      ├── 🌐 frontend/          # React app<br/>
+                      │   ├── config/           # TypeScript configs<br/>
+                      │   ├── docker/           # Docker files<br/>
+                      │   └── src/              # Source code<br/>
+                      ├── 🐳 config/            # Docker compose<br/>
+                      ├── 🚀 deployment/        # Platform configs<br/>
+                      └── 📜 scripts/           # Helper scripts
+                    </Typography>
+                  </Paper>
+
+                  <Box sx={{ mt: 3, p: 2, background: "rgba(76, 175, 80, 0.1)", borderRadius: 2, border: "1px solid #4caf50" }}>
+                    <Typography variant="subtitle2" sx={{ color: "#2e7d32", fontWeight: 600, mb: 1 }}>
+                      🎯 Key Benefits:
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#388e3c" }}>
+                      • Clean separation of concerns<br/>
+                      • Docker files organized in dedicated folders<br/>
+                      • Configuration files centralized<br/>
+                      • Optional tools - use when you want<br/>
+                      • Easy to find what you're looking for
+                    </Typography>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
               
               {/* Developer Tools Section */}
               <Box sx={{ mt: 4, mb: 2 }}>
