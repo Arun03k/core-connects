@@ -3,10 +3,9 @@ Input validation utilities for API endpoints
 """
 
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict
 
 import email_validator
-from flask import request
 
 
 class InputValidator:

@@ -2,14 +2,13 @@
 Tests for MongoDB User model and authentication
 """
 
+import json
 import os
 import sys
 
 import pytest
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-import json
 
 from app import create_app
 from models.user import User
@@ -47,7 +46,7 @@ class TestUserModel:
             try:
                 db = get_db()
                 db.users.delete_many({"email": "test@example.com"})
-            except:
+            except Exception:
                 pass
 
             user = user_model.create_user(
@@ -64,8 +63,8 @@ class TestUserModel:
             assert user["first_name"] == "Test"
             assert user["last_name"] == "User"
             assert "password_hash" not in user  # Should not return password hash
-            assert user["is_active"] == True
-            assert user["is_verified"] == False
+            assert user["is_active"] is True
+            assert user["is_verified"] is False
 
     def test_authenticate_user(self, app, user_model):
         """Test user authentication"""
@@ -74,7 +73,7 @@ class TestUserModel:
             try:
                 db = get_db()
                 db.users.delete_many({"email": "auth@example.com"})
-            except:
+            except Exception:
                 pass
 
             user_model.create_user(email="auth@example.com", password="password123")
@@ -95,7 +94,7 @@ class TestUserModel:
             try:
                 db = get_db()
                 db.users.delete_many({"email": "find@example.com"})
-            except:
+            except Exception:
                 pass
 
             user_model.create_user(email="find@example.com", password="password123")
@@ -120,7 +119,7 @@ class TestAuthEndpoints:
             try:
                 db = get_db()
                 db.users.delete_many({"email": "register@example.com"})
-            except:
+            except Exception:
                 pass
 
         response = client.post(
@@ -147,7 +146,7 @@ class TestAuthEndpoints:
             try:
                 db = get_db()
                 db.users.delete_many({"email": "login@example.com"})
-            except:
+            except Exception:
                 pass
 
             user_model = User()

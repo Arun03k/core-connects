@@ -98,7 +98,7 @@ def token_required(f):
             # Add user to request context
             request.current_user = user
 
-        except Exception as e:
+        except Exception:
             return jsonify({"error": "Failed to verify user", "status": "error"}), 401
 
         return f(*args, **kwargs)
