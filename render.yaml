@@ -21,7 +21,7 @@ services:
       - key: MONGO_DBNAME
         value: coreconnect_prod
       - key: FRONTEND_URL
-        value: https://core-connects.vercel.app
+        value: https://core-connect-seven.vercel.app
       - key: RENDER_EXTERNAL_URL
         value: https://coreconnect-backend.onrender.com
       - key: MAIL_SERVER

@@ -701,7 +701,7 @@ const Api: React.FC = () => {
                 <Public sx={{ fontSize: "1rem" }} />
               </ListItemIcon>
               <ListItemText
-                primary="Production: https://core-connect-api.vercel.app"
+                primary="Production: https://core-connect-seven.vercel.app"
                 sx={{ margin: 0, "& .MuiListItemText-primary": { fontSize: "0.9rem", fontFamily: "monospace" } }}
               />
             </ListItem>

@@ -1,6 +1,6 @@
 # CoreConnect - Workforce Management Platform
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live-green?style=for-the-badge)](https://core-connect-iqcmjox77-arun03ks-projects.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-green?style=for-the-badge)](https://core-connect-seven.vercel.app)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
 [![React](https://img.shields.io/badge/React-19.1.1-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-red?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
@@ -16,7 +16,7 @@ docker-compose up -d
 **Access:** http://localhost:80 | **API:** http://localhost:5000
 
 ## 🌐 Live Demo
-**Production:** https://core-connect-iqcmjox77-arun03ks-projects.vercel.app
+**Production:** https://core-connect-seven.vercel.app
 
 CoreConnect is a modern workforce management platform built with React, Flask, and Docker. Currently features a responsive landing page, documentation system, and authentication framework.
 

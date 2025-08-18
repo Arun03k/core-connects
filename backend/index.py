@@ -33,8 +33,8 @@ def create_app(config_name=None):
         "http://localhost:80",    # Docker frontend
         "http://localhost:3000",  # Alternative dev server
         "https://*.vercel.app",   # Vercel domains
-        "https://core-connects.vercel.app",  # Your specific Vercel domain
-        "https://core-connects-*.vercel.app"  # Preview deployments
+        "https://core-connect-seven.vercel.app",  # Your specific Vercel domain
+        "https://core-connect-seven-*.vercel.app"  # Preview deployments
     ]
     
     # Add production URLs if available

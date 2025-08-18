@@ -324,7 +324,7 @@ const Documentation: React.FC = () => {
               
               <Button
                 component="a"
-                href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app"
+                href="https://core-connect-seven.vercel.app"
                 target="_blank"
                 variant="outlined"
                 startIcon={<Rocket />}
@@ -525,7 +525,7 @@ const Documentation: React.FC = () => {
                       🌐 Now Live on Vercel!
                     </Typography>
                     <Typography variant="body2" sx={{ color: "#1565c0", fontWeight: 600 }}>
-                      Experience the full application at: <a href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "none" }}>core-connect-iqcmjox77-arun03ks-projects.vercel.app</a>
+                      Experience the full application at: <a href="https://core-connect-seven.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", textDecoration: "none" }}>core-connect-seven.vercel.app</a>
                     </Typography>
                   </Box>
                   
@@ -685,7 +685,7 @@ const Documentation: React.FC = () => {
                   🌐 Try the Live Application First!
                 </Typography>
                 <Typography variant="body1" sx={{ color: "#388e3c", mb: 2, fontWeight: 500, fontSize: { xs: "0.9rem", sm: "1rem" }, wordBreak: "break-word" }}>
-                  Visit our production deployment: <a href="https://core-connect-iqcmjox77-arun03ks-projects.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", fontWeight: 600, textDecoration: "none" }}>core-connect-iqcmjox77-arun03ks-projects.vercel.app</a>
+                  Visit our production deployment: <a href="https://core-connect-seven.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2", fontWeight: 600, textDecoration: "none" }}>core-connect-seven.vercel.app</a>
                 </Typography>
                 <Typography variant="body2" sx={{ color: "#2e7d32", fontSize: { xs: "0.8rem", sm: "0.875rem" } }}>
                   ✅ Fully functional frontend • ✅ Backend API endpoints • ✅ Authentication system • ✅ Mobile responsive
