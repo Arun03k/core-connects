@@ -88,8 +88,7 @@ core-connect/
 ├── 🚀 .github/                       # GitHub Actions workflows
 │   └── workflows/                   # CI/CD pipelines
 │       ├── code-quality.yml         # Code quality checks (CI only)
-│       ├── docker-build-test.yml    # Docker testing
-│       ├── api-integration-tests.yml # API testing
+│       ├── security.yml             # Security scanning
 │       └── ci-cd.yml                # Main deployment pipeline
 │
 └── 📋 Root Configuration Files

@@ -17,7 +17,7 @@ docker-compose up -d
 
 ```bash
 # Development mode (hot reload)
-docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.dev.yml up
 
 # Check status
 docker-compose ps

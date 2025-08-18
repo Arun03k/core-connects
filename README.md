@@ -75,7 +75,7 @@ docker-compose up -d
 
 **Development Mode (with hot reload):**
 ```bash
-docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.dev.yml up
 ```
 - Frontend: http://localhost:5173
 - Backend: http://localhost:5000
@@ -127,17 +127,10 @@ The project features a robust, security-focused CI/CD pipeline with multiple aut
 - Dependency vulnerability scanning
 - Code style consistency enforcement
 
-**Docker Build Testing** (`.github/workflows/docker-build-test.yml`):
-- Multi-stage Docker image building
-- Container functionality testing
-- Health check validation
-- Security scanning with Trivy
-- Image optimization verification
-
-**API Integration Testing** (`.github/workflows/api-integration-tests.yml`):
-- MongoDB service integration
-- Full API endpoint testing
-- Authentication flow validation
+**Security and Quality Checks** (Additional workflows):
+- Dependency security scanning
+- Code quality analysis
+- Status monitoring
 - CORS and security header testing
 - Performance and load testing
 
@@ -194,7 +187,6 @@ chmod +x scripts/docker-setup.sh && ./scripts/docker-setup.sh
 ```
 GET  /                     # API status
 GET  /health              # Health check
-GET  /api/test           # Test endpoint
 POST /api/auth/login     # User login
 POST /api/auth/register  # User registration
 ```

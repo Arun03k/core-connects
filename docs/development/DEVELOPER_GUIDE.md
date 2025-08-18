@@ -228,10 +228,8 @@ SKIP=flake8 git commit -m "commit message"
 - `tools/code-quality/` - Additional quality assurance tools
 
 ### GitHub Workflows
-- `style-enforcement.yml` - Strict code style validation
 - `code-quality.yml` - Advanced code quality checks
-- `docker-build-test.yml` - Container build and testing
-- `api-integration-tests.yml` - API endpoint validation
+- `security.yml` - Security scanning and validation
 
 ## 🆘 Getting Help
 

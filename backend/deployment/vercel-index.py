@@ -318,52 +318,6 @@ def create_app(config_name=None):
             )
 
     # API routes
-    @app.route("/api/test")
-    def api_test():
-        return jsonify(
-            {
-                "status": "success",
-                "message": "API endpoint is working",
-                "data": {
-                    "message": "Hello from Flask backend!",
-                    "environment": os.getenv("FLASK_ENV", "production"),
-                },
-            }
-        )
-
-    @app.route("/api/test-json", methods=["POST"])
-    def test_json():
-        """Test JSON request/response handling"""
-        try:
-            data = request.get_json()
-            return (
-                jsonify(
-                    {
-                        "status": "success",
-                        "message": "JSON handling is working",
-                        "data": {
-                            "received": data,
-                            "method": request.method,
-                            "content_type": request.content_type,
-                            "environment": os.getenv("FLASK_ENV", "production"),
-                        },
-                    }
-                ),
-                200,
-            )
-        except Exception as e:
-            logger.error(f"JSON test error: {str(e)}")
-            return (
-                jsonify(
-                    {
-                        "status": "error",
-                        "message": "JSON test failed",
-                        "errors": {"server": str(e)},
-                    }
-                ),
-                500,
-            )
-
     @app.route("/api/stats")
     def api_stats():
         """Get API statistics"""

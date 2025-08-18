@@ -129,7 +129,7 @@ const Documentation: React.FC = () => {
     {
       icon: <Speed sx={{ color: "#1976d2" }} />,
       title: "CI/CD Pipeline",
-      description: "Advanced GitHub Actions pipeline with extended timeouts (45-min), 30-attempt health checks, comprehensive testing, Docker builds, automated security scanning, and deployment",
+      description: "Advanced GitHub Actions pipeline with extended timeouts (45-min), 30-attempt health checks, comprehensive testing, automated security scanning, and deployment",
       status: "completed",
     },
     {
@@ -191,8 +191,6 @@ const Documentation: React.FC = () => {
         { task: "Organized project structure with tools/ and docs/ directories", completed: true },
         { task: "Security policies and repository protection", completed: true },
         { task: "Optional developer tools (no mandatory requirements)", completed: true },
-        { task: "Docker security scanning with Trivy", completed: true },
-        { task: "API integration testing with MongoDB", completed: true },
         { task: "Authentication framework (frontend)", completed: true },
         { task: "Redux state management setup", completed: true },
         { task: "Protected routes system", completed: true },
@@ -618,7 +616,7 @@ const Documentation: React.FC = () => {
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Comprehensive testing: code quality, Docker builds, API integration" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Comprehensive testing: code quality and security scanning" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
@@ -859,7 +857,7 @@ const Documentation: React.FC = () => {
                       </Typography>
                       <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#fff3e0", borderRadius: 2, fontFamily: "monospace", border: "2px solid #ff9800", overflow: "auto" }}>
                         <code style={{ color: "#f57c00", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", wordBreak: "break-all" }}>
-                          docker-compose -f docker-compose.dev.yml up --build<br/>
+                          docker-compose -f docker-compose.dev.yml up<br/>
                           # OR<br/>
                           dev-start.bat
                         </code>
@@ -874,7 +872,6 @@ const Documentation: React.FC = () => {
                           🌐 Frontend: <a href="http://localhost:80" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:80</a><br/>
                           🔧 Backend: <a href="http://localhost:5000" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000</a><br/>
                           ❤️ Health: <a href="http://localhost:5000/health" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/health</a><br/>
-                          🧪 API Test: <a href="http://localhost:5000/api/test" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/api/test</a><br/>
                           📱 Dev Server: <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5173</a> (dev mode only)
                         </Typography>
                       </Paper>

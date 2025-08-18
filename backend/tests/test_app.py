@@ -63,16 +63,6 @@ def test_api_status_endpoint(client):
     assert "environment" in data["data"]
 
 
-def test_api_test_endpoint(client):
-    """Test the API test endpoint."""
-    response = client.get("/api/test")
-    assert response.status_code == 200
-
-    data = json.loads(response.data)
-    assert data["message"] == "API endpoint is working"
-    assert data["data"] == "Hello from Flask backend!"
-
-
 def test_login_endpoint_missing_data(client):
     """Test login endpoint with missing data."""
     response = client.post("/api/auth/login", json={}, content_type="application/json")
