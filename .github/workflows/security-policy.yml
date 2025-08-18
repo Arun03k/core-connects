@@ -1,0 +1,105 @@
+name: Security Policy Enforcement
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  enforce-security-policy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Display Security Policy
+      run: |
+        echo "🔐 CoreConnect Repository Security Policy"
+        echo "========================================"
+        echo ""
+        echo "📋 Access Control Rules:"
+        echo "  👑 Repository Owner: ${{ github.repository_owner }}"
+        echo "  🏢 Repository: ${{ github.repository }}"
+        echo "  📅 Policy Effective: $(date)"
+        echo ""
+        echo "🚨 Main Branch Protection:"
+        echo "  ✅ Only repository owner can push directly to main"
+        echo "  ✅ All external contributors must use pull requests"
+        echo "  ✅ Deployment workflows require owner authorization"
+        echo "  ✅ Production deployments are owner-restricted"
+        echo ""
+        echo "📝 Contribution Workflow for External Contributors:"
+        echo "  1️⃣  Fork the repository or create a feature branch"
+        echo "  2️⃣  Implement changes on your branch"
+        echo "  3️⃣  Create a pull request targeting main branch"
+        echo "  4️⃣  Wait for code review and approval"
+        echo "  5️⃣  Repository owner will merge and deploy"
+        echo ""
+        echo "🔍 Current Event Details:"
+        echo "  Event Type: ${{ github.event_name }}"
+        echo "  Triggered By: ${{ github.actor }}"
+        echo "  Target Branch: ${{ github.ref }}"
+    
+    - name: Validate Access Permissions
+      run: |
+        echo "🔍 Validating access permissions..."
+        
+        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          echo "📋 Main branch push detected - validating permissions"
+          
+          if [ "${{ github.actor }}" = "${{ github.repository_owner }}" ]; then
+            echo "✅ AUTHORIZED: Repository owner push to main branch"
+            echo "👑 Owner: ${{ github.actor }}"
+            echo "🚀 Deployment workflows will proceed"
+          else
+            echo "❌ UNAUTHORIZED: Non-owner push to main branch detected"
+            echo "👤 Actor: ${{ github.actor }}"
+            echo "👑 Owner: ${{ github.repository_owner }}"
+            echo "🔒 This violates the security policy"
+            
+            echo ""
+            echo "🚨 SECURITY POLICY VIOLATION"
+            echo "============================="
+            echo "Only the repository owner is authorized to push directly to the main branch."
+            echo "This policy ensures:"
+            echo "  • Code quality through required reviews"
+            echo "  • Deployment security and control" 
+            echo "  • Audit trail for production changes"
+            echo ""
+            echo "Please use the pull request workflow for contributions."
+            exit 1
+          fi
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "✅ VALID: Pull request workflow detected"
+          echo "👤 PR Author: ${{ github.actor }}"
+          echo "🔍 Pull requests are welcome from all contributors"
+          echo "📝 Changes will be reviewed before merge"
+        else
+          echo "✅ VALID: Non-main branch activity or scheduled workflow"
+          echo "🔍 No special restrictions apply"
+        fi
+    
+    - name: Security Policy Summary
+      if: always()
+      run: |
+        echo "📊 Security Policy Enforcement Summary"
+        echo "======================================"
+        echo "🔐 Policy Status: ${{ job.status }}"
+        echo "👤 Actor: ${{ github.actor }}"
+        echo "📅 Check Time: $(date)"
+        echo "🔍 Event: ${{ github.event_name }}"
+        
+        if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          if [ "${{ github.actor }}" = "${{ github.repository_owner }}" ]; then
+            echo "✅ Authorized main branch deployment by owner"
+          else
+            echo "❌ Blocked unauthorized main branch push"
+          fi
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "✅ Pull request workflow - security policy compliant"
+        fi
+        
+        echo ""
+        echo "🛡️  Security measures active and enforcing policy compliance"

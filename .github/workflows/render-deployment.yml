@@ -19,6 +19,31 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Verify Repository Owner
+      run: |
+        echo "🔐 Verifying deployment permissions..."
+        echo "Repository: ${{ github.repository }}"
+        echo "Repository Owner: ${{ github.repository_owner }}"
+        echo "Actor (who triggered): ${{ github.actor }}"
+        echo "Event: ${{ github.event_name }}"
+        
+        # Only allow repository owner to deploy directly to main
+        if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+          echo "❌ DEPLOYMENT BLOCKED: Only repository owner can deploy directly to main"
+          echo "🔒 Security Policy: External contributors must use pull requests"
+          echo "👤 Current actor: ${{ github.actor }}"
+          echo "👑 Required owner: ${{ github.repository_owner }}"
+          echo ""
+          echo "📝 To deploy your changes:"
+          echo "  1. Create a pull request targeting the main branch"
+          echo "  2. Wait for review and approval from repository owner"
+          echo "  3. Pull request will be merged and deployed by owner"
+          exit 1
+        else
+          echo "✅ Repository owner verified - deployment authorized"
+          echo "👑 Owner: ${{ github.actor }} - proceeding with deployment"
+        fi
+    
     - name: Monitor Render Auto-Deployment
       id: monitor
       run: |

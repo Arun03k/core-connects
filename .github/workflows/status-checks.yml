@@ -15,6 +15,34 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Verify Repository Owner for Main Branch
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo "🔐 Verifying main branch push permissions..."
+        echo "Repository: ${{ github.repository }}"
+        echo "Repository Owner: ${{ github.repository_owner }}"
+        echo "Actor (who triggered): ${{ github.actor }}"
+        echo "Event: ${{ github.event_name }}"
+        
+        # Only allow repository owner to push directly to main
+        if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+          echo "❌ MAIN BRANCH PUSH BLOCKED: Only repository owner can push directly to main"
+          echo "🔒 Security Policy: External contributors must use pull requests"
+          echo "👤 Current actor: ${{ github.actor }}"
+          echo "👑 Required owner: ${{ github.repository_owner }}"
+          echo ""
+          echo "📝 Contribution Guidelines:"
+          echo "  1. Fork the repository or create a feature branch"
+          echo "  2. Make your changes on the feature branch"
+          echo "  3. Create a pull request targeting the main branch"
+          echo "  4. Wait for code review and approval"
+          echo "  5. Repository owner will merge after approval"
+          exit 1
+        else
+          echo "✅ Repository owner verified - main branch access authorized"
+          echo "👑 Owner: ${{ github.actor }} - proceeding with status checks"
+        fi
+    
     - name: Setup Status Checks
       run: |
         echo "🔍 Setting up required status checks for deployment pipeline"
@@ -79,16 +107,39 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Check Deployment Readiness
+  # Create a status check that GitHub can use for branch protection
+  deployment-readiness:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Verify Deployment Authorization
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           echo "🔍 Checking deployment readiness for PR #${{ github.event.number }}"
+          echo "👤 PR Author: ${{ github.actor }}"
+          echo "✅ Pull request workflow - no owner verification needed"
         else
           echo "🔍 Checking deployment readiness for main branch push"
+          echo "👤 Actor: ${{ github.actor }}"
+          echo "👑 Owner: ${{ github.repository_owner }}"
+          
+          # Verify owner for main branch pushes
+          if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+            echo "❌ DEPLOYMENT READINESS BLOCKED: Only repository owner can push to main"
+            echo "🔒 Security Policy: Use pull requests for contributions"
+            exit 1
+          else
+            echo "✅ Repository owner verified - deployment authorized"
+          fi
         fi
         
+    - name: Check Deployment Requirements
+      run: |        
         # Check if this change would pass all deployment requirements
-        echo "Validating:"
+        echo "Validating deployment requirements:"
         echo "  📝 Code changes review"
         echo "  🧪 Test requirements"
         echo "  🔒 Security requirements"

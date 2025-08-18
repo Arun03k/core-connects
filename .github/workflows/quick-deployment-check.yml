@@ -15,6 +15,32 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Verify Repository Owner for Deployment Checks
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: |
+        echo "🔐 Verifying deployment check permissions..."
+        echo "Repository: ${{ github.repository }}"
+        echo "Repository Owner: ${{ github.repository_owner }}"
+        echo "Actor (who triggered): ${{ github.actor }}"
+        echo "Event: ${{ github.event_name }}"
+        
+        # Only allow repository owner to trigger deployment checks on main pushes
+        if [ "${{ github.actor }}" != "${{ github.repository_owner }}" ]; then
+          echo "❌ DEPLOYMENT CHECK BLOCKED: Only repository owner can push directly to main"
+          echo "🔒 Security Policy: External contributors must use pull requests"
+          echo "👤 Current actor: ${{ github.actor }}"
+          echo "👑 Required owner: ${{ github.repository_owner }}"
+          echo ""
+          echo "📝 To contribute your changes:"
+          echo "  1. Fork the repository or create a feature branch"
+          echo "  2. Create a pull request targeting the main branch"
+          echo "  3. Wait for review and approval from repository owner"
+          exit 1
+        else
+          echo "✅ Repository owner verified - deployment checks authorized"
+          echo "👑 Owner: ${{ github.actor }} - proceeding with verification"
+        fi
+    
     - name: Quick Health Check
       id: health_check
       run: |
