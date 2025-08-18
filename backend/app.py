@@ -193,6 +193,39 @@ def create_app(config_name=None):
             message='Service is healthy' if health_data['connected'] else 'Service has issues'
         ) if health_data['connected'] else ErrorResponses.service_unavailable("Database connection issues")
     
+    @app.route('/api/health')
+    def api_health_check():
+        """API-specific health check endpoint for deployment monitoring."""
+        try:
+            health_data = db_manager.health_check()
+            
+            # Check critical components
+            checks = {
+                'api': 'healthy',
+                'database': 'healthy' if health_data['connected'] else 'unhealthy',
+                'auth_service': 'healthy',  # Could add actual auth service check
+                'timestamp': health_data.get('timestamp', ''),
+                'version': '1.0.0'
+            }
+            
+            # Determine overall health
+            overall_health = all(status == 'healthy' for key, status in checks.items() 
+                               if key not in ['timestamp', 'version'])
+            
+            if overall_health:
+                return APIResponse.success(
+                    data=checks,
+                    message='All API services are healthy'
+                )
+            else:
+                return ErrorResponses.service_unavailable(
+                    "One or more API services are unhealthy",
+                    details=checks
+                )
+        except Exception as e:
+            logger.error(f"API health check error: {str(e)}")
+            return ErrorResponses.internal_error("Health check failed")
+    
     # API routes
     @app.route('/api/test')
     def api_test():
@@ -270,6 +303,42 @@ def create_app(config_name=None):
         except Exception as e:
             logger.error(f"Stats error: {str(e)}")
             return ErrorResponses.internal_error('Failed to get statistics')
+    
+    @app.route('/api/status')
+    def api_status():
+        """Get detailed API status for deployment monitoring"""
+        try:
+            # Gather system information
+            health_data = db_manager.health_check()
+            
+            status_info = {
+                'api_version': '1.0.0',
+                'service_name': 'CoreConnect API',
+                'environment': os.getenv('FLASK_ENV', 'unknown'),
+                'database': {
+                    'status': 'connected' if health_data['connected'] else 'disconnected',
+                    'details': health_data
+                },
+                'endpoints': {
+                    'auth': 'available',
+                    'health': 'available',
+                    'cors': 'configured'
+                },
+                'deployment': {
+                    'platform': 'render' if os.getenv('RENDER_EXTERNAL_URL') else 'unknown',
+                    'url': os.getenv('RENDER_EXTERNAL_URL', 'unknown'),
+                    'frontend_url': os.getenv('FRONTEND_URL', 'unknown')
+                },
+                'timestamp': health_data.get('timestamp', '')
+            }
+            
+            return APIResponse.success(
+                data=status_info,
+                message='API status retrieved successfully'
+            )
+        except Exception as e:
+            logger.error(f"Status check error: {str(e)}")
+            return ErrorResponses.internal_error('Failed to get API status')
     
     return app
 

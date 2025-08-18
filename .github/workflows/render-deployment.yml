@@ -1,0 +1,174 @@
+name: Render Deployment Monitor
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      skip_health_checks:
+        description: 'Skip health checks after deployment'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  monitor-render-deployment:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Monitor Render Auto-Deployment
+      id: monitor
+      run: |
+        echo "🚀 Monitoring Render auto-deployment for CoreConnect Backend"
+        echo "📅 Deployment triggered by: ${{ github.event.head_commit.message }}"
+        echo "👤 Triggered by: ${{ github.actor }}"
+        
+        # Wait for Render to detect the push and start deployment
+        echo "⏳ Waiting for Render to detect repository changes..."
+        sleep 45
+        
+        # Monitor deployment progress
+        max_wait_time=900  # 15 minutes
+        check_interval=15  # 15 seconds
+        elapsed_time=0
+        
+        echo "🔍 Starting deployment health monitoring..."
+        
+        while [ $elapsed_time -lt $max_wait_time ]; do
+          echo "⏱️  Elapsed time: ${elapsed_time}s / ${max_wait_time}s"
+          
+          # Check if the service is responding
+          if curl -f -s --connect-timeout 10 --max-time 30 https://coreconnect-backend.onrender.com/health > /dev/null 2>&1; then
+            echo "✅ Service is responding! Deployment likely successful."
+            echo "deployment_ready=true" >> $GITHUB_OUTPUT
+            break
+          else
+            echo "⏳ Service not yet responding, deployment may still be in progress..."
+            sleep $check_interval
+            elapsed_time=$((elapsed_time + check_interval))
+          fi
+        done
+        
+        if [ $elapsed_time -ge $max_wait_time ]; then
+          echo "❌ Deployment monitoring timed out after 15 minutes"
+          echo "deployment_ready=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+    
+    - name: Comprehensive Health Checks
+      if: steps.monitor.outputs.deployment_ready == 'true' && inputs.skip_health_checks != 'true'
+      run: |
+        echo "🔍 Running comprehensive health checks..."
+        
+        # Test basic health endpoint
+        echo "Testing health endpoint..."
+        health_response=$(curl -s -w "%{http_code}\n%{time_total}" https://coreconnect-backend.onrender.com/health)
+        health_code=$(echo "$health_response" | tail -n2 | head -n1)
+        response_time=$(echo "$health_response" | tail -n1)
+        
+        if [ "$health_code" = "200" ]; then
+          echo "✅ Health endpoint OK (${response_time}s response time)"
+        else
+          echo "❌ Health endpoint failed with code: $health_code"
+          exit 1
+        fi
+        
+        # Test API endpoints
+        echo "Testing API auth endpoints..."
+        auth_response=$(curl -s -w "%{http_code}" -X OPTIONS https://coreconnect-backend.onrender.com/api/auth/login)
+        auth_code=$(echo "$auth_response" | tail -n1)
+        
+        if [ "$auth_code" = "200" ] || [ "$auth_code" = "204" ]; then
+          echo "✅ Auth API endpoints accessible"
+        else
+          echo "❌ Auth API endpoints failed with code: $auth_code"
+          exit 1
+        fi
+        
+        # Test CORS headers
+        echo "Testing CORS configuration..."
+        cors_headers=$(curl -s -I -X OPTIONS -H "Origin: https://core-connect-seven.vercel.app" https://coreconnect-backend.onrender.com/api/auth/login)
+        if echo "$cors_headers" | grep -i "access-control-allow-origin" > /dev/null; then
+          echo "✅ CORS headers configured correctly"
+        else
+          echo "⚠️  CORS headers may not be configured properly"
+        fi
+        
+        # Performance check
+        echo "Running performance check..."
+        perf_time=$(curl -s -w "%{time_total}" -o /dev/null https://coreconnect-backend.onrender.com/health)
+        perf_time_ms=$(echo "$perf_time * 1000" | bc -l | cut -d. -f1)
+        
+        if [ "$perf_time_ms" -lt 2000 ]; then
+          echo "✅ Performance check passed (${perf_time_ms}ms)"
+        elif [ "$perf_time_ms" -lt 5000 ]; then
+          echo "⚠️  Performance warning (${perf_time_ms}ms - slower than expected)"
+        else
+          echo "❌ Performance check failed (${perf_time_ms}ms - too slow)"
+          exit 1
+        fi
+        
+        echo "🎉 All health checks completed successfully!"
+    
+    - name: Integration Tests
+      if: steps.monitor.outputs.deployment_ready == 'true' && inputs.skip_health_checks != 'true'
+      run: |
+        echo "🧪 Running integration tests against deployed service..."
+        
+        # Test user registration endpoint (should fail without proper data, but endpoint should be reachable)
+        echo "Testing user registration endpoint availability..."
+        reg_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{}' https://coreconnect-backend.onrender.com/api/auth/register)
+        reg_code=$(echo "$reg_response" | tail -n1)
+        
+        # Should return 400 (bad request) or 422 (validation error), not 500 or connection errors
+        if [ "$reg_code" = "400" ] || [ "$reg_code" = "422" ] || [ "$reg_code" = "401" ]; then
+          echo "✅ Registration endpoint responding correctly (validation working)"
+        elif [ "$reg_code" = "200" ] || [ "$reg_code" = "201" ]; then
+          echo "⚠️  Registration endpoint accessible (unexpected success with empty data)"
+        else
+          echo "❌ Registration endpoint error (code: $reg_code)"
+          exit 1
+        fi
+        
+        # Test login endpoint
+        echo "Testing login endpoint availability..."
+        login_response=$(curl -s -w "%{http_code}" -X POST -H "Content-Type: application/json" -d '{}' https://coreconnect-backend.onrender.com/api/auth/login)
+        login_code=$(echo "$login_response" | tail -n1)
+        
+        if [ "$login_code" = "400" ] || [ "$login_code" = "422" ] || [ "$login_code" = "401" ]; then
+          echo "✅ Login endpoint responding correctly"
+        else
+          echo "❌ Login endpoint error (code: $login_code)"
+          exit 1
+        fi
+        
+        echo "✅ Integration tests completed successfully!"
+    
+    - name: Deployment Summary
+      if: always()
+      run: |
+        echo "📊 Render Deployment Summary"
+        echo "=========================="
+        echo "🔗 Backend URL: https://coreconnect-backend.onrender.com"
+        echo "🔗 Frontend URL: https://core-connect-seven.vercel.app"
+        echo "⏰ Deployment Time: $(date)"
+        echo "🌟 Commit: ${{ github.sha }}"
+        echo "💬 Message: ${{ github.event.head_commit.message }}"
+        
+        if [ "${{ steps.monitor.outputs.deployment_ready }}" = "true" ]; then
+          echo "✅ Status: Deployment Successful"
+          echo "🎉 All systems operational!"
+        else
+          echo "❌ Status: Deployment Failed or Timed Out"
+          echo "🚨 Manual investigation required"
+        fi
+    
+    - name: Post-deployment notification
+      if: success()
+      run: |
+        echo "🎊 CoreConnect Backend successfully deployed to Render!"
+        echo "🌐 Service is healthy and responding to requests"
+        echo "🔗 Health check: https://coreconnect-backend.onrender.com/health"
