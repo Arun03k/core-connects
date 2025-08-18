@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: coreconnect-backend
+    runtime: python3
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT app:app
+    plan: free
+    env: python
+    region: oregon
+    buildCommand: |
+      cd backend
+      pip install -r requirements.txt
+      pip install gunicorn
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DBNAME
+        value: coreconnect_prod
+      - key: FRONTEND_URL
+        value: https://core-connects.vercel.app
+      - key: MAIL_SERVER
+        sync: false
+      - key: MAIL_PORT
+        value: 587
+      - key: MAIL_USE_TLS
+        value: true
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: BCRYPT_ROUNDS
+        value: 12
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 60
+      - key: MAX_LOGIN_ATTEMPTS
+        value: 5
+      - key: LOCKOUT_DURATION
+        value: 1800
