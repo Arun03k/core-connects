@@ -4,7 +4,6 @@ Email service for sending authentication-related emails
 
 import logging
 import smtplib
-from typing import Dict
 
 try:
     from email.mime.multipart import MIMEMultipart as MimeMultipart

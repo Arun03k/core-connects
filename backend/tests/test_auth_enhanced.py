@@ -2,14 +2,15 @@
 Enhanced test suite for authentication system
 """
 
-import json
 import os
 import sys
 
-import pytest
-
 # Add the backend directory to Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+import json
+
+import pytest
 
 from app import create_app
 from services.auth_service import AuthService

@@ -693,18 +693,19 @@ def reset_password():
 
     except Exception as e:
         logger.error(f"Reset password error: {str(e)}")
-        return jsonify(
-            {
-                "status": "error",
-                "message": "An error occurred while resetting your password",
-                "errors": {"server": "Internal server error"},
-            }
-        ), 500
+        return (
+            jsonify(
+                {
+                    "status": "error",
+                    "message": "An error occurred while resetting your password",
+                    "errors": {"server": "Internal server error"},
+                }
+            ),
+            500,
+        )
 
 
 @auth_bp.route("/verify", methods=["GET"])
-
-
 @enhanced_token_required
 def verify():
     """Token verification endpoint with enhanced security"""
