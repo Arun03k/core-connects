@@ -140,8 +140,8 @@ const Documentation: React.FC = () => {
     },
     {
       icon: <Build sx={{ color: "#1976d2" }} />,
-      title: "Code Quality Enforcement",
-      description: "Automated code formatting with Black, ESLint, pre-commit hooks, and strict quality gates",
+      title: "Optional Code Tools",
+      description: "Optional code formatting tools with Black and ESLint - no mandatory enforcement",
       status: "completed",
     },
     {
@@ -187,10 +187,10 @@ const Documentation: React.FC = () => {
         { task: "Docker containerization (dev + prod)", completed: true },
         { task: "CI/CD pipeline with GitHub Actions", completed: true },
         { task: "Comprehensive testing workflows", completed: true },
-        { task: "Code quality enforcement with Black, ESLint, pre-commit hooks", completed: true },
+        { task: "Optional code quality tools (no mandatory enforcement)", completed: true },
         { task: "Organized project structure with tools/ and docs/ directories", completed: true },
         { task: "Security policies and repository protection", completed: true },
-        { task: "Code quality automation (linting, formatting)", completed: true },
+        { task: "Optional developer tools (no mandatory requirements)", completed: true },
         { task: "Docker security scanning with Trivy", completed: true },
         { task: "API integration testing with MongoDB", completed: true },
         { task: "Authentication framework (frontend)", completed: true },
@@ -630,7 +630,7 @@ const Documentation: React.FC = () => {
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Automated code formatting with Black, ESLint, and pre-commit hooks" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Optional code formatting tools - developer-friendly approach" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
@@ -672,7 +672,7 @@ const Documentation: React.FC = () => {
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Code Quality</Typography>
-                      <Chip label="✅ Enforced" size="small" sx={{ background: "rgba(76,175,80,0.9)", color: "white", fontWeight: 600 }} />
+                      <Chip label="✅ Optional" size="small" sx={{ background: "rgba(76,175,80,0.9)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Security</Typography>
@@ -1044,78 +1044,42 @@ const Documentation: React.FC = () => {
               {/* Developer Tools Section */}
               <Box sx={{ mt: 4, mb: 2 }}>
                 <Typography variant="h5" gutterBottom sx={{ color: "#1976d2", fontWeight: 600, mb: 3, fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
-                  🛠️ Developer Tools & Code Quality
+                  🛠️ Optional Developer Tools
                 </Typography>
                 
-                <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>
-                  <AlertTitle>Automated Code Quality Enforcement</AlertTitle>
-                  Code formatting and quality checks are automatically enforced through pre-commit hooks and GitHub Actions. No manual intervention required!
+                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+                  <AlertTitle>Developer-Friendly Approach</AlertTitle>
+                  Code formatting tools are available but completely optional. No hooks, no enforcement - just easy development!
                 </Alert>
 
                 <Accordion sx={{ mb: 2, borderRadius: 2, boxShadow: "0 4px 16px rgba(25,118,210,0.1)" }}>
                   <AccordionSummary expandIcon={<ExpandMore />}>
                     <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
-                      Pre-commit Hooks (Automatic Setup)
+                      Optional Code Formatting Tools
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Typography variant="body1" paragraph sx={{ color: "#555" }}>
-                      Pre-commit hooks are automatically installed when you run the setup scripts. They provide:
+                      We provide optional formatting scripts if you want to clean up your code, but they're entirely optional:
                     </Typography>
                     <List dense>
                       <ListItem>
-                        <ListItemIcon><CheckCircle sx={{ color: "#4caf50" }} /></ListItemIcon>
-                        <ListItemText primary="Automatic code formatting with Black (Python) and ESLint (TypeScript)" />
+                        <ListItemIcon><Build sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Python: tools/code-quality/format-code.bat (Windows) or .sh (Linux)" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><Build sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Uses Black for Python formatting and isort for import organization" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><Build sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Run manually when you want - no automatic enforcement" />
                       </ListItem>
                       <ListItem>
                         <ListItemIcon><CheckCircle sx={{ color: "#4caf50" }} /></ListItemIcon>
-                        <ListItemText primary="Import sorting with isort" />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemIcon><CheckCircle sx={{ color: "#4caf50" }} /></ListItemIcon>
-                        <ListItemText primary="Code quality checks with flake8 and Bandit" />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemIcon><CheckCircle sx={{ color: "#4caf50" }} /></ListItemIcon>
-                        <ListItemText primary="Automatic file cleanup (trailing whitespace, EOF fixes)" />
+                        <ListItemText primary="Push code anytime without formatting requirements" />
                       </ListItem>
                     </List>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion sx={{ mb: 2, borderRadius: 2, boxShadow: "0 4px 16px rgba(25,118,210,0.1)" }}>
-                  <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
-                      Available Developer Scripts
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                      <Typography variant="body1" sx={{ color: "#555", mb: 2 }}>
-                        Located in <code>tools/code-quality/</code> directory:
-                      </Typography>
-                      
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1976d2" }}>Format Code:</Typography>
-                        <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 1, fontFamily: "monospace", fontSize: "0.9rem" }}>
-                          <code>./tools/code-quality/format-code.bat  # Windows<br />./tools/code-quality/format-code.sh   # Linux/Mac</code>
-                        </Paper>
-                      </Box>
-                      
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1976d2" }}>Setup Development Environment:</Typography>
-                        <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 1, fontFamily: "monospace", fontSize: "0.9rem" }}>
-                          <code>./tools/code-quality/setup-dev.bat  # Windows<br />./tools/code-quality/setup-dev.sh   # Linux/Mac</code>
-                        </Paper>
-                      </Box>
-                      
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1976d2" }}>Test Enforcement:</Typography>
-                        <Paper sx={{ p: 2, background: "#f5f5f5", borderRadius: 1, fontFamily: "monospace", fontSize: "0.9rem" }}>
-                          <code>./tools/code-quality/test-enforcement.bat  # Windows<br />./tools/code-quality/test-enforcement.sh   # Linux/Mac</code>
-                        </Paper>
-                      </Box>
-                    </Box>
                   </AccordionDetails>
                 </Accordion>
               </Box>

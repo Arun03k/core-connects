@@ -235,7 +235,7 @@ chmod +x setup-dev.sh && ./setup-dev.sh
 ```
 
 This installs:
-- ✅ **Pre-commit hooks** (auto-format on commit)
+- ✅ **Optional formatting tools** (use when you want)
 - ✅ **Pre-push hooks** (block push if code quality fails)
 - ✅ **Commit message validation** (conventional commits)
 - ✅ **Code quality tools** (Black, isort, flake8, ESLint)
@@ -243,7 +243,7 @@ This installs:
 #### 🛡️ **Automatic Enforcement**
 
 **Git Hooks Behavior:**
-- **Pre-commit**: Automatically formats code before each commit
+- **Optional Tools**: Manual code formatting available in tools/ directory
 - **Pre-push**: Blocks push if code quality checks fail
 - **Commit-msg**: Enforces conventional commit message format
 
@@ -296,17 +296,19 @@ npx tsc --noEmit
   test: add user authentication tests
   ```
 
-#### ⚡ **Pre-commit Framework Integration**
+#### ⚡ **Optional Code Formatting**
 
-We use [pre-commit](https://pre-commit.com/) for additional validation:
+We provide optional formatting tools if you want to clean up your code:
 
 ```bash
-# Run all hooks manually
-pre-commit run --all-files
+# Windows
+./tools/code-quality/format-code.bat
 
-# Update hooks
-pre-commit autoupdate
+# Linux/Mac  
+./tools/code-quality/format-code.sh
 ```
+
+**Note:** These tools are completely optional - you can commit and push without using them!
 
 ### Contribution Process
 
