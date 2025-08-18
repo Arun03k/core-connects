@@ -60,6 +60,7 @@ const StyledInput = styled.input<{ hasError?: boolean; variant?: 'outlined' | 'f
   padding-right: ${props => props.hasEndIcon ? '3rem' : '1rem'};
   border-radius: 0.5rem;
   font-size: 1rem;
+  color: ${colors.text.primary} !important;
   transition: all 0.2s ease;
   outline: none;
   font-family: inherit;
@@ -78,16 +79,27 @@ const StyledInput = styled.input<{ hasError?: boolean; variant?: 'outlined' | 'f
     box-shadow: 0 0 0 3px ${props => props.hasError 
       ? getColorWithOpacity(colors.error[500], 0.1) 
       : getColorWithOpacity(colors.input.focus, 0.1)};
+    color: ${colors.text.primary} !important;
   }
 
   &::placeholder {
-    color: ${colors.text.hint};
+    color: ${colors.text.hint} !important;
+    opacity: 1;
   }
 
   &:disabled {
     background-color: ${colors.neutral[100]};
-    color: ${colors.text.disabled};
+    color: ${colors.text.disabled} !important;
     cursor: not-allowed;
+  }
+
+  /* Ensure text is never white */
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px ${colors.background.default} inset !important;
+    -webkit-text-fill-color: ${colors.text.primary} !important;
   }
 `;
 
