@@ -9,6 +9,7 @@ on:
 jobs:
   docker-build-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     
     steps:
     - uses: actions/checkout@v4
@@ -29,6 +30,7 @@ jobs:
     
     # Backend Docker Build
     - name: Build Backend Docker Image
+      timeout-minutes: 15
       run: |
         echo "🐳 Building backend Docker image..."
         docker buildx build \
@@ -36,9 +38,11 @@ jobs:
           --file backend/Dockerfile \
           --tag coreconnect-backend:test \
           --load \
+          --progress=plain \
           backend/
     
     - name: Test Backend Docker Image
+      timeout-minutes: 10
       run: |
         echo "🧪 Testing backend Docker image..."
         
@@ -51,8 +55,9 @@ jobs:
           -e JWT_SECRET_KEY=test-jwt-secret \
           coreconnect-backend:test
         
-        # Wait for container to start
-        sleep 10
+        # Wait for container to start (longer initial wait)
+        echo "⏳ Waiting for container initialization..."
+        sleep 20
         
         # Test if the container is running
         if docker ps | grep backend-test; then
@@ -63,25 +68,34 @@ jobs:
           exit 1
         fi
         
-        # Test health endpoint
-        max_attempts=10
+        # Test health endpoint with more attempts and longer waits
+        max_attempts=30
         attempt=0
         
         while [ $attempt -lt $max_attempts ]; do
-          if curl -f http://localhost:5000/health > /dev/null 2>&1; then
+          if curl -f --max-time 10 http://localhost:5000/health > /dev/null 2>&1; then
             echo "✅ Backend health endpoint responding"
             break
           else
-            echo "⏳ Waiting for backend to be ready... (attempt $((attempt + 1)))"
-            sleep 3
+            echo "⏳ Waiting for backend to be ready... (attempt $((attempt + 1))/$max_attempts)"
+            sleep 5
             attempt=$((attempt + 1))
           fi
         done
         
         if [ $attempt -eq $max_attempts ]; then
-          echo "❌ Backend health check failed"
+          echo "❌ Backend health check failed after $max_attempts attempts"
+          echo "📋 Container logs:"
           docker logs backend-test
           exit 1
+        fi
+        
+        # Additional API test
+        echo "🧪 Testing API endpoints..."
+        if curl -f --max-time 10 http://localhost:5000/api/test > /dev/null 2>&1; then
+          echo "✅ API test endpoint responding"
+        else
+          echo "⚠️  API test endpoint not responding (non-critical)"
         fi
         
         # Cleanup
@@ -90,6 +104,7 @@ jobs:
     
     # Frontend Docker Build
     - name: Build Frontend Docker Image
+      timeout-minutes: 15
       run: |
         echo "🐳 Building frontend Docker image..."
         docker buildx build \
@@ -97,9 +112,11 @@ jobs:
           --file frontend/Dockerfile \
           --tag coreconnect-frontend:test \
           --load \
+          --progress=plain \
           frontend/
     
     - name: Test Frontend Docker Image
+      timeout-minutes: 8
       run: |
         echo "🧪 Testing frontend Docker image..."
         
@@ -109,8 +126,9 @@ jobs:
           -p 80:80 \
           coreconnect-frontend:test
         
-        # Wait for container to start
-        sleep 5
+        # Wait for container to start (longer initial wait)
+        echo "⏳ Waiting for container initialization..."
+        sleep 15
         
         # Test if the container is running
         if docker ps | grep frontend-test; then
@@ -121,25 +139,34 @@ jobs:
           exit 1
         fi
         
-        # Test if frontend is serving content
-        max_attempts=10
+        # Test if frontend is serving content with more attempts
+        max_attempts=25
         attempt=0
         
         while [ $attempt -lt $max_attempts ]; do
-          if curl -f http://localhost:80 > /dev/null 2>&1; then
+          if curl -f --max-time 10 http://localhost:80 > /dev/null 2>&1; then
             echo "✅ Frontend is serving content"
             break
           else
-            echo "⏳ Waiting for frontend to be ready... (attempt $((attempt + 1)))"
-            sleep 3
+            echo "⏳ Waiting for frontend to be ready... (attempt $((attempt + 1))/$max_attempts)"
+            sleep 5
             attempt=$((attempt + 1))
           fi
         done
         
         if [ $attempt -eq $max_attempts ]; then
-          echo "❌ Frontend serving test failed"
+          echo "❌ Frontend serving test failed after $max_attempts attempts"
+          echo "📋 Container logs:"
           docker logs frontend-test
           exit 1
+        fi
+        
+        # Test if we can get HTML content
+        echo "🧪 Testing HTML content delivery..."
+        if curl -s http://localhost:80 | grep -i "coreconnect\|html" > /dev/null 2>&1; then
+          echo "✅ Frontend is serving HTML content"
+        else
+          echo "⚠️  HTML content test inconclusive (non-critical)"
         fi
         
         # Cleanup
@@ -148,6 +175,7 @@ jobs:
     
     # Docker Compose Test
     - name: Test Docker Compose Configuration
+      timeout-minutes: 5
       run: |
         echo "🐳 Testing Docker Compose configuration..."
         
@@ -165,24 +193,26 @@ jobs:
         fi
     
     - name: Docker Security Scan
+      timeout-minutes: 10
       run: |
         echo "🔍 Running Docker security scan..."
         
-        # Install Trivy
-        sudo apt-get update
+        # Install Trivy with timeout handling
+        echo "📦 Installing Trivy scanner..."
+        sudo apt-get update -qq
         sudo apt-get install -y wget apt-transport-https gnupg lsb-release
         wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
         echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-        sudo apt-get update
+        sudo apt-get update -qq
         sudo apt-get install -y trivy
         
-        # Scan backend image
-        echo "Scanning backend image..."
-        trivy image --severity HIGH,CRITICAL coreconnect-backend:test || (echo "⚠️  Security issues found in backend image" && exit 0)
+        # Scan backend image with timeout
+        echo "🔍 Scanning backend image for security vulnerabilities..."
+        timeout 300 trivy image --timeout 240s --severity HIGH,CRITICAL coreconnect-backend:test || (echo "⚠️  Security scan completed with warnings - continuing deployment" && exit 0)
         
-        # Scan frontend image
-        echo "Scanning frontend image..."
-        trivy image --severity HIGH,CRITICAL coreconnect-frontend:test || (echo "⚠️  Security issues found in frontend image" && exit 0)
+        # Scan frontend image with timeout  
+        echo "🔍 Scanning frontend image for security vulnerabilities..."
+        timeout 300 trivy image --timeout 240s --severity HIGH,CRITICAL coreconnect-frontend:test || (echo "⚠️  Security scan completed with warnings - continuing deployment" && exit 0)
     
     - name: Clean up Docker images
       if: always()

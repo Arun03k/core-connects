@@ -127,7 +127,13 @@ const Documentation: React.FC = () => {
     {
       icon: <Speed sx={{ color: "#1976d2" }} />,
       title: "CI/CD Pipeline",
-      description: "Automated GitHub Actions pipeline with testing, security scanning, and deployment",
+      description: "Advanced GitHub Actions pipeline with security policies, comprehensive testing, Docker builds, and automated deployment",
+      status: "completed",
+    },
+    {
+      icon: <Security sx={{ color: "#1976d2" }} />,
+      title: "Security Framework",
+      description: "Repository owner-only deployments, automated vulnerability scanning, and comprehensive security policies",
       status: "completed",
     },
     {
@@ -166,6 +172,11 @@ const Documentation: React.FC = () => {
         { task: "Animation system with Material-UI", completed: true },
         { task: "Docker containerization (dev + prod)", completed: true },
         { task: "CI/CD pipeline with GitHub Actions", completed: true },
+        { task: "Comprehensive testing workflows", completed: true },
+        { task: "Security policies and repository protection", completed: true },
+        { task: "Code quality automation (linting, formatting)", completed: true },
+        { task: "Docker security scanning with Trivy", completed: true },
+        { task: "API integration testing with MongoDB", completed: true },
         { task: "Authentication framework (frontend)", completed: true },
         { task: "Redux state management setup", completed: true },
         { task: "Protected routes system", completed: true },
@@ -549,7 +560,8 @@ const Documentation: React.FC = () => {
                   <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
                     The platform uses React 19 with TypeScript for type-safe frontend development, Flask 3.0 for the robust backend API with 
                     <strong> MongoDB database integration</strong>, and is fully containerized with Docker for consistent deployment across environments. 
-                    Our automated CI/CD pipeline ensures code quality through testing, security scanning, and automated deployments. 
+                    Our automated CI/CD pipeline features <strong>comprehensive security policies</strong>, multi-stage testing workflows, 
+                    and automated deployments with <strong>repository owner-only protection</strong>. 
                     The production deployment leverages <strong> Vercel's serverless functions</strong> for the backend and <strong>CDN distribution</strong> for the frontend.
                   </Typography>
                   <Typography variant="h6" gutterBottom sx={{ color: "#1565c0", mt: 4, fontWeight: 600 }}>
@@ -583,6 +595,18 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText primary="CI/CD pipeline with automated testing & deployment" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Repository owner-only security with pull request enforcement" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Comprehensive testing: code quality, Docker builds, API integration" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Automated security scanning with vulnerability detection" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
@@ -620,7 +644,15 @@ const Documentation: React.FC = () => {
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Features</Typography>
-                      <Chip label="8 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                      <Chip label="10 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Security</Typography>
+                      <Chip label="✅ Owner-Only" size="small" sx={{ background: "rgba(76,175,80,0.9)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Testing</Typography>
+                      <Chip label="Multi-Workflow" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Authentication</Typography>

@@ -106,6 +106,89 @@ docker-compose exec backend sh # Access backend container
 docker-compose down            # Stop services
 ```
 
+## 🚀 Deployment & CI/CD
+
+### Comprehensive Pipeline System
+
+The project features a robust, security-focused CI/CD pipeline with multiple automated workflows:
+
+#### 🛡️ Security & Access Control
+- **Repository Owner-Only Deployments**: Only the repository owner can deploy to production
+- **Pull Request Enforcement**: Third-party contributors must use pull requests
+- **Security Policy Documentation**: Complete security guidelines in `SECURITY.md`
+- **Automated Security Scanning**: Dependency vulnerability detection
+
+#### 🔧 Automated Testing Workflows
+
+**Code Quality Pipeline** (`.github/workflows/code-quality.yml`):
+- Python code formatting with Black
+- Linting with flake8 and Pylint
+- TypeScript/JavaScript linting with ESLint
+- Dependency vulnerability scanning
+- Code style consistency enforcement
+
+**Docker Build Testing** (`.github/workflows/docker-build-test.yml`):
+- Multi-stage Docker image building
+- Container functionality testing
+- Health check validation
+- Security scanning with Trivy
+- Image optimization verification
+
+**API Integration Testing** (`.github/workflows/api-integration-tests.yml`):
+- MongoDB service integration
+- Full API endpoint testing
+- Authentication flow validation
+- CORS and security header testing
+- Performance and load testing
+
+**Main CI/CD Pipeline** (`.github/workflows/ci-cd.yml`):
+- Repository owner verification
+- Automated dependency installation
+- Comprehensive test execution
+- Production deployment to Vercel and Render
+- Environment-specific configurations
+
+#### 📊 Pipeline Features
+- **Multi-Environment Support**: Development, staging, and production
+- **Parallel Test Execution**: Faster feedback loops
+- **Comprehensive Health Checks**: Application availability monitoring
+- **Error Handling**: Graceful failure recovery and notifications
+- **Performance Monitoring**: Build time and resource optimization
+
+### Manual Deployment Options
+
+#### Vercel Deployment
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy to production
+vercel --prod
+```
+
+#### Docker Production Deployment
+```bash
+# Build and run production containers
+docker-compose -f docker-compose.prod.yml up -d
+
+# Or use the provided scripts
+# Windows
+scripts/docker-setup.bat
+
+# Linux/macOS
+chmod +x scripts/docker-setup.sh && ./scripts/docker-setup.sh
+```
+
+### Security Policies
+
+- **Owner-Only Direct Deployment**: Only repository owners can push directly to main for production deployment
+- **Contributor Workflow**: External contributors must use pull requests for all changes
+- **Automated Security Scanning**: All dependencies and Docker images scanned for vulnerabilities
+- **Environment Protection**: Production environments require approval and security verification
+
 ## 📊 API Endpoints
 
 ```
