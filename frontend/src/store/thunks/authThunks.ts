@@ -50,7 +50,7 @@ export const loginUser = createAsyncThunk<
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export const signupUser = createAsyncThunk<
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...signupData } = credentials;
       
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ export const logoutUser = createAsyncThunk<
       const refreshToken = state.auth.tokens?.refreshToken;
 
       if (refreshToken) {
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        await fetch(`${API_BASE_URL}/api/auth/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -241,7 +241,7 @@ export const verifyToken = createAsyncThunk<
         return rejectWithValue('No token found');
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -279,7 +279,7 @@ export const refreshToken = createAsyncThunk<
         return rejectWithValue('No refresh token found');
       }
 
-      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -310,7 +310,7 @@ export const forgotPassword = createAsyncThunk<
   'auth/forgotPassword',
   async (request, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -339,7 +339,7 @@ export const resetPassword = createAsyncThunk<
   'auth/resetPassword',
   async (request, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -368,7 +368,7 @@ export const verifyEmail = createAsyncThunk<
   'auth/verifyEmail',
   async (token, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/verify-email/${token}`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/verify-email/${token}`, {
         method: 'GET',
       });
 
@@ -393,7 +393,7 @@ export const resendVerification = createAsyncThunk<
   'auth/resendVerification',
   async (email, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/resend-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
