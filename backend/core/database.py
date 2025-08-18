@@ -9,6 +9,7 @@ from pymongo.errors import ServerSelectionTimeoutError, ConnectionFailure
 import logging
 import os
 from typing import Optional
+from flask import current_app
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +19,19 @@ class DatabaseManager:
     def __init__(self):
         self._client: Optional[MongoClient] = None
         self._database: Optional[Database] = None
-        self.connection_string = os.getenv(
-            'MONGODB_URI', 
-            'mongodb://localhost:27017/coreconnect'
-        )
-        self.database_name = os.getenv('DATABASE_NAME', 'coreconnect')
+        self.connection_string = None
+        self.database_name = None
+    
+    def _get_config(self):
+        """Get configuration from Flask app or environment variables."""
+        try:
+            # Try to get from Flask app config first
+            self.connection_string = current_app.config.get('MONGO_URI')
+            self.database_name = current_app.config.get('MONGO_DBNAME')
+        except RuntimeError:
+            # Fallback to environment variables if no app context
+            self.connection_string = os.getenv('MONGO_URI', 'mongodb://localhost:27017/coreconnect')
+            self.database_name = os.getenv('MONGO_DBNAME', 'coreconnect')
     
     def connect(self) -> bool:
         """
@@ -32,6 +41,8 @@ class DatabaseManager:
             bool: True if connection successful, False otherwise
         """
         try:
+            self._get_config()
+            
             self._client = MongoClient(
                 self.connection_string,
                 serverSelectionTimeoutMS=5000,
@@ -44,6 +55,7 @@ class DatabaseManager:
             self._database = self._client[self.database_name]
             
             logger.info(f"Successfully connected to MongoDB database: {self.database_name}")
+            logger.info(f"Using connection string: {self.connection_string[:20]}...")
             return True
             
         except (ServerSelectionTimeoutError, ConnectionFailure) as e:
@@ -72,7 +84,7 @@ class DatabaseManager:
         Returns:
             Database: MongoDB database instance or None if not connected
         """
-        if not self._database:
+        if self._database is None:
             if self.connect():
                 return self._database
             return None
@@ -86,7 +98,7 @@ class DatabaseManager:
             dict: Health status information
         """
         try:
-            if not self._database:
+            if self._database is None:
                 return {
                     'status': 'disconnected',
                     'message': 'Not connected to database',
@@ -144,7 +156,7 @@ def create_auth_indexes():
     """Create necessary indexes for authentication collections."""
     try:
         db = get_db()
-        if not db:
+        if db is None:
             return
         
         # Users collection indexes

@@ -4,19 +4,20 @@ services:
   # Backend service with hot reload
   backend:
     build: 
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile.dev
     container_name: coreconnect-backend-dev
     ports:
       - "5000:5000"
+    env_file:
+      - ../backend/.env
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
-      - SECRET_KEY=docker-development-secret-key
       - PORT=5000
       - API_VERSION=v1
     volumes:
-      - ./backend:/app
+      - ../backend:/app
       - /app/__pycache__
       - /app/.venv
     restart: unless-stopped
@@ -31,7 +32,7 @@ services:
   # Frontend service with hot reload (Vite dev server)
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile.dev
     container_name: coreconnect-frontend-dev
     ports:
@@ -41,7 +42,7 @@ services:
       - NODE_ENV=development
       - VITE_API_BASE_URL=http://localhost:5000
     volumes:
-      - ./frontend:/app
+      - ../frontend:/app
       - /app/node_modules
       - /app/dist
     depends_on:
