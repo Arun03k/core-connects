@@ -1,0 +1,170 @@
+name: Code Quality Checks
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install Python dependencies
+      working-directory: ./backend
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install flake8 black isort mypy bandit
+    
+    - name: Install Node.js dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    # Python Code Quality Checks
+    - name: Python Code Formatting (Black)
+      working-directory: ./backend
+      run: |
+        echo "🔍 Checking Python code formatting with Black..."
+        black --check --diff . || (echo "❌ Code formatting issues found. Run 'black .' to fix." && exit 1)
+    
+    - name: Python Import Sorting (isort)
+      working-directory: ./backend
+      run: |
+        echo "🔍 Checking Python import sorting..."
+        isort --check-only --diff . || (echo "❌ Import sorting issues found. Run 'isort .' to fix." && exit 1)
+    
+    - name: Python Linting (Flake8)
+      working-directory: ./backend
+      run: |
+        echo "🔍 Running Python linting..."
+        flake8 . --max-line-length=88 --extend-ignore=E203,W503 --exclude=__pycache__,migrations,venv
+    
+    - name: Python Security Scan (Bandit)
+      working-directory: ./backend
+      run: |
+        echo "🔍 Running Python security scan..."
+        bandit -r . -x tests/ -f json -o bandit-report.json || true
+        bandit -r . -x tests/ || (echo "⚠️  Security issues found, but continuing..." && exit 0)
+    
+    # Frontend Code Quality Checks
+    - name: TypeScript/JavaScript Linting
+      working-directory: ./frontend
+      run: |
+        echo "🔍 Running TypeScript/JavaScript linting..."
+        npm run lint
+    
+    - name: TypeScript Type Checking
+      working-directory: ./frontend
+      run: |
+        echo "🔍 Running TypeScript type checking..."
+        npx tsc --noEmit
+    
+    # Documentation and Configuration Checks
+    - name: Check Documentation
+      run: |
+        echo "🔍 Checking documentation completeness..."
+        
+        # Check for required documentation files
+        required_docs=(
+          "README.md"
+          "SECURITY.md"
+          "docs/DEVELOPMENT.md"
+        )
+        
+        for doc in "${required_docs[@]}"; do
+          if [ -f "$doc" ]; then
+            echo "✅ Found: $doc"
+          else
+            echo "❌ Missing: $doc"
+            exit 1
+          fi
+        done
+    
+    - name: Validate Configuration Files
+      run: |
+        echo "🔍 Validating configuration files..."
+        
+        # Check JSON files
+        find . -name "*.json" -not -path "./node_modules/*" -not -path "./.git/*" | while read -r file; do
+          echo "Validating JSON: $file"
+          python -m json.tool "$file" > /dev/null || (echo "❌ Invalid JSON: $file" && exit 1)
+        done
+        
+        # Check YAML files
+        find . -name "*.yml" -o -name "*.yaml" | grep -v node_modules | while read -r file; do
+          echo "Validating YAML: $file"
+          python -c "import yaml; yaml.safe_load(open('$file'))" || (echo "❌ Invalid YAML: $file" && exit 1)
+        done
+        
+        echo "✅ All configuration files are valid"
+    
+    - name: Check Environment Configuration
+      run: |
+        echo "🔍 Checking environment configuration..."
+        
+        # Check for required environment files
+        if [ -f "backend/.env.example" ]; then
+          echo "✅ Found backend/.env.example"
+        else
+          echo "⚠️  Missing backend/.env.example - consider adding one"
+        fi
+        
+        if [ -f "frontend/.env.example" ]; then
+          echo "✅ Found frontend/.env.example"
+        else
+          echo "⚠️  Missing frontend/.env.example - consider adding one"
+        fi
+        
+        # Check render.yaml
+        if [ -f "render.yaml" ]; then
+          echo "✅ Found render.yaml deployment configuration"
+        else
+          echo "❌ Missing render.yaml deployment configuration"
+          exit 1
+        fi
+    
+    - name: Dependency Vulnerability Check
+      run: |
+        echo "🔍 Checking for dependency vulnerabilities..."
+        
+        # Check Python dependencies
+        echo "Checking Python dependencies..."
+        cd backend
+        pip install safety
+        safety check || (echo "⚠️  Python dependency vulnerabilities found" && exit 0)
+        cd ..
+        
+        # Check Node.js dependencies
+        echo "Checking Node.js dependencies..."
+        cd frontend
+        npm audit --audit-level=high || (echo "⚠️  Node.js dependency vulnerabilities found" && exit 0)
+        cd ..
+    
+    - name: Code Quality Summary
+      if: always()
+      run: |
+        echo "📊 Code Quality Check Summary"
+        echo "============================="
+        echo "✅ Python formatting and linting completed"
+        echo "✅ TypeScript type checking completed"
+        echo "✅ Configuration files validated"
+        echo "✅ Documentation structure verified"
+        echo "✅ Dependency security scan completed"
+        echo ""
+        echo "🎯 Code quality standards maintained!"

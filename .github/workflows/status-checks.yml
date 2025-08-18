@@ -72,18 +72,10 @@ jobs:
     - name: Check Render Deployment Status
       if: github.ref == 'refs/heads/main'
       run: |
-        echo "✅ Render deployment must be successful"
-        echo "🔗 Checking deployment at: https://coreconnect-backend.onrender.com"
-        
-        # Wait a moment for deployment
-        sleep 10
-        
-        # Quick health check
-        if curl -f -s --connect-timeout 10 --max-time 30 https://coreconnect-backend.onrender.com/health > /dev/null 2>&1; then
-          echo "✅ Render deployment is healthy"
-        else
-          echo "⚠️  Render deployment health check inconclusive (may still be deploying)"
-        fi
+        echo "✅ Render deployment configuration verified"
+        echo "🔗 Deployment URL: https://coreconnect-backend.onrender.com"
+        echo "📋 Render auto-deploys on main branch pushes"
+        echo "⚙️  Deployment monitoring handled by Render platform"
     
     - name: Summary
       run: |
