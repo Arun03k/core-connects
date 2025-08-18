@@ -127,9 +127,20 @@ class AuthService:
         try:
             email = user_data.get('email', '').strip().lower()
             password = user_data.get('password', '')
-            first_name = user_data.get('firstName') or user_data.get('first_name', '').strip()
-            last_name = user_data.get('lastName') or user_data.get('last_name', '').strip()
-            username = user_data.get('username', '').strip().lower() or None
+            
+            # Safely handle name fields that might be None
+            first_name = user_data.get('firstName') or user_data.get('first_name') or ''
+            if first_name:
+                first_name = first_name.strip()
+            
+            last_name = user_data.get('lastName') or user_data.get('last_name') or ''
+            if last_name:
+                last_name = last_name.strip()
+            
+            username = user_data.get('username') or ''
+            if username:
+                username = username.strip().lower()
+            username = username or None
             
             # Validate password strength
             is_valid, message = self.validate_password_strength(password)

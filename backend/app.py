@@ -28,11 +28,39 @@ def create_app(config_name=None):
     app.config.from_object(config[config_name])
     
     # Enable CORS for frontend communication
-    CORS(app, origins=[
+    cors_origins = [
         "http://localhost:5173",  # Vite dev server
         "http://localhost:80",    # Docker frontend
         "http://localhost:3000",  # Alternative dev server
-    ])
+    ]
+    
+    # Add production URLs if available
+    if os.getenv('FRONTEND_URL'):
+        cors_origins.append(os.getenv('FRONTEND_URL'))
+    
+    # For Vercel deployment
+    if os.getenv('VERCEL_URL'):
+        cors_origins.append(f"https://{os.getenv('VERCEL_URL')}")
+    
+    # Allow all origins in development, specific origins in production
+    if config_name == 'development':
+        CORS(app, origins="*", methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+             allow_headers=['Content-Type', 'Authorization'])
+    else:
+        CORS(app, origins=cors_origins, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+             allow_headers=['Content-Type', 'Authorization'])
+    
+    # Ensure all responses are JSON
+    @app.before_request
+    def ensure_json_request():
+        """Ensure request content type is correct for JSON endpoints"""
+        if request.method in ['POST', 'PUT', 'PATCH'] and request.path.startswith('/api/'):
+            if not request.is_json and request.content_length and request.content_length > 0:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Request must be JSON',
+                    'errors': {'content_type': 'Content-Type must be application/json'}
+                }), 400
     
     # Initialize database
     try:
@@ -43,6 +71,72 @@ def create_app(config_name=None):
     
     # Register blueprints
     app.register_blueprint(auth_bp)
+    
+    # Add global error handlers
+    @app.errorhandler(400)
+    def handle_bad_request(e):
+        """Handle 400 Bad Request errors"""
+        return jsonify({
+            'status': 'error',
+            'message': 'Bad Request',
+            'errors': {'request': str(e.description) if hasattr(e, 'description') else 'Invalid request'}
+        }), 400
+
+    @app.errorhandler(401)
+    def handle_unauthorized(e):
+        """Handle 401 Unauthorized errors"""
+        return jsonify({
+            'status': 'error',
+            'message': 'Unauthorized',
+            'errors': {'auth': str(e.description) if hasattr(e, 'description') else 'Authentication required'}
+        }), 401
+
+    @app.errorhandler(403)
+    def handle_forbidden(e):
+        """Handle 403 Forbidden errors"""
+        return jsonify({
+            'status': 'error',
+            'message': 'Forbidden',
+            'errors': {'auth': str(e.description) if hasattr(e, 'description') else 'Access denied'}
+        }), 403
+
+    @app.errorhandler(404)
+    def handle_not_found(e):
+        """Handle 404 Not Found errors"""
+        return jsonify({
+            'status': 'error',
+            'message': 'Not Found',
+            'errors': {'resource': 'The requested resource was not found'}
+        }), 404
+
+    @app.errorhandler(405)
+    def handle_method_not_allowed(e):
+        """Handle 405 Method Not Allowed errors"""
+        return jsonify({
+            'status': 'error',
+            'message': 'Method Not Allowed',
+            'errors': {'method': str(e.description) if hasattr(e, 'description') else 'Method not allowed for this endpoint'}
+        }), 405
+
+    @app.errorhandler(500)
+    def handle_internal_error(e):
+        """Handle 500 Internal Server Error"""
+        logger.error(f"Internal server error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'Internal Server Error',
+            'errors': {'server': 'An unexpected error occurred'}
+        }), 500
+
+    @app.errorhandler(Exception)
+    def handle_unexpected_error(e):
+        """Handle any unexpected errors"""
+        logger.error(f"Unexpected error: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': 'An unexpected error occurred',
+            'errors': {'server': 'Please try again later'}
+        }), 500
     
     # Add security middleware
     @app.after_request
@@ -80,10 +174,33 @@ def create_app(config_name=None):
     # API routes
     @app.route('/api/test')
     def api_test():
-        return APIResponse.success(
-            data='Hello from Flask backend!',
-            message='API endpoint is working'
-        )
+        return jsonify({
+            'status': 'success',
+            'message': 'API endpoint is working',
+            'data': 'Hello from Flask backend!'
+        })
+    
+    @app.route('/api/test-json', methods=['POST'])
+    def test_json():
+        """Test JSON request/response handling"""
+        try:
+            data = request.get_json()
+            return jsonify({
+                'status': 'success',
+                'message': 'JSON handling is working',
+                'data': {
+                    'received': data,
+                    'method': request.method,
+                    'content_type': request.content_type
+                }
+            }), 200
+        except Exception as e:
+            logger.error(f"JSON test error: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': 'JSON test failed',
+                'errors': {'server': str(e)}
+            }), 500
     
     @app.route('/api/stats')
     def api_stats():

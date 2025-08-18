@@ -58,12 +58,42 @@ export const loginUser = createAsyncThunk<
         body: JSON.stringify(credentials),
       });
 
+      // Check if response is JSON by looking at content-type header
+      const contentType = response.headers.get('content-type');
+      const isJsonResponse = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
-        const errorData = await response.json();
+        // Handle non-JSON responses (like HTML error pages)
+        if (!isJsonResponse) {
+          const textResponse = await response.text();
+          console.error('Non-JSON error response:', textResponse);
+          return rejectWithValue(`Server error (${response.status}): The server returned an unexpected response. Please try again later.`);
+        }
+
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError);
+          return rejectWithValue(`Server error (${response.status}): Unable to process server response`);
+        }
+
         return rejectWithValue(errorData.message || 'Login failed');
       }
 
-      const data = await response.json();
+      // Handle successful response
+      if (!isJsonResponse) {
+        console.error('Non-JSON success response received');
+        return rejectWithValue('Server returned an unexpected response format');
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse success response:', parseError);
+        return rejectWithValue('Unable to process server response');
+      }
       
       // Transform response to match expected format
       return {
@@ -77,6 +107,7 @@ export const loginUser = createAsyncThunk<
         message: data.message
       };
     } catch (error) {
+      console.error('Login network error:', error);
       return rejectWithValue(
         error instanceof Error ? error.message : 'Network error occurred'
       );
@@ -108,12 +139,42 @@ export const signupUser = createAsyncThunk<
         body: JSON.stringify(signupData),
       });
 
+      // Check if response is JSON by looking at content-type header
+      const contentType = response.headers.get('content-type');
+      const isJsonResponse = contentType && contentType.includes('application/json');
+
       if (!response.ok) {
-        const errorData = await response.json();
+        // Handle non-JSON responses (like HTML error pages)
+        if (!isJsonResponse) {
+          const textResponse = await response.text();
+          console.error('Non-JSON error response:', textResponse);
+          return rejectWithValue(`Server error (${response.status}): The server returned an unexpected response. Please try again later.`);
+        }
+
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError);
+          return rejectWithValue(`Server error (${response.status}): Unable to process server response`);
+        }
+
         return rejectWithValue(errorData.message || 'Registration failed');
       }
 
-      const data = await response.json();
+      // Handle successful response
+      if (!isJsonResponse) {
+        console.error('Non-JSON success response received');
+        return rejectWithValue('Server returned an unexpected response format');
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse success response:', parseError);
+        return rejectWithValue('Unable to process server response');
+      }
       
       // Transform response to match expected format
       return {
@@ -128,6 +189,7 @@ export const signupUser = createAsyncThunk<
         message: data.message
       };
     } catch (error) {
+      console.error('Signup network error:', error);
       return rejectWithValue(
         error instanceof Error ? error.message : 'Network error occurred'
       );
