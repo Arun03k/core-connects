@@ -31,8 +31,33 @@ def test_health_check(client):
     assert response.status_code == 200
     
     data = json.loads(response.data)
-    assert data['status'] == 'healthy'
-    assert 'timestamp' in data
+    assert data['status'] == 'success'
+    assert 'database' in data['data']
+    assert 'api' in data['data']
+
+
+def test_api_health_check(client):
+    """Test the API health check endpoint."""
+    response = client.get('/api/health')
+    assert response.status_code == 200
+    
+    data = json.loads(response.data)
+    assert data['status'] == 'success'
+    assert 'api' in data['data']
+    assert 'database' in data['data']
+    assert 'version' in data['data']
+
+
+def test_api_status_endpoint(client):
+    """Test the API status endpoint."""
+    response = client.get('/api/status')
+    assert response.status_code == 200
+    
+    data = json.loads(response.data)
+    assert data['status'] == 'success'
+    assert 'api_version' in data['data']
+    assert 'service_name' in data['data']
+    assert 'environment' in data['data']
 
 
 def test_api_test_endpoint(client):
