@@ -221,11 +221,103 @@ POST /api/auth/register  # User registration
 
 ## 🤝 Contributing
 
+### Code Quality Standards
+
+We enforce **strict code quality standards** with automatic formatting and validation:
+
+#### 🚀 **Quick Setup (Recommended)**
+```bash
+# Windows
+setup-dev.bat
+
+# Linux/macOS
+chmod +x setup-dev.sh && ./setup-dev.sh
+```
+
+This installs:
+- ✅ **Pre-commit hooks** (auto-format on commit)
+- ✅ **Pre-push hooks** (block push if code quality fails)
+- ✅ **Commit message validation** (conventional commits)
+- ✅ **Code quality tools** (Black, isort, flake8, ESLint)
+
+#### 🛡️ **Automatic Enforcement**
+
+**Git Hooks Behavior:**
+- **Pre-commit**: Automatically formats code before each commit
+- **Pre-push**: Blocks push if code quality checks fail
+- **Commit-msg**: Enforces conventional commit message format
+
+**GitHub Actions:**
+- **Pull Requests**: Auto-fixes formatting issues and commits them
+- **Push to main**: Strict validation - blocks merge if style issues exist
+
+#### 📝 **Manual Commands**
+
+**Backend (Python) Code Formatting:**
+```bash
+cd backend
+
+# Auto-format everything (recommended)
+./format-code.bat  # Windows
+./format-code.sh   # Linux/macOS
+
+# Or run tools individually:
+black .                    # Code formatting
+isort .                    # Import sorting  
+flake8 . --config=.flake8  # Linting
+```
+
+**Frontend (TypeScript) Code Quality:**
+```bash
+cd frontend
+
+# Check linting
+npm run lint
+
+# Auto-fix linting issues
+npm run lint -- --fix
+
+# Type checking
+npx tsc --noEmit
+```
+
+#### 🚫 **Enforcement Rules**
+
+- **No commits allowed** with unformatted Python code
+- **No pushes allowed** with linting errors
+- **Pull requests automatically receive** formatting fixes
+- **Commit messages must follow** conventional commit format:
+  ```
+  feat: add new feature
+  fix: resolve login bug
+  docs: update API documentation
+  style: format code with black
+  refactor: restructure auth service
+  test: add user authentication tests
+  ```
+
+#### ⚡ **Pre-commit Framework Integration**
+
+We use [pre-commit](https://pre-commit.com/) for additional validation:
+
+```bash
+# Run all hooks manually
+pre-commit run --all-files
+
+# Update hooks
+pre-commit autoupdate
+```
+
+### Contribution Process
+
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/name`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push branch: `git push origin feature/name`
-5. Submit pull request
+3. **Format your code** using the tools above
+4. Commit changes: `git commit -m 'Add feature'`
+5. Push branch: `git push origin feature/name`
+6. Submit pull request
+
+**Note:** All pull requests must pass automated code quality checks including Black formatting, import sorting, linting, and security scans.
 
 ## 📄 License
 

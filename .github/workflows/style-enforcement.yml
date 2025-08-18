@@ -1,0 +1,161 @@
+name: Code Style Enforcement
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  style-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+    
+    - name: Install Python formatting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install black isort flake8 bandit
+    
+    - name: Install Node.js dependencies
+      working-directory: ./frontend
+      run: npm ci
+    
+    # Python Style Checks (STRICT - will fail if not formatted)
+    - name: Check Python formatting with Black
+      working-directory: ./backend
+      run: |
+        echo "🔍 Checking Python code formatting..."
+        black --check --diff --color .
+        if [ $? -ne 0 ]; then
+          echo "❌ Python code is not properly formatted!"
+          echo ""
+          echo "💡 To fix locally, run:"
+          echo "cd backend && black ."
+          echo ""
+          echo "Or use the auto-format script:"
+          echo "cd backend && ./format-code.bat  # Windows"
+          echo "cd backend && ./format-code.sh   # Linux/macOS"
+          exit 1
+        fi
+    
+    - name: Check Python import sorting
+      working-directory: ./backend
+      run: |
+        echo "🔍 Checking Python import sorting..."
+        isort --check-only --diff --color .
+        if [ $? -ne 0 ]; then
+          echo "❌ Python imports are not properly sorted!"
+          echo ""
+          echo "💡 To fix locally, run:"
+          echo "cd backend && isort ."
+          exit 1
+        fi
+    
+    - name: Python linting with Flake8
+      working-directory: ./backend
+      run: |
+        echo "🔍 Running Python linting..."
+        flake8 . --config=.flake8
+        if [ $? -ne 0 ]; then
+          echo "❌ Python linting issues found!"
+          echo ""
+          echo "💡 To check locally, run:"
+          echo "cd backend && flake8 . --config=.flake8"
+          exit 1
+        fi
+    
+    # Frontend Style Checks
+    - name: Check TypeScript/JavaScript linting
+      working-directory: ./frontend
+      run: |
+        echo "🔍 Checking frontend code style..."
+        npm run lint
+        if [ $? -ne 0 ]; then
+          echo "❌ Frontend linting issues found!"
+          echo ""
+          echo "💡 To fix locally, run:"
+          echo "cd frontend && npm run lint -- --fix"
+          exit 1
+        fi
+    
+    - name: TypeScript type checking
+      working-directory: ./frontend
+      run: |
+        echo "🔍 Checking TypeScript types..."
+        npx tsc --noEmit
+        if [ $? -ne 0 ]; then
+          echo "❌ TypeScript type errors found!"
+          exit 1
+        fi
+    
+    # Optional: Auto-fix and comment on PR (only for pull requests)
+    - name: Auto-fix code style (PR only)
+      if: github.event_name == 'pull_request'
+      id: autofix
+      continue-on-error: true
+      run: |
+        echo "🔧 Attempting to auto-fix style issues..."
+        
+        # Auto-fix Python code
+        cd backend
+        black . || true
+        isort . || true
+        cd ..
+        
+        # Auto-fix frontend code
+        cd frontend
+        npm run lint -- --fix || true
+        cd ..
+        
+        # Check if any files were modified
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "modified=true" >> $GITHUB_OUTPUT
+          echo "✅ Auto-fixes applied"
+        else
+          echo "modified=false" >> $GITHUB_OUTPUT
+          echo "ℹ️  No auto-fixes needed"
+        fi
+    
+    - name: Commit auto-fixes
+      if: steps.autofix.outputs.modified == 'true' && github.event_name == 'pull_request'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action (Auto-format)"
+        git add -A
+        git commit -m "style: auto-format code with Black, isort, and ESLint"
+        git push
+        echo "🎯 Auto-formatting applied and committed!"
+    
+    # Final Status
+    - name: Style Check Summary
+      if: always()
+      run: |
+        echo "📊 Code Style Check Summary"
+        echo "============================"
+        echo "🐍 Python formatting: ${{ job.status }}"
+        echo "🌐 Frontend linting: ${{ job.status }}"
+        echo "📝 TypeScript types: ${{ job.status }}"
+        echo ""
+        if [ "${{ job.status }}" = "success" ]; then
+          echo "✅ All code style checks passed!"
+        else
+          echo "❌ Code style issues found - please fix before merging"
+          echo ""
+          echo "🔧 Quick setup for local development:"
+          echo "Run: ./setup-dev.bat (Windows) or ./setup-dev.sh (Linux/macOS)"
+        fi

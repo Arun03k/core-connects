@@ -5,11 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "build": "tsc -b config/tsconfig.json && vite build",
+    "lint": "eslint . --config config/eslint.config.js",
+    "lint:fix": "eslint . --config config/eslint.config.js --fix",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --project config/tsconfig.json --noEmit",
     "vercel-build": "npm run build"
   },
   "dependencies": {

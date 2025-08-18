@@ -1,22 +1,26 @@
 """
 Email service for sending authentication-related emails
 """
-from typing import Dict, Any, Optional
-import smtplib
+
 import logging
+import smtplib
+from typing import Any, Dict, Optional
+
 try:
-    from email.mime.text import MIMEText as MimeText
     from email.mime.multipart import MIMEMultipart as MimeMultipart
+    from email.mime.text import MIMEText as MimeText
 except ImportError:
     from email.mime.text import MimeText
     from email.mime.multipart import MimeMultipart
+
 from flask import current_app
 
 logger = logging.getLogger(__name__)
 
+
 class EmailService:
     """Email service for authentication and notifications"""
-    
+
     def __init__(self):
         self.smtp_server = None
         self.smtp_port = None
@@ -25,71 +29,77 @@ class EmailService:
         self.use_tls = True
         self.from_email = None
         self.from_name = "CoreConnect"
-        
+
         self._load_config()
-    
+
     def _load_config(self):
         """Load email configuration from app config"""
         try:
-            self.smtp_server = current_app.config.get('MAIL_SERVER', 'smtp.gmail.com')
-            self.smtp_port = current_app.config.get('MAIL_PORT', 587)
-            self.username = current_app.config.get('MAIL_USERNAME')
-            self.password = current_app.config.get('MAIL_PASSWORD')
-            self.use_tls = current_app.config.get('MAIL_USE_TLS', True)
-            self.from_email = self.username or current_app.config.get('MAIL_DEFAULT_SENDER')
+            self.smtp_server = current_app.config.get("MAIL_SERVER", "smtp.gmail.com")
+            self.smtp_port = current_app.config.get("MAIL_PORT", 587)
+            self.username = current_app.config.get("MAIL_USERNAME")
+            self.password = current_app.config.get("MAIL_PASSWORD")
+            self.use_tls = current_app.config.get("MAIL_USE_TLS", True)
+            self.from_email = self.username or current_app.config.get(
+                "MAIL_DEFAULT_SENDER"
+            )
         except Exception as e:
             logger.warning(f"Email configuration not fully loaded: {str(e)}")
-    
+
     def _create_smtp_connection(self):
         """Create SMTP connection"""
         if not all([self.smtp_server, self.username, self.password]):
             raise Exception("Email configuration is incomplete")
-        
+
         server = smtplib.SMTP(self.smtp_server, self.smtp_port)
-        
+
         if self.use_tls:
             server.starttls()
-        
+
         server.login(self.username, self.password)
         return server
-    
-    def send_email(self, to_email: str, subject: str, html_content: str, text_content: str = None) -> bool:
+
+    def send_email(
+        self, to_email: str, subject: str, html_content: str, text_content: str = None
+    ) -> bool:
         """Send email with HTML and optional text content"""
         try:
-            msg = MimeMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = f"{self.from_name} <{self.from_email}>"
-            msg['To'] = to_email
-            
+            msg = MimeMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"{self.from_name} <{self.from_email}>"
+            msg["To"] = to_email
+
             # Add text content if provided
             if text_content:
-                text_part = MimeText(text_content, 'plain')
+                text_part = MimeText(text_content, "plain")
                 msg.attach(text_part)
-            
+
             # Add HTML content
-            html_part = MimeText(html_content, 'html')
+            html_part = MimeText(html_content, "html")
             msg.attach(html_part)
-            
+
             # Send email
             server = self._create_smtp_connection()
             server.send_message(msg)
             server.quit()
-            
+
             logger.info(f"Email sent successfully to {to_email}")
             return True
-            
+
         except Exception as e:
             logger.error(f"Failed to send email to {to_email}: {str(e)}")
             return False
-    
-    def send_verification_email(self, user_email: str, user_name: str, verification_token: str) -> bool:
+
+    def send_verification_email(
+        self, user_email: str, user_name: str, verification_token: str
+    ) -> bool:
         """Send email verification email"""
         try:
-            base_url = current_app.config.get('FRONTEND_URL', 'http://localhost:3000')
+            base_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
             verification_url = f"{base_url}/verify-email/{verification_token}"
-            
+
             subject = "Verify Your CoreConnect Account"
-            
+
             html_content = f"""
             <!DOCTYPE html>
             <html>
@@ -145,7 +155,7 @@ class EmailService:
             </body>
             </html>
             """
-            
+
             text_content = f"""
             Welcome to CoreConnect!
             
@@ -161,21 +171,23 @@ class EmailService:
             
             © 2025 CoreConnect. All rights reserved.
             """
-            
+
             return self.send_email(user_email, subject, html_content, text_content)
-            
+
         except Exception as e:
             logger.error(f"Failed to send verification email: {str(e)}")
             return False
-    
-    def send_password_reset_email(self, user_email: str, user_name: str, reset_token: str) -> bool:
+
+    def send_password_reset_email(
+        self, user_email: str, user_name: str, reset_token: str
+    ) -> bool:
         """Send password reset email"""
         try:
-            base_url = current_app.config.get('FRONTEND_URL', 'http://localhost:3000')
+            base_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
             reset_url = f"{base_url}/reset-password/{reset_token}"
-            
+
             subject = "Reset Your CoreConnect Password"
-            
+
             html_content = f"""
             <!DOCTYPE html>
             <html>
@@ -228,7 +240,7 @@ class EmailService:
             </body>
             </html>
             """
-            
+
             text_content = f"""
             Password Reset Request - CoreConnect
             
@@ -244,21 +256,21 @@ class EmailService:
             
             © 2025 CoreConnect. All rights reserved.
             """
-            
+
             return self.send_email(user_email, subject, html_content, text_content)
-            
+
         except Exception as e:
             logger.error(f"Failed to send password reset email: {str(e)}")
             return False
-    
+
     def send_welcome_email(self, user_email: str, user_name: str) -> bool:
         """Send welcome email after successful verification"""
         try:
-            base_url = current_app.config.get('FRONTEND_URL', 'http://localhost:3000')
+            base_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
             dashboard_url = f"{base_url}/dashboard"
-            
+
             subject = "Welcome to CoreConnect - Your Account is Ready!"
-            
+
             html_content = f"""
             <!DOCTYPE html>
             <html>
@@ -324,9 +336,9 @@ class EmailService:
             </body>
             </html>
             """
-            
+
             return self.send_email(user_email, subject, html_content)
-            
+
         except Exception as e:
             logger.error(f"Failed to send welcome email: {str(e)}")
             return False
