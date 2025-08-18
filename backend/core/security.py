@@ -8,11 +8,11 @@ import re
 import secrets
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import bcrypt
 import jwt
-from flask import current_app, jsonify, request
+from flask import jsonify, request
 
 logger = logging.getLogger(__name__)
 

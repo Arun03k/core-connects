@@ -4,7 +4,7 @@ Email service for sending authentication-related emails
 
 import logging
 import smtplib
-from typing import Any, Dict, Optional
+from typing import Dict
 
 try:
     from email.mime.multipart import MIMEMultipart as MimeMultipart
@@ -125,24 +125,24 @@ class EmailService:
                     </div>
                     <div class="content">
                         <h2 style="color: #333; margin-bottom: 20px;">Hi {user_name or 'there'}!</h2>
-                        
+
                         <p style="color: #555; line-height: 1.6; font-size: 16px;">
                             Thank you for signing up for CoreConnect! To complete your registration and start using our workforce management platform, please verify your email address.
                         </p>
-                        
+
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="{verification_url}" class="button" style="color: white;">Verify Email Address</a>
                         </div>
-                        
+
                         <p style="color: #666; font-size: 14px; line-height: 1.6;">
                             If the button above doesn't work, you can copy and paste this link into your browser:<br>
                             <a href="{verification_url}" style="color: #1976d2; word-break: break-all;">{verification_url}</a>
                         </p>
-                        
+
                         <p style="color: #666; font-size: 14px; margin-top: 30px;">
                             <strong>Note:</strong> This verification link will expire in 24 hours for security reasons.
                         </p>
-                        
+
                         <p style="color: #666; font-size: 14px;">
                             If you didn't create an account with CoreConnect, please ignore this email.
                         </p>
@@ -158,17 +158,17 @@ class EmailService:
 
             text_content = f"""
             Welcome to CoreConnect!
-            
+
             Hi {user_name or 'there'}!
-            
+
             Thank you for signing up for CoreConnect! To complete your registration, please verify your email address by clicking the link below:
-            
+
             {verification_url}
-            
+
             This verification link will expire in 24 hours.
-            
+
             If you didn't create an account with CoreConnect, please ignore this email.
-            
+
             © 2025 CoreConnect. All rights reserved.
             """
 
@@ -214,20 +214,20 @@ class EmailService:
                     </div>
                     <div class="content">
                         <h2 style="color: #333; margin-bottom: 20px;">Hi {user_name or 'there'}!</h2>
-                        
+
                         <p style="color: #555; line-height: 1.6; font-size: 16px;">
                             We received a request to reset your CoreConnect password. If you made this request, click the button below to set a new password.
                         </p>
-                        
+
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="{reset_url}" class="button" style="color: white;">Reset Password</a>
                         </div>
-                        
+
                         <p style="color: #666; font-size: 14px; line-height: 1.6;">
                             If the button above doesn't work, you can copy and paste this link into your browser:<br>
                             <a href="{reset_url}" style="color: #d32f2f; word-break: break-all;">{reset_url}</a>
                         </p>
-                        
+
                         <div class="warning">
                             <strong>Security Notice:</strong> This password reset link will expire in 1 hour for security reasons. If you didn't request a password reset, please ignore this email or contact support if you have concerns.
                         </div>
@@ -243,17 +243,17 @@ class EmailService:
 
             text_content = f"""
             Password Reset Request - CoreConnect
-            
+
             Hi {user_name or 'there'}!
-            
+
             We received a request to reset your CoreConnect password. If you made this request, use the link below to set a new password:
-            
+
             {reset_url}
-            
+
             This password reset link will expire in 1 hour for security reasons.
-            
+
             If you didn't request a password reset, please ignore this email.
-            
+
             © 2025 CoreConnect. All rights reserved.
             """
 
@@ -297,33 +297,33 @@ class EmailService:
                     </div>
                     <div class="content">
                         <h2 style="color: #333; margin-bottom: 20px;">Hi {user_name or 'there'}!</h2>
-                        
+
                         <p style="color: #555; line-height: 1.6; font-size: 16px;">
                             Congratulations! Your CoreConnect account has been successfully verified and is ready to use. You now have access to our comprehensive workforce management platform.
                         </p>
-                        
+
                         <h3 style="color: #1976d2; margin-top: 30px;">What you can do now:</h3>
-                        
+
                         <div class="feature">
                             <strong>📊 Dashboard:</strong> View your personalized dashboard with key metrics and updates
                         </div>
-                        
+
                         <div class="feature">
                             <strong>👤 Profile Management:</strong> Update your profile and preferences
                         </div>
-                        
+
                         <div class="feature">
                             <strong>⏱️ Time Tracking:</strong> Clock in/out and manage your work hours (coming soon)
                         </div>
-                        
+
                         <div class="feature">
                             <strong>🌴 Leave Management:</strong> Request and manage your time off (coming soon)
                         </div>
-                        
+
                         <div style="text-align: center; margin: 30px 0;">
                             <a href="{dashboard_url}" class="button" style="color: white;">Go to Dashboard</a>
                         </div>
-                        
+
                         <p style="color: #666; font-size: 14px;">
                             If you have any questions or need help getting started, feel free to explore our documentation or contact our support team.
                         </p>

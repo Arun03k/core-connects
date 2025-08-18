@@ -8,7 +8,6 @@ from flask_cors import CORS
 from api.auth import auth_bp
 from config import config
 from core.database import db_manager, init_database
-from core.responses import APIResponse, ErrorResponses
 from core.security import SecurityMiddleware
 from models.user import User
 

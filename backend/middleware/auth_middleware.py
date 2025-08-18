@@ -6,7 +6,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 
-from flask import current_app, jsonify, request
+from flask import jsonify, request
 
 from models.user import User
 from utils.auth_utils import verify_token

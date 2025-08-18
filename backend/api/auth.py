@@ -2,14 +2,13 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from bson import ObjectId
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from middleware.auth_middleware import enhanced_token_required, rate_limit
 from models.user import User
 from services.auth_service import AuthService
 from services.email_service import EmailService
-from utils.auth_utils import generate_token, token_required, verify_token
+from utils.auth_utils import token_required
 from utils.validators import input_validator
 
 logger = logging.getLogger(__name__)
@@ -507,8 +506,6 @@ def forgot_password():
         )
 
         # Store reset token
-        from flask import current_app
-
         from utils.database import get_db
 
         db = get_db()
@@ -586,8 +583,6 @@ def reset_password():
 
         # Verify reset token
         try:
-            from flask import current_app
-
             payload = jwt.decode(
                 reset_token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"]
             )
@@ -704,7 +699,10 @@ def reset_password():
                 "message": "An error occurred while resetting your password",
                 "errors": {"server": "Internal server error"},
             }
-        ), 500 @ auth_bp.route("/verify", methods=["GET"])
+        ), 500
+
+
+@auth_bp.route("/verify", methods=["GET"])
 
 
 @enhanced_token_required

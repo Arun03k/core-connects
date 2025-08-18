@@ -6,7 +6,7 @@ import logging
 import re
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import jwt
 from flask import current_app

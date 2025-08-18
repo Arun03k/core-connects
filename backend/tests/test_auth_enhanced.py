@@ -5,7 +5,6 @@ Enhanced test suite for authentication system
 import json
 import os
 import sys
-from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -42,7 +41,7 @@ class TestAuthenticationSystem:
         """Test strong password validation"""
         strong_password = "StrongP@ss123!"
         is_valid, message = password_validator.validate_password(strong_password)
-        assert is_valid == True
+        assert is_valid is True
 
         score, strength = password_validator.get_password_strength_score(
             strong_password
@@ -62,7 +61,7 @@ class TestAuthenticationSystem:
 
         for password in weak_passwords:
             is_valid, errors = password_validator.validate_password(password)
-            assert is_valid == False
+            assert is_valid is False
             assert len(errors) > 0
 
     def test_input_validation_email(self):
@@ -82,11 +81,11 @@ class TestAuthenticationSystem:
 
         for email in valid_emails:
             result = input_validator.validate_email(email)
-            assert result["valid"] == True
+            assert result["valid"] is True
 
         for email in invalid_emails:
             result = input_validator.validate_email(email)
-            assert result["valid"] == False
+            assert result["valid"] is False
 
     def test_input_validation_registration(self):
         """Test registration data validation"""
@@ -99,7 +98,7 @@ class TestAuthenticationSystem:
         }
 
         result = input_validator.validate_registration_data(valid_data)
-        assert result["valid"] == True
+        assert result["valid"] is True
 
         invalid_data = {
             "email": "not-an-email",
@@ -109,7 +108,7 @@ class TestAuthenticationSystem:
         }
 
         result = input_validator.validate_registration_data(invalid_data)
-        assert result["valid"] == False
+        assert result["valid"] is False
         assert "email" in result["errors"]
         assert "password" in result["errors"]
 
@@ -256,7 +255,7 @@ class TestAuthenticationSystem:
 
         for password in weak_passwords:
             is_valid, errors = password_validator.validate_password(password)
-            assert is_valid == False
+            assert is_valid is False
             assert len(errors) > 0
 
     def test_rate_limiting_simulation(self, client):
