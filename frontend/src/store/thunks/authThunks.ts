@@ -3,7 +3,7 @@ import type { User, AuthTokens } from '../slices/authSlice';
 
 // API base URL - Use environment variable or fallback to localhost for development
 const API_BASE_URL = import.meta.env.VITE_API_URL || 
-                     (import.meta.env.MODE === 'development' ? 'http://localhost:5000' : '/api');
+                     (import.meta.env.MODE === 'development' ? 'http://localhost:5000' : 'https://core-connects.onrender.com');
 
 export interface LoginCredentials {
   email: string;
