@@ -27,13 +27,13 @@ def create_app(config_name=None):
     # Load configuration
     app.config.from_object(config[config_name])
     
-    # Enable CORS for frontend communication - Updated for Vercel
+    # Enable CORS for frontend communication - Updated for production
     cors_origins = [
         "http://localhost:5173",  # Vite dev server
         "http://localhost:80",    # Docker frontend
         "http://localhost:3000",  # Alternative dev server
+        "https://core-connect-seven.vercel.app",  # Production frontend
         "https://*.vercel.app",   # Vercel domains
-        "https://core-connect-seven.vercel.app",  # Your specific Vercel domain
         "https://core-connect-seven-*.vercel.app"  # Preview deployments
     ]
     
@@ -47,6 +47,19 @@ def create_app(config_name=None):
     
     CORS(app, origins=cors_origins, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
          allow_headers=['Content-Type', 'Authorization'], supports_credentials=True)
+    
+    # Handle preflight requests
+    @app.before_request
+    def handle_preflight():
+        """Handle CORS preflight requests"""
+        if request.method == 'OPTIONS':
+            response = jsonify({'status': 'success'})
+            response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '86400'
+            return response
     
     # Ensure all responses are JSON
     @app.before_request
@@ -140,6 +153,14 @@ def create_app(config_name=None):
     @app.after_request
     def add_security_headers(response):
         """Add security headers to all responses."""
+        # Add CORS headers for production compatibility
+        if request.method == 'OPTIONS':
+            response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '86400'
+        
         return SecurityMiddleware.add_security_headers(response)
     
     # Basic health check endpoint

@@ -27,10 +27,13 @@ def serialize_user(user_dict):
     user_dict.pop('password_hash', None)  # Never return password hash
     return user_dict
 
-@auth_bp.route('/login', methods=['POST'])
+@auth_bp.route('/login', methods=['POST', 'OPTIONS'])
 @rate_limit(max_requests=5, window_minutes=5, per='ip')  # 5 attempts per 5 minutes per IP
 def login():
     """Enhanced login endpoint with security features"""
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     try:
         data = request.get_json()
         
@@ -79,11 +82,14 @@ def login():
             'errors': {'server': 'Internal server error'}
         }), 500
 
-@auth_bp.route('/register', methods=['POST'])
-@auth_bp.route('/signup', methods=['POST'])  # Add signup alias for frontend compatibility
+@auth_bp.route('/register', methods=['POST', 'OPTIONS'])
+@auth_bp.route('/signup', methods=['POST', 'OPTIONS'])  # Add signup alias for frontend compatibility
 @rate_limit(max_requests=3, window_minutes=10, per='ip')  # 3 registrations per 10 minutes per IP
 def register():
     """Enhanced registration endpoint with password validation and email verification"""
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'success'}), 200
+    
     try:
         data = request.get_json()
         

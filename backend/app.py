@@ -32,6 +32,7 @@ def create_app(config_name=None):
         "http://localhost:5173",  # Vite dev server
         "http://localhost:80",    # Docker frontend
         "http://localhost:3000",  # Alternative dev server
+        "https://core-connect-seven.vercel.app",  # Production frontend
     ]
     
     # Add production URLs if available
@@ -44,11 +45,11 @@ def create_app(config_name=None):
     
     # Allow all origins in development, specific origins in production
     if config_name == 'development':
-        CORS(app, origins="*", methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
-             allow_headers=['Content-Type', 'Authorization'])
+        CORS(app, origins=cors_origins + ["*"], methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], 
+             allow_headers=['Content-Type', 'Authorization'], supports_credentials=True)
     else:
         CORS(app, origins=cors_origins, methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-             allow_headers=['Content-Type', 'Authorization'])
+             allow_headers=['Content-Type', 'Authorization'], supports_credentials=True)
     
     # Ensure all responses are JSON
     @app.before_request
@@ -142,7 +143,28 @@ def create_app(config_name=None):
     @app.after_request
     def add_security_headers(response):
         """Add security headers to all responses."""
+        # Add CORS headers for production compatibility
+        if request.method == 'OPTIONS':
+            response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '86400'  # Cache preflight for 24 hours
+        
         return SecurityMiddleware.add_security_headers(response)
+    
+    # Handle preflight requests
+    @app.before_request
+    def handle_preflight():
+        """Handle CORS preflight requests"""
+        if request.method == 'OPTIONS':
+            response = jsonify({'status': 'success'})
+            response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers['Access-Control-Max-Age'] = '86400'
+            return response
     
     # Basic health check endpoint
     @app.route('/')
@@ -179,6 +201,38 @@ def create_app(config_name=None):
             'message': 'API endpoint is working',
             'data': 'Hello from Flask backend!'
         })
+    
+    @app.route('/api/cors-test', methods=['GET', 'POST', 'OPTIONS'])
+    def cors_test():
+        """Explicit CORS test endpoint"""
+        if request.method == 'OPTIONS':
+            response = jsonify({'status': 'success', 'message': 'CORS preflight successful'})
+        else:
+            response = jsonify({
+                'status': 'success',
+                'message': 'CORS test endpoint',
+                'data': {
+                    'method': request.method,
+                    'origin': request.headers.get('Origin'),
+                    'user_agent': request.headers.get('User-Agent')
+                }
+            })
+        
+        # Explicitly set CORS headers
+        origin = request.headers.get('Origin')
+        allowed_origins = [
+            'https://core-connect-seven.vercel.app',
+            'http://localhost:5173',
+            'http://localhost:3000'
+        ]
+        
+        if origin in allowed_origins or not origin:
+            response.headers['Access-Control-Allow-Origin'] = origin or '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
+        return response
     
     @app.route('/api/test-json', methods=['POST'])
     def test_json():
