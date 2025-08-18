@@ -1,4 +1,4 @@
-name: Code Quality Checks
+name: Advanced Code Quality
 
 on:
   push:
@@ -42,19 +42,19 @@ jobs:
       working-directory: ./backend
       run: |
         echo "🔍 Checking Python code formatting with Black..."
-        black --check --diff . || (echo "❌ Code formatting issues found. Run 'black .' to fix." && exit 1)
+        black --check --diff --color . || (echo "❌ Code formatting issues found. Run 'black .' to fix." && exit 1)
     
     - name: Python Import Sorting (isort)
       working-directory: ./backend
       run: |
         echo "🔍 Checking Python import sorting..."
-        isort --check-only --diff . || (echo "❌ Import sorting issues found. Run 'isort .' to fix." && exit 1)
+        isort --check-only --diff --color . || (echo "❌ Import sorting issues found. Run 'isort .' to fix." && exit 1)
     
     - name: Python Linting (Flake8)
       working-directory: ./backend
       run: |
-        echo "🔍 Running Python linting..."
-        flake8 . --max-line-length=88 --extend-ignore=E203,W503 --exclude=__pycache__,migrations,venv
+        echo "🔍 Running Python linting with flake8..."
+        flake8 . --config=config/.flake8
     
     - name: Python Security Scan (Bandit)
       working-directory: ./backend

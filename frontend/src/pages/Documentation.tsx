@@ -19,6 +19,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import {
@@ -127,13 +129,25 @@ const Documentation: React.FC = () => {
     {
       icon: <Speed sx={{ color: "#1976d2" }} />,
       title: "CI/CD Pipeline",
-      description: "Advanced GitHub Actions pipeline with security policies, comprehensive testing, Docker builds, and automated deployment",
+      description: "Advanced GitHub Actions pipeline with extended timeouts (45-min), 30-attempt health checks, comprehensive testing, automated security scanning, and deployment",
       status: "completed",
     },
     {
       icon: <Security sx={{ color: "#1976d2" }} />,
       title: "Security Framework",
       description: "Repository owner-only deployments, automated vulnerability scanning, and comprehensive security policies",
+      status: "completed",
+    },
+    {
+      icon: <Build sx={{ color: "#1976d2" }} />,
+      title: "Optional Code Tools",
+      description: "Optional code formatting tools with Black and ESLint - no mandatory enforcement",
+      status: "completed",
+    },
+    {
+      icon: <DeviceHub sx={{ color: "#1976d2" }} />,
+      title: "Development Tools",
+      description: "Comprehensive developer tooling with automated setup, formatting scripts, and quality testing",
       status: "completed",
     },
     {
@@ -173,10 +187,10 @@ const Documentation: React.FC = () => {
         { task: "Docker containerization (dev + prod)", completed: true },
         { task: "CI/CD pipeline with GitHub Actions", completed: true },
         { task: "Comprehensive testing workflows", completed: true },
+        { task: "Optional code quality tools (no mandatory enforcement)", completed: true },
+        { task: "Organized project structure with tools/ and docs/ directories", completed: true },
         { task: "Security policies and repository protection", completed: true },
-        { task: "Code quality automation (linting, formatting)", completed: true },
-        { task: "Docker security scanning with Trivy", completed: true },
-        { task: "API integration testing with MongoDB", completed: true },
+        { task: "Optional developer tools (no mandatory requirements)", completed: true },
         { task: "Authentication framework (frontend)", completed: true },
         { task: "Redux state management setup", completed: true },
         { task: "Protected routes system", completed: true },
@@ -560,7 +574,7 @@ const Documentation: React.FC = () => {
                   <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8, color: "#555", fontSize: "1.1rem" }}>
                     The platform uses React 19 with TypeScript for type-safe frontend development, Flask 3.0 for the robust backend API with 
                     <strong> MongoDB database integration</strong>, and is fully containerized with Docker for consistent deployment across environments. 
-                    Our automated CI/CD pipeline features <strong>comprehensive security policies</strong>, multi-stage testing workflows, 
+                    Our automated CI/CD pipeline features <strong>comprehensive security policies</strong>, multi-stage testing workflows with extended timeouts (45-min job limits, 30-attempt health checks), 
                     and automated deployments with <strong>repository owner-only protection</strong>. 
                     The production deployment leverages <strong> Vercel's serverless functions</strong> for the backend and <strong>CDN distribution</strong> for the frontend.
                   </Typography>
@@ -602,7 +616,7 @@ const Documentation: React.FC = () => {
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
-                      <ListItemText primary="Comprehensive testing: code quality, Docker builds, API integration" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                      <ListItemText primary="Comprehensive testing: code quality and security scanning" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
@@ -611,6 +625,14 @@ const Documentation: React.FC = () => {
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
                       <ListItemText primary="Interactive documentation and component library" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Optional code formatting tools - developer-friendly approach" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
+                      <ListItemText primary="Organized project structure with tools/ and docs/ directories" sx={{ "& .MuiListItemText-primary": { color: "#555", fontWeight: 500 } }} />
                     </ListItem>
                     <ListItem>
                       <ListItemIcon><CheckCircle sx={{ color: "#1976d2" }} /></ListItemIcon>
@@ -644,7 +666,11 @@ const Documentation: React.FC = () => {
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Features</Typography>
-                      <Chip label="10 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                      <Chip label="13 Complete" size="small" sx={{ background: "rgba(255,255,255,0.2)", color: "white", fontWeight: 600 }} />
+                    </Box>
+                    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <Typography sx={{ fontWeight: 500 }}>Code Quality</Typography>
+                      <Chip label="✅ Optional" size="small" sx={{ background: "rgba(76,175,80,0.9)", color: "white", fontWeight: 600 }} />
                     </Box>
                     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <Typography sx={{ fontWeight: 500 }}>Security</Typography>
@@ -831,7 +857,7 @@ const Documentation: React.FC = () => {
                       </Typography>
                       <Paper sx={{ p: { xs: 2, sm: 3 }, background: "#fff3e0", borderRadius: 2, fontFamily: "monospace", border: "2px solid #ff9800", overflow: "auto" }}>
                         <code style={{ color: "#f57c00", fontWeight: 600, fontSize: "clamp(0.8rem, 2.5vw, 1.1rem)", wordBreak: "break-all" }}>
-                          docker-compose -f docker-compose.dev.yml up --build<br/>
+                          docker-compose -f docker-compose.dev.yml up<br/>
                           # OR<br/>
                           dev-start.bat
                         </code>
@@ -846,7 +872,6 @@ const Documentation: React.FC = () => {
                           🌐 Frontend: <a href="http://localhost:80" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:80</a><br/>
                           🔧 Backend: <a href="http://localhost:5000" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000</a><br/>
                           ❤️ Health: <a href="http://localhost:5000/health" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/health</a><br/>
-                          🧪 API Test: <a href="http://localhost:5000/api/test" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5000/api/test</a><br/>
                           📱 Dev Server: <a href="http://localhost:5173" target="_blank" rel="noopener noreferrer" style={{ color: "#1976d2" }}>http://localhost:5173</a> (dev mode only)
                         </Typography>
                       </Paper>
@@ -1012,6 +1037,106 @@ const Documentation: React.FC = () => {
                   </Box>
                 </AccordionDetails>
               </Accordion>
+
+              <Accordion
+                expanded={expandedAccordion === "project-structure"}
+                onChange={handleAccordionChange("project-structure")}
+                sx={{ 
+                  background: "linear-gradient(145deg, #e3f2fd 0%, #f3e5f5 100%)",
+                  boxShadow: "0 4px 16px rgba(25,118,210,0.1)",
+                  borderRadius: 2,
+                  mt: 2,
+                  "&:before": { display: "none" },
+                }}
+              >
+                <AccordionSummary expandIcon={<ExpandMore sx={{ color: "#1976d2" }} />}>
+                  <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
+                    📁 Project Structure Overview
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Typography variant="body1" paragraph sx={{ color: "#555" }}>
+                    CoreConnect is organized for easy navigation and development:
+                  </Typography>
+                  
+                  <Paper sx={{ p: 3, background: "#f8f9fa", borderRadius: 2, fontFamily: "monospace", fontSize: "0.8rem", overflow: "auto" }}>
+                    <Typography component="div" sx={{ color: "#333", lineHeight: 1.4 }}>
+                      core-connect/<br/>
+                      ├── 📚 docs/              # Documentation<br/>
+                      ├── 🔧 tools/             # Optional dev tools<br/>
+                      │   ├── code-quality/     # Optional formatting<br/>
+                      │   └── deployment/       # Deploy utilities<br/>
+                      ├── 🐍 backend/           # Flask API<br/>
+                      │   ├── config/           # Configuration<br/>
+                      │   ├── docker/           # Docker files<br/>
+                      │   └── deployment/       # Deploy configs<br/>
+                      ├── 🌐 frontend/          # React app<br/>
+                      │   ├── config/           # TypeScript configs<br/>
+                      │   ├── docker/           # Docker files<br/>
+                      │   └── src/              # Source code<br/>
+                      ├── 🐳 config/            # Docker compose<br/>
+                      ├── 🚀 deployment/        # Platform configs<br/>
+                      └── 📜 scripts/           # Helper scripts
+                    </Typography>
+                  </Paper>
+
+                  <Box sx={{ mt: 3, p: 2, background: "rgba(76, 175, 80, 0.1)", borderRadius: 2, border: "1px solid #4caf50" }}>
+                    <Typography variant="subtitle2" sx={{ color: "#2e7d32", fontWeight: 600, mb: 1 }}>
+                      🎯 Key Benefits:
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "#388e3c" }}>
+                      • Clean separation of concerns<br/>
+                      • Docker files organized in dedicated folders<br/>
+                      • Configuration files centralized<br/>
+                      • Optional tools - use when you want<br/>
+                      • Easy to find what you're looking for
+                    </Typography>
+                  </Box>
+                </AccordionDetails>
+              </Accordion>
+              
+              {/* Developer Tools Section */}
+              <Box sx={{ mt: 4, mb: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ color: "#1976d2", fontWeight: 600, mb: 3, fontSize: { xs: "1.25rem", sm: "1.5rem" } }}>
+                  🛠️ Optional Developer Tools
+                </Typography>
+                
+                <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
+                  <AlertTitle>Developer-Friendly Approach</AlertTitle>
+                  Code formatting tools are available but completely optional. No hooks, no enforcement - just easy development!
+                </Alert>
+
+                <Accordion sx={{ mb: 2, borderRadius: 2, boxShadow: "0 4px 16px rgba(25,118,210,0.1)" }}>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
+                      Optional Code Formatting Tools
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Typography variant="body1" paragraph sx={{ color: "#555" }}>
+                      We provide optional formatting scripts if you want to clean up your code, but they're entirely optional:
+                    </Typography>
+                    <List dense>
+                      <ListItem>
+                        <ListItemIcon><Build sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Python: tools/code-quality/format-code.bat (Windows) or .sh (Linux)" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><Build sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Uses Black for Python formatting and isort for import organization" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><Build sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Run manually when you want - no automatic enforcement" />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemIcon><CheckCircle sx={{ color: "#4caf50" }} /></ListItemIcon>
+                        <ListItemText primary="Push code anytime without formatting requirements" />
+                      </ListItem>
+                    </List>
+                  </AccordionDetails>
+                </Accordion>
+              </Box>
             </CardContent>
           </Card>
         </TabPanel>

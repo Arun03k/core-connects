@@ -385,22 +385,6 @@ const Api: React.FC = () => {
             },
             { status: 503, description: "System unhealthy" }
           ]
-        },
-        {
-          method: "GET",
-          path: "/api/test",
-          description: "Test API endpoint for connectivity",
-          requiresAuth: false,
-          responses: [
-            {
-              status: 200,
-              description: "API test successful",
-              example: {
-                message: "API endpoint is working",
-                data: "Hello from Flask backend!"
-              }
-            }
-          ]
         }
       ]
     },

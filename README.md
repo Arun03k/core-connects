@@ -75,7 +75,7 @@ docker-compose up -d
 
 **Development Mode (with hot reload):**
 ```bash
-docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.dev.yml up
 ```
 - Frontend: http://localhost:5173
 - Backend: http://localhost:5000
@@ -127,17 +127,10 @@ The project features a robust, security-focused CI/CD pipeline with multiple aut
 - Dependency vulnerability scanning
 - Code style consistency enforcement
 
-**Docker Build Testing** (`.github/workflows/docker-build-test.yml`):
-- Multi-stage Docker image building
-- Container functionality testing
-- Health check validation
-- Security scanning with Trivy
-- Image optimization verification
-
-**API Integration Testing** (`.github/workflows/api-integration-tests.yml`):
-- MongoDB service integration
-- Full API endpoint testing
-- Authentication flow validation
+**Security and Quality Checks** (Additional workflows):
+- Dependency security scanning
+- Code quality analysis
+- Status monitoring
 - CORS and security header testing
 - Performance and load testing
 
@@ -194,7 +187,6 @@ chmod +x scripts/docker-setup.sh && ./scripts/docker-setup.sh
 ```
 GET  /                     # API status
 GET  /health              # Health check
-GET  /api/test           # Test endpoint
 POST /api/auth/login     # User login
 POST /api/auth/register  # User registration
 ```
@@ -221,11 +213,105 @@ POST /api/auth/register  # User registration
 
 ## 🤝 Contributing
 
+### Code Quality Standards
+
+We enforce **strict code quality standards** with automatic formatting and validation:
+
+#### 🚀 **Quick Setup (Recommended)**
+```bash
+# Windows
+setup-dev.bat
+
+# Linux/macOS
+chmod +x setup-dev.sh && ./setup-dev.sh
+```
+
+This installs:
+- ✅ **Optional formatting tools** (use when you want)
+- ✅ **Pre-push hooks** (block push if code quality fails)
+- ✅ **Commit message validation** (conventional commits)
+- ✅ **Code quality tools** (Black, isort, flake8, ESLint)
+
+#### 🛡️ **Automatic Enforcement**
+
+**Git Hooks Behavior:**
+- **Optional Tools**: Manual code formatting available in tools/ directory
+- **Pre-push**: Blocks push if code quality checks fail
+- **Commit-msg**: Enforces conventional commit message format
+
+**GitHub Actions:**
+- **Pull Requests**: Auto-fixes formatting issues and commits them
+- **Push to main**: Strict validation - blocks merge if style issues exist
+
+#### 📝 **Manual Commands**
+
+**Backend (Python) Code Formatting:**
+```bash
+cd backend
+
+# Auto-format everything (recommended)
+./format-code.bat  # Windows
+./format-code.sh   # Linux/macOS
+
+# Or run tools individually:
+black .                    # Code formatting
+isort .                    # Import sorting  
+flake8 . --config=.flake8  # Linting
+```
+
+**Frontend (TypeScript) Code Quality:**
+```bash
+cd frontend
+
+# Check linting
+npm run lint
+
+# Auto-fix linting issues
+npm run lint -- --fix
+
+# Type checking
+npx tsc --noEmit
+```
+
+#### 🚫 **Enforcement Rules**
+
+- **No commits allowed** with unformatted Python code
+- **No pushes allowed** with linting errors
+- **Pull requests automatically receive** formatting fixes
+- **Commit messages must follow** conventional commit format:
+  ```
+  feat: add new feature
+  fix: resolve login bug
+  docs: update API documentation
+  style: format code with black
+  refactor: restructure auth service
+  test: add user authentication tests
+  ```
+
+#### ⚡ **Optional Code Formatting**
+
+We provide optional formatting tools if you want to clean up your code:
+
+```bash
+# Windows
+./tools/code-quality/format-code.bat
+
+# Linux/Mac  
+./tools/code-quality/format-code.sh
+```
+
+**Note:** These tools are completely optional - you can commit and push without using them!
+
+### Contribution Process
+
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/name`
-3. Commit changes: `git commit -m 'Add feature'`
-4. Push branch: `git push origin feature/name`
-5. Submit pull request
+3. **Format your code** using the tools above
+4. Commit changes: `git commit -m 'Add feature'`
+5. Push branch: `git push origin feature/name`
+6. Submit pull request
+
+**Note:** All pull requests must pass automated code quality checks including Black formatting, import sorting, linting, and security scans.
 
 ## 📄 License
 

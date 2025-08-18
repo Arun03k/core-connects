@@ -9,4 +9,4 @@ echo.
 echo To stop: Press Ctrl+C and run: docker-compose -f ..\config\docker-compose.dev.yml down
 echo.
 
-docker-compose -f ..\config\docker-compose.dev.yml up --build
+docker-compose -f ..\config\docker-compose.dev.yml up
