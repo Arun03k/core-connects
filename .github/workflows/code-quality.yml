@@ -54,7 +54,7 @@ jobs:
       working-directory: ./backend
       run: |
         echo "🔍 Running Python linting with flake8..."
-        flake8 . --config=.flake8
+        flake8 . --config=config/.flake8
     
     - name: Python Security Scan (Bandit)
       working-directory: ./backend
