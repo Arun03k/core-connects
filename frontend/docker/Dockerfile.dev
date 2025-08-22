@@ -10,8 +10,9 @@ ENV NODE_ENV=development
 # Install dependencies needed for development
 RUN apk add --no-cache curl
 
-# Copy package files
+# Copy package files and scripts
 COPY package*.json ./
+COPY scripts/ ./scripts/
 
 # Install all dependencies (including devDependencies)
 RUN npm ci

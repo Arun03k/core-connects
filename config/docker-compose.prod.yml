@@ -4,8 +4,8 @@ services:
   # Backend service
   backend:
     build: 
-      context: ./backend
-      dockerfile: Dockerfile
+      context: ../backend
+      dockerfile: docker/Dockerfile
     container_name: coreconnect-backend-prod
     ports:
       - "5000:5000"
@@ -24,8 +24,8 @@ services:
   # Frontend service
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: ../frontend
+      dockerfile: docker/Dockerfile
     container_name: coreconnect-frontend-prod
     ports:
       - "80:80"

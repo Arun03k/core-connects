@@ -5,7 +5,7 @@ services:
   backend:
     build: 
       context: ../backend
-      dockerfile: Dockerfile.dev
+      dockerfile: docker/Dockerfile.dev
     container_name: coreconnect-backend-dev
     ports:
       - "5000:5000"
@@ -33,7 +33,7 @@ services:
   frontend:
     build:
       context: ../frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: docker/Dockerfile.dev
     container_name: coreconnect-frontend-dev
     ports:
       - "5173:5173"  # Vite default dev port
