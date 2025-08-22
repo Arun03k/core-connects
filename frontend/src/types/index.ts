@@ -7,6 +7,18 @@ export type {
   AuthResponse 
 } from '../store/thunks/authThunks';
 
+// Dashboard types
+export type {
+  DashboardUser,
+  DashboardStats,
+  ActivityItem,
+  NotificationItem,
+  DashboardWidget,
+  DashboardConfig,
+  QuickAction,
+  DashboardData
+} from './dashboard';
+
 // Import types for hook interfaces
 import type { RootState, AppDispatch } from '../store';
 
