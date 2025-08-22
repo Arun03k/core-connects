@@ -14,7 +14,7 @@ import {
   NotificationPanel,
   ProfileCard
 } from '../components/dashboard';
-import { useAuth } from '../contexts/useAuth';
+import { useAppSelector } from '../store/hooks';
 
 interface DashboardData {
   stats: {
@@ -57,7 +57,7 @@ interface UserProfile {
 }
 
 const Dashboard: React.FC = () => {
-  const { user } = useAuth();
+  const { user } = useAppSelector((state) => state.auth);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
