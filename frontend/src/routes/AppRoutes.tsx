@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Landing from "../pages/Landing";
 import Documentation from "../pages/Documentation";
-import Dashboard from "../pages/Dashboard";
+import Dashboard from "../pages/Dashboard.tsx";
 import AuthDemo from "../pages/AuthDemo";
 import Login from "../components/auth/Login";
 import Signup from "../components/auth/Signup";

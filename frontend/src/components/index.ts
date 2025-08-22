@@ -8,3 +8,6 @@ export { default as InputField } from './common/InputField';
 
 // Documentation components
 export { default as Api } from './Api';
+
+// Dashboard components
+export * from './dashboard';
