@@ -1,9 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { User, AuthTokens } from '../slices/authSlice';
 
-// API base URL - Use environment variable or fallback to localhost for development
-const API_BASE_URL = process.env.VITE_API_URL || 
-                     (process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : 'https://core-connects.onrender.com');
+// API base URL - Use environment variable with proper fallbacks
+const API_BASE_URL = (import.meta as any).env.VITE_API_URL || 
+                     ((import.meta as any).env.DEV ? 'http://localhost:5000' : 'https://core-connects.onrender.com');
 
 export interface LoginCredentials {
   email: string;

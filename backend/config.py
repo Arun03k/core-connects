@@ -33,8 +33,17 @@ class Config:
     MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", MAIL_USERNAME)
 
-    # Frontend URL for email links
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    # Frontend URL Configuration - Environment-aware
+    FRONTEND_URL_DEV = os.getenv("FRONTEND_URL_DEV", "http://localhost:5173")
+    FRONTEND_URL_PROD = os.getenv("FRONTEND_URL_PROD", "https://core-connect-seven.vercel.app")
+    
+    # Dynamic frontend URL based on environment
+    FRONTEND_URL = os.getenv("FRONTEND_URL") or (
+        FRONTEND_URL_DEV if os.getenv("FLASK_ENV") == "development" else FRONTEND_URL_PROD
+    )
+
+    # CORS Configuration
+    CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "")
 
     # Security Configuration
     BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", 12))

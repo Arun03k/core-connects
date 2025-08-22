@@ -30,41 +30,56 @@ def create_app(config_name=None):
     # Load configuration
     app.config.from_object(config[config_name])
 
-    # Enable CORS for frontend communication - Unified for dev and production
-    cors_origins = [
-        "http://localhost:5173",  # Vite dev server
-        "http://localhost:80",  # Docker frontend
-        "http://localhost:3000",  # Alternative dev server
-        "https://core-connect-seven.vercel.app",  # Production frontend
-        "https://*.vercel.app",  # Vercel domains
-        "https://core-connect-seven-*.vercel.app",  # Preview deployments
-    ]
-
-    # Add production URLs if available
-    if os.getenv("FRONTEND_URL"):
-        cors_origins.append(os.getenv("FRONTEND_URL"))
+    # Enable CORS for frontend communication - Environment-based configuration
+    cors_origins = []
+    
+    # Get CORS origins from environment variable
+    cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
+    if cors_env:
+        cors_origins.extend([origin.strip() for origin in cors_env.split(",") if origin.strip()])
+    
+    # Add environment-specific frontend URLs
+    if config_name == "development":
+        # Development URLs
+        dev_frontend = os.getenv("FRONTEND_URL_DEV", "http://localhost:5173")
+        cors_origins.append(dev_frontend)
+        
+        # Add common development ports
+        cors_origins.extend([
+            "http://localhost:3000",
+            "http://localhost:5173", 
+            "http://localhost:80",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5173"
+        ])
+    else:
+        # Production URLs
+        prod_frontend = os.getenv("FRONTEND_URL_PROD")
+        if prod_frontend:
+            cors_origins.append(prod_frontend)
+    
+    # Add additional URLs from legacy FRONTEND_URL for backward compatibility
+    legacy_frontend_url = os.getenv("FRONTEND_URL")
+    if legacy_frontend_url:
+        cors_origins.append(legacy_frontend_url)
 
     # For Vercel deployment
     if os.getenv("VERCEL_URL"):
         cors_origins.append(f"https://{os.getenv('VERCEL_URL')}")
 
-    # Allow all origins in development, specific origins in production
-    if config_name == "development":
-        CORS(
-            app,
-            origins=cors_origins + ["*"],
-            methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-            supports_credentials=True,
-        )
-    else:
-        CORS(
-            app,
-            origins=cors_origins,
-            methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-            supports_credentials=True,
-        )
+    # Remove duplicates and empty values
+    cors_origins = list(set([origin for origin in cors_origins if origin]))
+    
+    logger.info(f"CORS origins configured for {config_name}: {cors_origins}")
+
+    # Configure CORS
+    CORS(
+        app,
+        origins=cors_origins,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+        supports_credentials=True,
+    )
 
     # Ensure all responses are JSON
     @app.before_request
@@ -230,21 +245,31 @@ def create_app(config_name=None):
     @app.after_request
     def add_security_headers(response):
         """Add security headers to all responses."""
-        # Add CORS headers for production compatibility
-        if request.method == "OPTIONS":
-            response.headers["Access-Control-Allow-Origin"] = request.headers.get(
-                "Origin", "*"
-            )
-            response.headers["Access-Control-Allow-Methods"] = (
-                "GET, POST, PUT, DELETE, OPTIONS"
-            )
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization"
-            )
+        # Get the origin from the request
+        origin = request.headers.get('Origin')
+        
+        # Configure CORS headers for credentials support
+        if origin and origin in cors_origins:
+            response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Max-Age"] = (
-                "86400"  # Cache preflight for 24 hours
-            )
+        
+        # Handle preflight requests
+        if request.method == "OPTIONS":
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+            response.headers["Access-Control-Max-Age"] = "86400"  # Cache preflight for 24 hours
+
+        # Add cookie security settings
+        if config_name == "production":
+            # Production cookie settings
+            response.headers["Set-Cookie"] = response.headers.get("Set-Cookie", "").replace(
+                "HttpOnly", "HttpOnly; Secure; SameSite=None"
+            ) if response.headers.get("Set-Cookie") else None
+        else:
+            # Development cookie settings
+            response.headers["Set-Cookie"] = response.headers.get("Set-Cookie", "").replace(
+                "HttpOnly", "HttpOnly; SameSite=Lax"
+            ) if response.headers.get("Set-Cookie") else None
 
         return SecurityMiddleware.add_security_headers(response)
 
@@ -253,19 +278,15 @@ def create_app(config_name=None):
     def handle_preflight():
         """Handle CORS preflight requests"""
         if request.method == "OPTIONS":
-            response = jsonify({"status": "success"})
-            response.headers["Access-Control-Allow-Origin"] = request.headers.get(
-                "Origin", "*"
-            )
-            response.headers["Access-Control-Allow-Methods"] = (
-                "GET, POST, PUT, DELETE, OPTIONS"
-            )
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization"
-            )
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Max-Age"] = "86400"
-            return response
+            origin = request.headers.get('Origin')
+            if origin in cors_origins:
+                response = jsonify({"status": "success"})
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+                response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Max-Age"] = "86400"
+                return response
 
     # Basic health check endpoint
     @app.route("/")

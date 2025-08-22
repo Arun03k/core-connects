@@ -22,9 +22,6 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install development dependencies
-RUN pip install --no-cache-dir flask-cors python-dotenv watchdog
-
 # Copy application code
 COPY . .
 

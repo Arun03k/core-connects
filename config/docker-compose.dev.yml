@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Backend service with hot reload
   backend:
@@ -9,13 +7,22 @@ services:
     container_name: coreconnect-backend-dev
     ports:
       - "5000:5000"
-    env_file:
-      - ../backend/.env
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - PORT=5000
-      - API_VERSION=v1
+      - CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000,http://localhost:80,http://127.0.0.1:5173
+      - FRONTEND_URL=http://localhost:5173
+      - SECRET_KEY=dev-secret-key-for-docker
+      - JWT_SECRET_KEY=dev-jwt-secret-key-for-docker
+      - MONGO_URI=mongodb+srv://arunkumar:Lfe1tt3AGeCk8WAQ@coreconnect.4gocxxb.mongodb.net/coreconnect_dev?retryWrites=true&w=majority
+      - MONGO_DBNAME=coreconnect_dev
+      - MAIL_SERVER=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USE_TLS=True
+      - MAIL_USERNAME=learnarun10@gmail.com
+      - MAIL_PASSWORD=Ganpati@10k
+      - MAIL_DEFAULT_SENDER=learnarun10@gmail.com
     volumes:
       - ../backend:/app
       - /app/__pycache__
@@ -36,11 +43,10 @@ services:
       dockerfile: docker/Dockerfile.dev
     container_name: coreconnect-frontend-dev
     ports:
-      - "5173:5173"  # Vite default dev port
-      - "80:5173"     # Alternative port mapping
+      - "5173:5173"
     environment:
       - NODE_ENV=development
-      - VITE_API_BASE_URL=http://localhost:5000
+      - VITE_API_URL=http://localhost:5000
     volumes:
       - ../frontend:/app
       - /app/node_modules
@@ -51,21 +57,9 @@ services:
     command: npm run dev -- --host 0.0.0.0 --port 5173
     stdin_open: true
     tty: true
-
-  # Development database (optional)
-  # Uncomment when you need a database
-  # db:
-  #   image: postgres:15-alpine
-  #   container_name: coreconnect-db-dev
-  #   environment:
-  #     POSTGRES_DB: coreconnect_dev
-  #     POSTGRES_USER: coreconnect
-  #     POSTGRES_PASSWORD: password
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_dev_data:/var/lib/postgresql/data
-  #   restart: unless-stopped
-
-# volumes:
-#   postgres_dev_data:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
