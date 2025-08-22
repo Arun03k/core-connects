@@ -329,6 +329,7 @@ auth_middleware = AuthMiddleware()
 
 # Export decorators for easy import
 rate_limit = auth_middleware.rate_limit
+auth_required = auth_middleware.enhanced_token_required  # Alias for dashboard API
 enhanced_token_required = auth_middleware.enhanced_token_required
 admin_required = auth_middleware.admin_required
 verified_email_required = auth_middleware.verified_email_required

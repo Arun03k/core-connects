@@ -80,6 +80,10 @@ class User:
                 "password_hash": self.hash_password(password),
                 "first_name": first_name,
                 "last_name": last_name,
+                "role": "employee",  # Default role
+                "department": "General",  # Default department
+                "position": "Employee",  # Default position
+                "performance_score": 85,  # Default performance score
                 "is_active": True,
                 "is_verified": False,
                 "created_at": datetime.now(timezone.utc),

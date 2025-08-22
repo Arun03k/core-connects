@@ -6,6 +6,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 from api.auth import auth_bp
+from api.dashboard import dashboard_bp
 from config import config
 from core.database import db_manager, init_database
 from core.responses import APIResponse, ErrorResponses
@@ -115,6 +116,7 @@ def create_app(config_name=None):
 
     # Register blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(dashboard_bp)
 
     # Add global error handlers
     @app.errorhandler(400)
