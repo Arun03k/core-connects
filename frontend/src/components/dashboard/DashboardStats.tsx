@@ -63,13 +63,23 @@ const TrendIcon = styled.div<{ trend: 'up' | 'down' | 'neutral' }>`
   font-size: 0.75rem;
 `;
 
+interface StatItem {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ fontSize?: 'small' | 'medium' | 'large' }>;
+  color: string;
+  trend: 'up' | 'down' | 'neutral';
+  change: string;
+  description: string;
+}
+
 interface DashboardStatsProps {
   stats: StatsType;
   role: 'EMPLOYEE' | 'HR' | 'MANAGER' | 'ADMIN';
 }
 
 const DashboardStats: React.FC<DashboardStatsProps> = ({ stats, role }) => {
-  const getStatsForRole = () => {
+  const getStatsForRole = (): StatItem[] => {
     switch (role) {
       case 'HR':
         return [
@@ -296,7 +306,6 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats, role }) => {
               )}
             </StatCard>
           ))}
-        )}
       </Box>
     </StatsContainer>
   );

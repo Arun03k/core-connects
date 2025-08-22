@@ -12,12 +12,14 @@ import { colors } from '../../theme/colors';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logoutUser } from '../../store/thunks/authThunks';
 import { getDashboardConfig, getQuickActions } from '../../config/dashboardConfig';
-import DashboardStats from './DashboardStats';
-import QuickActions from './QuickActions';
-import ActivityFeed from './ActivityFeed';
-import NotificationPanel from './NotificationPanel';
-import WelcomeHeader from './WelcomeHeader';
 import type { DashboardData, DashboardUser } from '../../types/dashboard';
+
+// Import dashboard components
+import DashboardStats from './SimpleDashboardStats';
+import QuickActions from './SimpleQuickActions';
+import ActivityFeed from './SimpleActivityFeed';
+import NotificationPanel from './SimpleNotificationPanel';
+import WelcomeHeader from './SimpleWelcomeHeader';
 
 const DashboardContainer = styled.div`
   min-height: 100vh;
