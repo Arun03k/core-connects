@@ -2,3 +2,8 @@ export { default as DashboardStats } from './DashboardStats';
 export { default as ActivityFeed } from './ActivityFeed';
 export { default as NotificationPanel } from './NotificationPanel';
 export { default as ProfileCard } from './ProfileCard';
+export { default as QuickActions } from './QuickActions';
+export { default as HROverview } from './HROverview';
+export { default as EmployeeOverview } from './EmployeeOverview';
+export { default as ManagerOverview } from './ManagerOverview';
+export { default as AdminOverview } from './AdminOverview';
