@@ -23,8 +23,12 @@ import {
   Person,
   CheckCircle,
   Star,
-  TrendingUp
+  TrendingUp,
+  Logout as LogoutIcon
 } from '@mui/icons-material';
+import { useAppDispatch } from '../../store/hooks';
+import { logoutUser } from '../../store/thunks';
+import { useNavigate } from 'react-router-dom';
 
 interface UserProfile {
   id: string;
@@ -47,6 +51,23 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onEditProfile
 }) => {
   const theme = useTheme();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      // Dispatch logout thunk which clears tokens/server-side session where possible
+      // and clears local storage via the slice reducers
+      // We don't strictly require unwrap here; navigate after dispatch regardless
+      // to ensure UX is responsive even if server call fails.
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      dispatch(logoutUser());
+    } catch (e) {
+      console.warn('Logout failed:', e);
+    } finally {
+      navigate('/login');
+    }
+  };
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
@@ -337,6 +358,28 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 Complete Profile ({100 - profile.completionPercentage}% remaining)
               </Button>
             )}
+            {/* Logout button */}
+            <Button
+              variant="outlined"
+              startIcon={<LogoutIcon />}
+              onClick={handleLogout}
+              fullWidth
+              sx={{
+                py: 1.25,
+                fontSize: '0.95rem',
+                fontWeight: 600,
+                borderColor: alpha(theme.palette.error.main, 0.6),
+                color: theme.palette.error.main,
+                textTransform: 'none',
+                borderRadius: 2,
+                '&:hover': {
+                  background: alpha(theme.palette.error.main, 0.06),
+                  transform: 'translateY(-1px)',
+                }
+              }}
+            >
+              Logout
+            </Button>
           </Box>
         </CardContent>
       </Card>
