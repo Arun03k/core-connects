@@ -13,7 +13,14 @@ import {
   ListItemAvatar,
   ListItemText,
   LinearProgress,
-  Divider
+  Divider,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  TextField
 } from '@mui/material';
 import Grid from "@mui/material/Grid";
 import {
@@ -23,6 +30,7 @@ import {
   Warning,
   Assessment
 } from '@mui/icons-material';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
 
 interface HRApplication {
   id: string;
@@ -102,10 +110,37 @@ interface HRStats {
 interface HROverviewProps {
   data?: HRDashboardData;
   stats?: HRStats;
+  onRaiseTicket?: (payload: { title: string; message: string }) => void;
 }
 
-const HROverview: React.FC<HROverviewProps> = ({ data, stats }) => {
+const HROverview: React.FC<HROverviewProps> = ({ data, stats, onRaiseTicket }) => {
   const theme = useTheme();
+
+  const [ticketOpen, setTicketOpen] = React.useState(false);
+  const [ticketTitle, setTicketTitle] = React.useState('');
+  const [ticketMessage, setTicketMessage] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+
+  const openTicket = () => setTicketOpen(true);
+  const closeTicket = () => {
+    setTicketOpen(false);
+    setTicketTitle('');
+    setTicketMessage('');
+    setSubmitting(false);
+  };
+
+  const submitTicket = async () => {
+    if (!ticketTitle || !ticketMessage) return;
+    setSubmitting(true);
+    try {
+  // call parent handler if provided
+  onRaiseTicket?.({ title: ticketTitle, message: ticketMessage });
+  closeTicket();
+    } catch (err) {
+      console.error('Failed to raise ticket', err);
+      setSubmitting(false);
+    }
+  };
 
   const getStatusColor = (status: string, severity?: string) => {
     switch (status) {
@@ -196,6 +231,14 @@ const HROverview: React.FC<HROverviewProps> = ({ data, stats }) => {
         </Typography>
 
         <Grid container spacing={3}>
+          {/* Support ticket quick action area */}
+          <Grid size={{ xs: 12 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <Button variant="outlined" startIcon={<SupportAgentIcon />} onClick={openTicket}>
+                Report an Issue
+              </Button>
+            </Box>
+          </Grid>
           {/* Recruitment Metrics */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Box
@@ -441,6 +484,39 @@ const HROverview: React.FC<HROverviewProps> = ({ data, stats }) => {
           </Grid>
         </Grid>
       </CardContent>
+      <Dialog open={ticketOpen} onClose={closeTicket} fullWidth maxWidth="sm">
+        <DialogTitle>Report an Issue</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Please provide a short title and a detailed description of the issue. Our admin team will review it.
+          </DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Title"
+            type="text"
+            fullWidth
+            value={ticketTitle}
+            onChange={(e) => setTicketTitle(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Details"
+            type="text"
+            fullWidth
+            multiline
+            minRows={4}
+            value={ticketMessage}
+            onChange={(e) => setTicketMessage(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeTicket} disabled={submitting}>Cancel</Button>
+          <Button onClick={submitTicket} variant="contained" disabled={submitting || !ticketTitle || !ticketMessage}>
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };

@@ -367,16 +367,26 @@ interface UserProfile {
   completionPercentage: number;
 }
 
+interface SupportTicket {
+  id: string;
+  title: string;
+  reporter: string;
+  message: string;
+  timestamp: string;
+  status: 'open' | 'in_progress' | 'resolved';
+}
+
 const Dashboard: React.FC = () => {
   const theme = useTheme();
   const { user } = useAppSelector((state) => state.auth);
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Get user role from Redux store
-  const userRole = user?.role?.toLowerCase() || 'employee';
+  // Get user role from Redux store; default to 'admin' for previewing Admin Overview when no role-based login exists
+  const userRole = user?.role?.toLowerCase() || 'admin';
 
   useEffect(() => {
     setMounted(true);
@@ -495,6 +505,12 @@ const Dashboard: React.FC = () => {
         };
         
         setDashboardData(mockData);
+        // Initialize support tickets (admin view) so other roles can add to this list
+        const initialSupport = [
+          { id: 's1', title: 'Cannot access report page', reporter: 'Anita', message: 'Reports 500 error', timestamp: new Date().toISOString(), status: 'open' as const },
+          { id: 's2', title: 'Upload failing', reporter: 'Liam', message: 'File uploads timeout', timestamp: new Date(Date.now() - 3600000).toISOString(), status: 'in_progress' as const }
+        ];
+        setSupportTickets(initialSupport);
       } catch (err) {
         setError('Failed to load dashboard data. Please try again.');
         console.error('Dashboard data fetch error:', err);
@@ -711,8 +727,9 @@ const Dashboard: React.FC = () => {
       case 'hr':
         return (
           <HROverview 
-            data={dashboardData.roleSpecificData.hr} 
-            stats={dashboardData.stats.roleSpecific.hr}
+              data={dashboardData.roleSpecificData.hr} 
+              stats={dashboardData.stats.roleSpecific.hr}
+              onRaiseTicket={handleRaiseTicket}
           />
         );
       case 'manager':
@@ -722,21 +739,77 @@ const Dashboard: React.FC = () => {
             stats={dashboardData.stats.roleSpecific.manager}
           />
         );
-      case 'admin':
+      case 'admin': {
+        // Adapt existing dashboard data into the shape AdminOverview expects
+        const adminStats = dashboardData.stats.roleSpecific.admin;
+        const adminRaw = dashboardData.roleSpecificData.admin;
+
+        const adminOverviewData = {
+          stats: {
+            systemUptime: adminStats?.systemUptime ?? dashboardData.commonWidgets.systemHealth?.uptime ?? 0,
+            activeUsers: adminStats?.activeUsers ?? 0,
+            securityAlerts: adminStats?.securityAlerts ?? (adminRaw?.securityAlerts?.length ?? 0),
+            backupHealth: adminStats?.backupStatus ?? adminStats?.backupStatus ?? 0,
+            licenseUtilization: adminStats?.licenseUtilization ?? (adminRaw?.licenseInfo ? Math.round((adminRaw.licenseInfo.usedLicenses / Math.max(1, adminRaw.licenseInfo.totalLicenses)) * 100) : 0),
+            supportTickets: adminStats?.supportTickets ?? 0
+          },
+          recentAlerts: (adminRaw?.securityAlerts ?? []).map((s) => ({
+            id: s.id,
+            title: s.type,
+            severity: s.severity as 'low' | 'medium' | 'high',
+            date: s.timestamp,
+            description: s.description
+          })),
+          recentBackups: (adminRaw?.systemLogs ?? [])
+            .filter((l) => /backup/i.test(l.message))
+            .map((l) => {
+              const status: 'failed' | 'ok' | 'in_progress' = l.level === 'error' || /failed/i.test(l.message) ? 'failed' : 'ok';
+              return {
+                id: l.id,
+                status,
+                date: l.timestamp,
+                size: undefined
+              };
+            })
+          ,
+          recentRegisteredUsers: [
+            { id: 'u1', name: 'Maya Patel', email: 'maya.patel@example.com', role: 'employee', registeredAt: new Date().toISOString() },
+            { id: 'u2', name: 'Carlos Ruiz', email: 'carlos.ruiz@example.com', role: 'employee', registeredAt: new Date(Date.now()-86400000).toISOString() }
+          ]
+          ,
+          // use the shared supportTickets state so raises from other roles appear here
+          recentSupportTickets: supportTickets
+        };
+
         return (
           <AdminOverview 
-            data={dashboardData.roleSpecificData.admin}
-            stats={dashboardData.stats.roleSpecific.admin}
+            data={adminOverviewData}
           />
         );
+      }
       default:
         return (
           <EmployeeOverview 
             data={dashboardData.roleSpecificData.employee}
             stats={dashboardData.stats.roleSpecific.employee}
+            onRaiseTicket={handleRaiseTicket}
           />
         );
     }
+  };
+
+  // Handler to allow Employee/HR to raise a support ticket which Admin sees
+  const handleRaiseTicket = (payload: { title: string; message: string }) => {
+    const reporter = dashboardData?.userProfile.firstName || 'Unknown';
+    const newTicket: SupportTicket = {
+      id: `t-${Date.now()}`,
+      title: payload.title,
+      reporter,
+      message: payload.message,
+      timestamp: new Date().toISOString(),
+      status: 'open'
+    };
+    setSupportTickets(prev => [newTicket, ...prev]);
   };
 
   if (loading) {
