@@ -1,4 +1,5 @@
 import os
+import secrets
 
 from dotenv import load_dotenv
 
@@ -8,9 +9,10 @@ load_dotenv()
 class Config:
     """Base configuration class."""
 
-    SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+    SECRET_KEY = os.getenv("SECRET_KEY") or secrets.token_urlsafe(48)
     DEBUG = False
     TESTING = False
+    MAX_CONTENT_LENGTH = 1024 * 1024
 
     # MongoDB Configuration
     MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/coreconnect")
@@ -34,7 +36,7 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", MAIL_USERNAME)
 
     # Frontend URL for email links
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
     # Security Configuration
     BCRYPT_ROUNDS = int(os.getenv("BCRYPT_ROUNDS", 12))
@@ -62,7 +64,9 @@ class TestingConfig(Config):
     """Testing configuration."""
 
     TESTING = True
-    DEBUG = True
+    DEBUG = False
+    MONGO_DBNAME = "coreconnect_test"
+    BCRYPT_ROUNDS = 4
     MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/coreconnect_test")
 
 

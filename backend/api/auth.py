@@ -3,8 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from flask import Blueprint, current_app, jsonify, request
-
-from middleware.auth_middleware import enhanced_token_required, rate_limit
+from middleware.auth_middleware import enhanced_token_required, rate_limit, user_role
 from models.user import User
 from services.auth_service import AuthService
 from services.email_service import EmailService
@@ -26,7 +25,18 @@ def serialize_user(user_dict):
     if user_dict and "_id" in user_dict:
         user_dict["id"] = str(user_dict["_id"])
         user_dict.pop("_id", None)
-    user_dict.pop("password_hash", None)  # Never return password hash
+    # Retain snake_case keys for existing clients and add the frontend contract.
+    user_dict.pop("password_hash", None)
+    for source, target in (
+        ("first_name", "firstName"),
+        ("last_name", "lastName"),
+        ("is_verified", "isVerified"),
+        ("last_login", "lastLogin"),
+        ("created_at", "createdAt"),
+    ):
+        value = user_dict.get(source)
+        user_dict[target] = value.isoformat() if isinstance(value, datetime) else value
+    user_dict["role"] = user_role(user_dict)
     return user_dict
 
 
@@ -40,7 +50,7 @@ def login():
         return jsonify({"status": "success"}), 200
 
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data:
             return (
@@ -126,7 +136,7 @@ def register():
         return jsonify({"status": "success"}), 200
 
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data:
             return (
@@ -181,10 +191,6 @@ def register():
                         "expiresIn": result["tokens"]["access_expires_in"],
                         "tokenType": result["tokens"]["token_type"],
                         "emailSent": email_sent,
-                        # For development/testing only - remove in production
-                        "verificationToken": (
-                            result["verification_token"] if not email_sent else None
-                        ),
                     },
                 }
             ),
@@ -213,12 +219,11 @@ def register():
 
 
 @auth_bp.route("/logout", methods=["POST"])
-@token_required
 def logout():
     """Enhanced logout endpoint that revokes refresh token"""
     try:
         # Get refresh token from request body
-        data = request.get_json() or {}
+        data = request.get_json(silent=True) or {}
         refresh_token = data.get("refreshToken")
 
         # Revoke refresh token if provided
@@ -240,10 +245,11 @@ def logout():
 
 
 @auth_bp.route("/refresh", methods=["POST"])
+@rate_limit(max_requests=10, window_minutes=5)
 def refresh():
     """Refresh access token using refresh token"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data or "refreshToken" not in data:
             return (
@@ -340,10 +346,11 @@ def verify_email(token):
 
 
 @auth_bp.route("/resend-verification", methods=["POST"])
+@rate_limit(max_requests=10, window_minutes=5)
 def resend_verification():
     """Resend email verification"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data or "email" not in data:
             return (
@@ -446,10 +453,11 @@ def resend_verification():
 
 
 @auth_bp.route("/forgot-password", methods=["POST"])
+@rate_limit(max_requests=10, window_minutes=5)
 def forgot_password():
     """Send password reset email"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data or "email" not in data:
             return (
@@ -531,16 +539,13 @@ def forgot_password():
             or user.get("username")
             or "User"
         )
-        email_sent = email_service.send_password_reset_email(
-            user["email"], user_name, reset_token
-        )
+        email_service.send_password_reset_email(user["email"], user_name, reset_token)
 
         return (
             jsonify(
                 {
                     "status": "success",
                     "message": "If an account with that email exists, a password reset link has been sent.",
-                    "data": {"emailSent": email_sent},
                 }
             ),
             200,
@@ -561,10 +566,11 @@ def forgot_password():
 
 
 @auth_bp.route("/reset-password", methods=["POST"])
+@rate_limit(max_requests=10, window_minutes=5)
 def reset_password():
     """Reset password using reset token"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
 
         if not data or "token" not in data or "newPassword" not in data:
             return (
@@ -588,7 +594,10 @@ def reset_password():
             )
 
             if payload.get("type") != "password_reset":
-                raise ValueError("Invalid token type")
+                return (
+                    jsonify({"status": "error", "message": "Invalid reset token"}),
+                    400,
+                )
 
         except jwt.ExpiredSignatureError:
             return (
@@ -669,17 +678,22 @@ def reset_password():
                 400,
             )
 
-        # Update password
-        user_model.update_user(
-            str(user["_id"]),
-            {
-                "password_hash": user_model.hash_password(new_password),
-                "updated_at": datetime.now(timezone.utc),
-            },
+        # Claim the reset token once before changing credentials.
+        claimed = reset_tokens.update_one(
+            {"_id": token_doc["_id"], "is_used": False}, {"$set": {"is_used": True}}
         )
-
-        # Mark reset token as used
-        reset_tokens.update_one({"_id": token_doc["_id"]}, {"$set": {"is_used": True}})
+        if claimed.modified_count != 1:
+            return (
+                jsonify(
+                    {"status": "error", "message": "Reset token has already been used"}
+                ),
+                400,
+            )
+        if not user_model.set_password(str(user["_id"]), new_password):
+            return (
+                jsonify({"status": "error", "message": "Password could not be reset"}),
+                409,
+            )
 
         # Revoke all existing refresh tokens for security
         auth_service.revoke_all_tokens(str(user["_id"]))
@@ -756,7 +770,7 @@ def get_profile():
 def update_profile():
     """Update user profile"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
         user = request.current_user
 
         if not data:
@@ -810,7 +824,7 @@ def update_profile():
 def change_password():
     """Change user password"""
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True)
         user = request.current_user
 
         if not data or "old_password" not in data or "new_password" not in data:
@@ -827,6 +841,9 @@ def change_password():
         old_password = data["old_password"]
         new_password = data["new_password"]
 
+        valid, message = auth_service.validate_password_strength(new_password)
+        if not valid:
+            return jsonify({"status": "error", "message": message}), 400
         user_model = User()
         success = user_model.change_password(
             str(user["_id"]), old_password, new_password
@@ -838,6 +855,7 @@ def change_password():
                 500,
             )
 
+        auth_service.revoke_all_tokens(str(user["_id"]))
         return (
             jsonify({"message": "Password changed successfully", "status": "success"}),
             200,

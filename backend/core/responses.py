@@ -4,7 +4,7 @@ Provides standardized response formats and error handling.
 """
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from flask import Response, jsonify
@@ -36,9 +36,10 @@ class APIResponse:
         """
         response_data = {
             "success": True,
+            "status": "success",
             "message": message,
             "data": data,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         if meta:
@@ -69,8 +70,10 @@ class APIResponse:
         """
         response_data = {
             "success": False,
+            "status": "error",
+            "error": {"code": error_code or "REQUEST_FAILED", "message": message},
             "message": message,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         if error_code:

@@ -1,16 +1,18 @@
 import logging
 import os
 
-from dotenv import load_dotenv
-from flask import Flask, jsonify, request
-from flask_cors import CORS
-
 from api.auth import auth_bp
-from config import config
 from core.database import db_manager, init_database
 from core.responses import APIResponse, ErrorResponses
 from core.security import SecurityMiddleware
+from dotenv import load_dotenv
+from flask import Flask, request
+from flask_cors import CORS
+from middleware.auth_middleware import roles_required
 from models.user import User
+from werkzeug.exceptions import HTTPException
+
+from config import config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +22,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 
-def create_app(config_name=None):
+def create_app(config_name=None, config_overrides=None):
     """Application factory pattern for both development and production"""
     if config_name is None:
         config_name = os.getenv("FLASK_ENV", "development")
@@ -30,242 +32,90 @@ def create_app(config_name=None):
     # Load configuration
     app.config.from_object(config[config_name])
 
-    # Enable CORS for frontend communication - Unified for dev and production
-    cors_origins = [
-        "http://localhost:5173",  # Vite dev server
-        "http://localhost:80",  # Docker frontend
-        "http://localhost:3000",  # Alternative dev server
-        "https://core-connect-seven.vercel.app",  # Production frontend
-        "https://*.vercel.app",  # Vercel domains
-        "https://core-connect-seven-*.vercel.app",  # Preview deployments
+    if config_overrides:
+        app.config.update(config_overrides)
+    if config_name == "production":
+        for name in ("SECRET_KEY", "JWT_SECRET_KEY"):
+            value = (config_overrides or {}).get(name) or os.getenv(name)
+            if (
+                not value
+                or len(value) < 32
+                or value.startswith(("dev-", "change-", "replace-"))
+            ):
+                raise ValueError(
+                    f"Production requires a strong {name} of at least 32 characters"
+                )
+            app.config[name] = value
+    configured_origins = os.getenv("CORS_ORIGINS", app.config["FRONTEND_URL"])
+    origins = (config_overrides or {}).get("CORS_ORIGINS") or [
+        value.strip() for value in configured_origins.split(",") if value.strip()
     ]
+    if any("*" in origin for origin in origins):
+        raise ValueError("CORS_ORIGINS must contain explicit origins")
+    CORS(
+        app,
+        origins=origins,
+        supports_credentials=False,
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+    )
 
-    # Add production URLs if available
-    if os.getenv("FRONTEND_URL"):
-        cors_origins.append(os.getenv("FRONTEND_URL"))
-
-    # For Vercel deployment
-    if os.getenv("VERCEL_URL"):
-        cors_origins.append(f"https://{os.getenv('VERCEL_URL')}")
-
-    # Allow all origins in development, specific origins in production
-    if config_name == "development":
-        CORS(
-            app,
-            origins=cors_origins + ["*"],
-            methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-            supports_credentials=True,
-        )
-    else:
-        CORS(
-            app,
-            origins=cors_origins,
-            methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            allow_headers=["Content-Type", "Authorization"],
-            supports_credentials=True,
-        )
-
-    # Ensure all responses are JSON
     @app.before_request
-    def ensure_json_request():
-        """Ensure request content type is correct for JSON endpoints"""
-        if request.method in ["POST", "PUT", "PATCH"] and request.path.startswith(
+    def validate_json_body():
+        if request.method in {"POST", "PUT", "PATCH"} and request.path.startswith(
             "/api/"
         ):
-            if (
-                not request.is_json
-                and request.content_length
-                and request.content_length > 0
-            ):
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Request must be JSON",
-                            "errors": {
-                                "content_type": "Content-Type must be application/json"
-                            },
-                        }
-                    ),
-                    400,
-                )
+            if request.content_length:
+                if not request.is_json:
+                    return APIResponse.error(
+                        "Request must be JSON", 415, "UNSUPPORTED_MEDIA_TYPE"
+                    )
+                data = request.get_json()
+                if not isinstance(data, dict):
+                    return APIResponse.error(
+                        "Request must be a JSON object", 400, "INVALID_REQUEST"
+                    )
+                for field in (
+                    "email",
+                    "password",
+                    "newPassword",
+                    "old_password",
+                    "new_password",
+                    "token",
+                    "refreshToken",
+                ):
+                    if field in data and not isinstance(data[field], str):
+                        return APIResponse.error(
+                            f"{field} must be a string", 400, "INVALID_REQUEST"
+                        )
 
-    # Initialize database
-    try:
+    db_manager.init_app(app)
+
+    @app.cli.command("init-db")
+    def initialize_database_command():
+        """Apply additive authentication indexes; never seed or delete users."""
         init_database()
-        logger.info("Database initialized successfully")
-    except Exception as e:
-        logger.error(f"Failed to initialize database: {str(e)}")
+        print("Authentication indexes are ready.")
 
     # Register blueprints
     app.register_blueprint(auth_bp)
 
-    # Add global error handlers
-    @app.errorhandler(400)
-    def handle_bad_request(e):
-        """Handle 400 Bad Request errors"""
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Bad Request",
-                    "errors": {
-                        "request": (
-                            str(e.description)
-                            if hasattr(e, "description")
-                            else "Invalid request"
-                        )
-                    },
-                }
-            ),
-            400,
-        )
-
-    @app.errorhandler(401)
-    def handle_unauthorized(e):
-        """Handle 401 Unauthorized errors"""
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Unauthorized",
-                    "errors": {
-                        "auth": (
-                            str(e.description)
-                            if hasattr(e, "description")
-                            else "Authentication required"
-                        )
-                    },
-                }
-            ),
-            401,
-        )
-
-    @app.errorhandler(403)
-    def handle_forbidden(e):
-        """Handle 403 Forbidden errors"""
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Forbidden",
-                    "errors": {
-                        "auth": (
-                            str(e.description)
-                            if hasattr(e, "description")
-                            else "Access denied"
-                        )
-                    },
-                }
-            ),
-            403,
-        )
-
-    @app.errorhandler(404)
-    def handle_not_found(e):
-        """Handle 404 Not Found errors"""
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Not Found",
-                    "errors": {"resource": "The requested resource was not found"},
-                }
-            ),
-            404,
-        )
-
-    @app.errorhandler(405)
-    def handle_method_not_allowed(e):
-        """Handle 405 Method Not Allowed errors"""
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Method Not Allowed",
-                    "errors": {
-                        "method": (
-                            str(e.description)
-                            if hasattr(e, "description")
-                            else "Method not allowed for this endpoint"
-                        )
-                    },
-                }
-            ),
-            405,
-        )
-
-    @app.errorhandler(500)
-    def handle_internal_error(e):
-        """Handle 500 Internal Server Error"""
-        logger.error(f"Internal server error: {str(e)}")
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "Internal Server Error",
-                    "errors": {"server": "An unexpected error occurred"},
-                }
-            ),
-            500,
+    @app.errorhandler(HTTPException)
+    def handle_http_error(error):
+        return APIResponse.error(
+            error.name, error.code, error.name.upper().replace(" ", "_")
         )
 
     @app.errorhandler(Exception)
-    def handle_unexpected_error(e):
-        """Handle any unexpected errors"""
-        logger.error(f"Unexpected error: {str(e)}")
-        return (
-            jsonify(
-                {
-                    "status": "error",
-                    "message": "An unexpected error occurred",
-                    "errors": {"server": "Please try again later"},
-                }
-            ),
-            500,
-        )
+    def handle_unexpected_error(error):
+        logger.error("unhandled_request_error type=%s", type(error).__name__)
+        return APIResponse.error("An unexpected error occurred", 500, "INTERNAL_ERROR")
 
-    # Add security middleware
     @app.after_request
     def add_security_headers(response):
-        """Add security headers to all responses."""
-        # Add CORS headers for production compatibility
-        if request.method == "OPTIONS":
-            response.headers["Access-Control-Allow-Origin"] = request.headers.get(
-                "Origin", "*"
-            )
-            response.headers["Access-Control-Allow-Methods"] = (
-                "GET, POST, PUT, DELETE, OPTIONS"
-            )
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization"
-            )
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Max-Age"] = (
-                "86400"  # Cache preflight for 24 hours
-            )
-
+        if request.path.startswith("/api/auth"):
+            response.headers["Cache-Control"] = "no-store"
         return SecurityMiddleware.add_security_headers(response)
-
-    # Handle preflight requests
-    @app.before_request
-    def handle_preflight():
-        """Handle CORS preflight requests"""
-        if request.method == "OPTIONS":
-            response = jsonify({"status": "success"})
-            response.headers["Access-Control-Allow-Origin"] = request.headers.get(
-                "Origin", "*"
-            )
-            response.headers["Access-Control-Allow-Methods"] = (
-                "GET, POST, PUT, DELETE, OPTIONS"
-            )
-            response.headers["Access-Control-Allow-Headers"] = (
-                "Content-Type, Authorization"
-            )
-            response.headers["Access-Control-Allow-Credentials"] = "true"
-            response.headers["Access-Control-Max-Age"] = "86400"
-            return response
 
     # Basic health check endpoint
     @app.route("/")
@@ -334,6 +184,7 @@ def create_app(config_name=None):
 
     # API routes
     @app.route("/api/stats")
+    @roles_required("ADMIN", "HR")
     def api_stats():
         """Get API statistics"""
         try:
@@ -348,6 +199,7 @@ def create_app(config_name=None):
             return ErrorResponses.internal_error("Failed to get statistics")
 
     @app.route("/api/status")
+    @roles_required("ADMIN")
     def api_status():
         """Get detailed API status for deployment monitoring"""
         try:

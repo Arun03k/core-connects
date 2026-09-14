@@ -42,13 +42,13 @@ jobs:
       working-directory: ./backend
       run: |
         echo "🔍 Checking Python code formatting with Black..."
-        black --check --diff --color . || (echo "❌ Code formatting issues found. Run 'black .' to fix." && exit 1)
+        black --config config/pyproject.toml --check --diff --color . || (echo "❌ Code formatting issues found. Run 'black .' to fix." && exit 1)
     
     - name: Python Import Sorting (isort)
       working-directory: ./backend
       run: |
         echo "🔍 Checking Python import sorting..."
-        isort --check-only --diff --color . || (echo "❌ Import sorting issues found. Run 'isort .' to fix." && exit 1)
+        isort --settings-path config/pyproject.toml --check-only --diff --color . || (echo "❌ Import sorting issues found. Run 'isort .' to fix." && exit 1)
     
     - name: Python Linting (Flake8)
       working-directory: ./backend
@@ -74,7 +74,7 @@ jobs:
       working-directory: ./frontend
       run: |
         echo "🔍 Running TypeScript type checking..."
-        npx tsc --noEmit
+        npm run type-check
     
     # Documentation and Configuration Checks
     - name: Check Documentation

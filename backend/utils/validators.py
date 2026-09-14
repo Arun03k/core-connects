@@ -51,7 +51,9 @@ class InputValidator:
 
         # Use email-validator library for more thorough validation
         try:
-            validated_email = email_validator.validate_email(email)
+            validated_email = email_validator.validate_email(
+                email, check_deliverability=False
+            )
             return {"valid": True, "value": validated_email.email}
         except email_validator.EmailNotValidError as e:
             return {"valid": False, "error": f"Invalid email: {str(e)}"}

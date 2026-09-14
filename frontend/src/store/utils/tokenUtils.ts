@@ -1,3 +1,10 @@
+// Storage can be disabled by browser privacy settings; keep in-memory auth usable.
+export const authStorage = {
+  getItem(key: string): string | null { try { return sessionStorage.getItem(key); } catch { return null; } },
+  setItem(key: string, value: string): void { try { sessionStorage.setItem(key, value); } catch { /* Session stays in memory. */ } },
+  removeItem(key: string): void { try { sessionStorage.removeItem(key); } catch { /* Storage unavailable. */ } },
+};
+
 // Token utility functions
 export interface TokenData {
   accessToken: string;
@@ -8,9 +15,9 @@ export interface TokenData {
 
 export const getStoredTokens = (): TokenData | null => {
   try {
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-    const expiresIn = localStorage.getItem('tokenExpiresIn');
+    const accessToken = authStorage.getItem('accessToken');
+    const refreshToken = authStorage.getItem('refreshToken');
+    const expiresIn = authStorage.getItem('tokenExpiresIn');
     
     if (accessToken && refreshToken && expiresIn) {
       return {
@@ -29,9 +36,9 @@ export const getStoredTokens = (): TokenData | null => {
 
 export const storeTokens = (tokens: TokenData): void => {
   try {
-    localStorage.setItem('accessToken', tokens.accessToken);
-    localStorage.setItem('refreshToken', tokens.refreshToken);
-    localStorage.setItem('tokenExpiresIn', tokens.expiresIn.toString());
+    authStorage.setItem('accessToken', tokens.accessToken);
+    authStorage.setItem('refreshToken', tokens.refreshToken);
+    authStorage.setItem('tokenExpiresIn', tokens.expiresIn.toString());
   } catch (error) {
     console.error('Error storing tokens:', error);
   }
@@ -39,16 +46,16 @@ export const storeTokens = (tokens: TokenData): void => {
 
 export const clearStoredTokens = (): void => {
   try {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('tokenExpiresIn');
-    localStorage.removeItem('user');
+    authStorage.removeItem('accessToken');
+    authStorage.removeItem('refreshToken');
+    authStorage.removeItem('tokenExpiresIn');
+    authStorage.removeItem('user');
   } catch (error) {
     console.error('Error clearing tokens:', error);
   }
 };
 
-export const isTokenExpired = (expiresIn: number): boolean => {
+export const isTokenExpired = (expiresAt: number): boolean => {
   const now = Date.now() / 1000;
-  return now >= expiresIn;
+  return !Number.isFinite(expiresAt) || now >= expiresAt;
 };

@@ -10,7 +10,6 @@ from typing import Any, Dict, Tuple
 
 import jwt
 from flask import current_app
-
 from models.user import User
 from utils.database import get_db
 
@@ -49,12 +48,12 @@ class AuthService:
 
     def _get_collection(self, collection_name: str):
         """Get database collection"""
-        if self.db is None:
-            self.db = get_db()
-        return self.db[collection_name]
+        return get_db()[collection_name]
 
     def validate_password_strength(self, password: str) -> Tuple[bool, str]:
         """Validate password strength according to security requirements"""
+        if not isinstance(password, str) or len(password.encode("utf-8")) > 72:
+            return False, "Password must be at most 72 UTF-8 bytes"
         if len(password) < self.PASSWORD_MIN_LENGTH:
             return (
                 False,
@@ -124,7 +123,6 @@ class AuthService:
             {
                 "jti": refresh_payload["jti"],
                 "user_id": str(user_id),
-                "token": refresh_token,
                 "created_at": now,
                 "expires_at": refresh_payload["exp"],
                 "is_revoked": False,
@@ -312,6 +310,8 @@ class AuthService:
                 "token_type": "Bearer",
             }
 
+        except ValueError:
+            raise
         except jwt.ExpiredSignatureError:
             raise ValueError("Refresh token has expired")
         except jwt.InvalidTokenError:

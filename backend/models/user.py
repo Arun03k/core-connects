@@ -8,7 +8,9 @@ from typing import Any, Dict, Optional
 
 import bcrypt
 from bson import ObjectId
-
+from bson.errors import InvalidId
+from flask import current_app
+from pymongo.errors import DuplicateKeyError
 from utils.database import get_db
 
 
@@ -23,9 +25,7 @@ class User:
 
     def _get_collection(self):
         """Get users collection from database"""
-        if self.db is None:
-            self.db = get_db()
-        return self.db.users
+        return get_db().users
 
     @staticmethod
     def validate_email(email: str) -> bool:
@@ -35,12 +35,16 @@ class User:
     @staticmethod
     def hash_password(password: str) -> str:
         """Hash password using bcrypt"""
-        salt = bcrypt.gensalt()
+        if not isinstance(password, str) or len(password.encode("utf-8")) > 72:
+            raise ValueError("Password must be at most 72 UTF-8 bytes")
+        salt = bcrypt.gensalt(rounds=current_app.config.get("BCRYPT_ROUNDS", 12))
         return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
     @staticmethod
     def verify_password(password: str, hashed: str) -> bool:
         """Verify password against hash"""
+        if not isinstance(password, str) or len(password.encode("utf-8")) > 72:
+            return False
         return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
     def create_user(
@@ -80,6 +84,7 @@ class User:
                 "password_hash": self.hash_password(password),
                 "first_name": first_name,
                 "last_name": last_name,
+                "role": "EMPLOYEE",
                 "is_active": True,
                 "is_verified": False,
                 "created_at": datetime.now(timezone.utc),
@@ -94,6 +99,10 @@ class User:
                 "settings": {"email_notifications": True, "privacy_level": "public"},
             }
 
+            # Sparse username indexes must not receive explicit null values.
+            if not username:
+                user_doc.pop("username", None)
+
             # Insert user
             collection = self._get_collection()
             result = collection.insert_one(user_doc)
@@ -104,8 +113,12 @@ class User:
 
             return user_doc
 
-        except Exception as e:
-            raise Exception(f"Failed to create user: {str(e)}")
+        except ValueError:
+            raise
+        except DuplicateKeyError:
+            raise ValueError("Email or username is already in use")
+        except Exception:
+            raise RuntimeError("Failed to create user")
 
     def find_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """Find user by email"""
@@ -131,8 +144,10 @@ class User:
             collection = self._get_collection()
             user = collection.find_one({"_id": ObjectId(user_id)})
             return user
-        except Exception as e:
-            raise Exception(f"Failed to find user by ID: {str(e)}")
+        except InvalidId:
+            return None
+        except Exception:
+            raise RuntimeError("Failed to find user")
 
     def authenticate(self, email: str, password: str) -> Optional[Dict[str, Any]]:
         """Authenticate user with email and password"""
@@ -176,6 +191,19 @@ class User:
         except Exception as e:
             raise Exception(f"Failed to update user: {str(e)}")
 
+    def set_password(self, user_id: str, new_password: str) -> bool:
+        """Dedicated credential update; profile updates cannot write password hashes."""
+        result = self._get_collection().update_one(
+            {"_id": ObjectId(user_id), "is_active": True},
+            {
+                "$set": {
+                    "password_hash": self.hash_password(new_password),
+                    "updated_at": datetime.now(timezone.utc),
+                }
+            },
+        )
+        return result.matched_count == 1
+
     def change_password(
         self, user_id: str, old_password: str, new_password: str
     ) -> bool:
@@ -205,8 +233,10 @@ class User:
 
             return result.modified_count > 0
 
-        except Exception as e:
-            raise Exception(f"Failed to change password: {str(e)}")
+        except ValueError:
+            raise
+        except Exception:
+            raise RuntimeError("Failed to change password")
 
     def delete_user(self, user_id: str) -> bool:
         """Delete user (soft delete by setting is_active to False)"""

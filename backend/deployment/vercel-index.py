@@ -1,15 +1,15 @@
 import logging
 import os
 
+from api.auth import auth_bp
+from core.database import db_manager, init_database
+from core.security import SecurityMiddleware
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-
-from api.auth import auth_bp
-from config import config
-from core.database import db_manager, init_database
-from core.security import SecurityMiddleware
 from models.user import User
+
+from config import config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

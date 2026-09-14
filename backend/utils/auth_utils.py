@@ -16,6 +16,7 @@ def generate_token(user_id: str, email: str) -> str:
         payload = {
             "user_id": str(user_id),
             "email": email,
+            "type": "access",
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc)
             + timedelta(seconds=current_app.config["JWT_ACCESS_TOKEN_EXPIRES"]),
@@ -35,7 +36,10 @@ def verify_token(token: str) -> Optional[Dict[str, Any]]:
     """Verify JWT token and return payload"""
     try:
         payload = jwt.decode(
-            token, current_app.config["JWT_SECRET_KEY"], algorithms=["HS256"]
+            token,
+            current_app.config["JWT_SECRET_KEY"],
+            algorithms=["HS256"],
+            options={"require": ["exp", "iat", "user_id", "type"]},
         )
         return payload
 
@@ -48,62 +52,10 @@ def verify_token(token: str) -> Optional[Dict[str, Any]]:
 
 
 def token_required(f):
-    """Decorator to require valid JWT token"""
+    # Lazy import avoids circular imports while retaining legacy callers.
+    from middleware.auth_middleware import enhanced_token_required
 
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        from flask import jsonify, request
-
-        from models.user import User
-
-        token = None
-
-        # Get token from Authorization header
-        auth_header = request.headers.get("Authorization")
-        if auth_header:
-            try:
-                token = auth_header.split(" ")[1]  # Bearer <token>
-            except IndexError:
-                return (
-                    jsonify(
-                        {
-                            "error": "Invalid authorization header format",
-                            "status": "error",
-                        }
-                    ),
-                    401,
-                )
-
-        if not token:
-            return jsonify({"error": "Token is missing", "status": "error"}), 401
-
-        # Verify token
-        payload = verify_token(token)
-        if not payload:
-            return (
-                jsonify({"error": "Token is invalid or expired", "status": "error"}),
-                401,
-            )
-
-        # Get user from database
-        try:
-            user_model = User()
-            user = user_model.find_by_id(payload["user_id"])
-            if not user or not user.get("is_active"):
-                return (
-                    jsonify({"error": "User not found or inactive", "status": "error"}),
-                    401,
-                )
-
-            # Add user to request context
-            request.current_user = user
-
-        except Exception:
-            return jsonify({"error": "Failed to verify user", "status": "error"}), 401
-
-        return f(*args, **kwargs)
-
-    return decorated_function
+    return enhanced_token_required(f)
 
 
 def optional_token(f):
@@ -112,7 +64,6 @@ def optional_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         from flask import request
-
         from models.user import User
 
         token = None
@@ -130,7 +81,7 @@ def optional_token(f):
         if token:
             # Verify token
             payload = verify_token(token)
-            if payload:
+            if payload and payload.get("type") == "access":
                 try:
                     user_model = User()
                     user = user_model.find_by_id(payload["user_id"])
