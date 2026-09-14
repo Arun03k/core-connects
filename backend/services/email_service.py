@@ -29,8 +29,6 @@ class EmailService:
         self.from_email = None
         self.from_name = "CoreConnect"
 
-        self._load_config()
-
     def _load_config(self):
         """Load email configuration from app config"""
         try:
@@ -47,10 +45,11 @@ class EmailService:
 
     def _create_smtp_connection(self):
         """Create SMTP connection"""
+        self._load_config()
         if not all([self.smtp_server, self.username, self.password]):
             raise Exception("Email configuration is incomplete")
 
-        server = smtplib.SMTP(self.smtp_server, self.smtp_port)
+        server = smtplib.SMTP(self.smtp_server, self.smtp_port, timeout=10)
 
         if self.use_tls:
             server.starttls()
@@ -63,6 +62,7 @@ class EmailService:
     ) -> bool:
         """Send email with HTML and optional text content"""
         try:
+            self._load_config()
             msg = MimeMultipart("alternative")
             msg["Subject"] = subject
             msg["From"] = f"{self.from_name} <{self.from_email}>"
@@ -95,7 +95,7 @@ class EmailService:
         """Send email verification email"""
         try:
             base_url = current_app.config.get("FRONTEND_URL", "http://localhost:3000")
-            verification_url = f"{base_url}/verify-email/{verification_token}"
+            verification_url = f"{base_url}/login?verify={verification_token}"
 
             subject = "Verify Your CoreConnect Account"
 

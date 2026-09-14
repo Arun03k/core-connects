@@ -1,322 +1,183 @@
-# CoreConnect - Workforce Management Platform
+# CoreConnect
 
-[![Live Demo](https://img.shields.io/badge/Demo-Live-green?style=for-the-badge)](https://core-connect-seven.vercel.app)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
-[![React](https://img.shields.io/badge/React-19.1.1-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.0.0-red?style=for-the-badge&logo=flask)](https://flask.palletsprojects.com/)
+CoreConnect is a workforce-management platform in development. The repository
+currently provides a React/TypeScript interface and a Flask/MongoDB authentication
+foundation. Employee operations and workforce workflows are the next increment.
 
-## 🚀 Quick Start
+See [the repository audit and five-phase plan](docs/PROJECT_AUDIT.md) for the
+source-based assessment and [Phase 1 notes](docs/PHASE_1.md) for changes and limits.
 
-```bash
-git clone https://github.com/Arun03k/core-connects.git
-cd core-connects
-docker-compose up -d
+## Features
+
+Implemented:
+
+- Landing page, documentation, sign-in, registration and password-recovery forms.
+- Bcrypt password hashing, signed access tokens, stored refresh-token revocation,
+  email verification, password reset, profile and password-change APIs.
+- Access-token type checks and database-backed ADMIN/HR/MANAGER/EMPLOYEE policies.
+  Existing lowercase roles are supported; absent/unknown roles resolve to EMPLOYEE.
+- Authenticated-only profiles, ADMIN/HR statistics, and ADMIN operational status.
+- Frontend session verification on reload with refresh recovery and loading state.
+- Exact-origin CORS, production secret validation, request size/type validation,
+  persistent rate limits and sanitized health/error responses.
+- Isolated backend regression tests and frontend session tests.
+
+Not implemented yet: employee directory, organization/team management, attendance,
+leave, tasks, announcements, notifications, reports, administrative audit logs,
+AI workflows, and demo seed data. The dashboard is still a placeholder.
+
+## Screenshots
+
+Screenshots will be added with the workforce application shell in Phase 3.
+
+## Architecture
+
+```text
+React + Redux + Material UI
+          |
+       Flask API
+          |
+     Auth services
+          |
+  PyMongo -> MongoDB
 ```
 
-**Access:** http://localhost:80 | **API:** http://localhost:5000
+MongoDB is the existing database and is preserved. The app uses one lazy connection
+pool per Flask application. The API retains `/api/auth` for compatibility; business
+modules can introduce `/api/v1` without breaking current clients. AI is planned,
+not connected to the current application.
 
-## 🌐 Live Demo
-**Production:** https://core-connect-seven.vercel.app
+## Tech stack
 
-CoreConnect is a modern workforce management platform built with React, Flask, and Docker. Currently features a responsive landing page, documentation system, and authentication framework.
+React 19, TypeScript, Vite, Material UI, Redux Toolkit, React Router, Flask,
+PyMongo/MongoDB, bcrypt, PyJWT, pytest, mongomock and Vitest. Existing infrastructure
+includes Docker, Nginx and GitHub Actions; see the deployment limitations below.
 
-## 🎯 Features
+## Local setup
 
-### ✅ Implemented
-- **Modern Landing Page** - Responsive design with animations
-- **Documentation System** - Interactive guides and setup instructions  
-- **Authentication Framework** - Redux state management and JWT-ready components
-- **Docker Containerization** - Production and development environments
-- **Vercel Deployment** - Live production environment with serverless backend
-- **Component Library** - Reusable TypeScript components with Material-UI
+Use Python 3.11+ and Node 22.12+ (or Node 24). MongoDB must be available separately.
+The tests do not require a running database.
 
-### � In Development  
-- Complete authentication with database integration
-- User profile management and dashboard
-- Employee management tools
-- Time tracking and leave management
+From the repository root, in PowerShell:
 
-## 🛠 Tech Stack
-
-**Frontend:** React 19.1.1, TypeScript, Vite, Material-UI, Redux Toolkit
-**Backend:** Flask 3.0.0, Python 3.11+
-**Deployment:** Docker, Vercel, GitHub Actions CI/CD
-**Database:** PostgreSQL (planned)
-
-## 📁 Project Structure
-
-```
-core-connect/
-├── frontend/           # React TypeScript app
-│   ├── src/
-│   │   ├── components/ # Reusable components
-│   │   ├── pages/      # Application pages
-│   │   ├── store/      # Redux state management
-│   │   └── types/      # TypeScript definitions
-├── backend/            # Flask API
-│   ├── api/           # Route handlers
-│   ├── models/        # Database models
-│   └── utils/         # Utility functions
-└── docker-compose.yml # Container orchestration
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend/requirements-dev.txt
+Copy-Item backend/.env.example backend/.env
 ```
 
-## 🚀 Development Setup
+Set `MONGO_URI` and `MONGO_DBNAME` in `backend/.env` to your development database.
+Apply additive authentication indexes, then start Flask:
 
-### 🐳 Docker (Recommended)
-
-**Production Mode:**
-```bash
-git clone https://github.com/Arun03k/core-connects.git
-cd core-connects
-docker-compose up -d
-```
-- Frontend: http://localhost:80
-- Backend: http://localhost:5000
-
-**Development Mode (with hot reload):**
-```bash
-docker-compose -f docker-compose.dev.yml up
-```
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
-
-**Helper Scripts (Windows):**
-- `dev-setup.bat` - Interactive setup menu
-- `dev-start.bat` - Start development environment
-- `dev-stop.bat` - Stop all services
-
-### � Manual Setup
-
-**Frontend:**
-```bash
-cd frontend && npm install && npm run dev
-```
-
-**Backend:**  
-```bash
-cd backend && pip install -r requirements.txt && python app.py
-```
-
-## 🐳 Docker Commands
-
-```bash
-docker-compose ps              # Check status
-docker-compose logs -f         # View logs
-docker-compose exec backend sh # Access backend container
-docker-compose down            # Stop services
-```
-
-## 🚀 Deployment & CI/CD
-
-### Comprehensive Pipeline System
-
-The project features a robust, security-focused CI/CD pipeline with multiple automated workflows:
-
-#### 🛡️ Security & Access Control
-- **Repository Owner-Only Deployments**: Only the repository owner can deploy to production
-- **Pull Request Enforcement**: Third-party contributors must use pull requests
-- **Security Policy Documentation**: Complete security guidelines in `SECURITY.md`
-- **Automated Security Scanning**: Dependency vulnerability detection
-
-#### 🔧 Automated Testing Workflows
-
-**Code Quality Pipeline** (`.github/workflows/code-quality.yml`):
-- Python code formatting with Black
-- Linting with flake8 and Pylint
-- TypeScript/JavaScript linting with ESLint
-- Dependency vulnerability scanning
-- Code style consistency enforcement
-
-**Security and Quality Checks** (Additional workflows):
-- Dependency security scanning
-- Code quality analysis
-- Status monitoring
-- CORS and security header testing
-- Performance and load testing
-
-**Main CI/CD Pipeline** (`.github/workflows/ci-cd.yml`):
-- Repository owner verification
-- Automated dependency installation
-- Comprehensive test execution
-- Production deployment to Vercel and Render
-- Environment-specific configurations
-
-#### 📊 Pipeline Features
-- **Multi-Environment Support**: Development, staging, and production
-- **Parallel Test Execution**: Faster feedback loops
-- **Comprehensive Health Checks**: Application availability monitoring
-- **Error Handling**: Graceful failure recovery and notifications
-- **Performance Monitoring**: Build time and resource optimization
-
-### Manual Deployment Options
-
-#### Vercel Deployment
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login to Vercel
-vercel login
-
-# Deploy to production
-vercel --prod
-```
-
-#### Docker Production Deployment
-```bash
-# Build and run production containers
-docker-compose -f docker-compose.prod.yml up -d
-
-# Or use the provided scripts
-# Windows
-scripts/docker-setup.bat
-
-# Linux/macOS
-chmod +x scripts/docker-setup.sh && ./scripts/docker-setup.sh
-```
-
-### Security Policies
-
-- **Owner-Only Direct Deployment**: Only repository owners can push directly to main for production deployment
-- **Contributor Workflow**: External contributors must use pull requests for all changes
-- **Automated Security Scanning**: All dependencies and Docker images scanned for vulnerabilities
-- **Environment Protection**: Production environments require approval and security verification
-
-## 📊 API Endpoints
-
-```
-GET  /                     # API status
-GET  /health              # Health check
-POST /api/auth/login     # User login
-POST /api/auth/register  # User registration
-```
-
-## 🎯 Roadmap
-
-**Phase 1 (Completed ✅)**
-- Landing page and documentation
-- Authentication framework
-- Docker containerization
-- Vercel deployment
-
-**Phase 2 (In Progress 🔄)**
-- Database integration (PostgreSQL)
-- Complete authentication backend
-- User profile management
-- Dashboard implementation
-
-**Phase 3 (Planned ⏳)**
-- Employee management
-- Time tracking
-- Leave management system
-- Advanced features and analytics
-
-## 🤝 Contributing
-
-### Code Quality Standards
-
-We enforce **strict code quality standards** with automatic formatting and validation:
-
-#### 🚀 **Quick Setup (Recommended)**
-```bash
-# Windows
-setup-dev.bat
-
-# Linux/macOS
-chmod +x setup-dev.sh && ./setup-dev.sh
-```
-
-This installs:
-- ✅ **Optional formatting tools** (use when you want)
-- ✅ **Pre-push hooks** (block push if code quality fails)
-- ✅ **Commit message validation** (conventional commits)
-- ✅ **Code quality tools** (Black, isort, flake8, ESLint)
-
-#### 🛡️ **Automatic Enforcement**
-
-**Git Hooks Behavior:**
-- **Optional Tools**: Manual code formatting available in tools/ directory
-- **Pre-push**: Blocks push if code quality checks fail
-- **Commit-msg**: Enforces conventional commit message format
-
-**GitHub Actions:**
-- **Pull Requests**: Auto-fixes formatting issues and commits them
-- **Push to main**: Strict validation - blocks merge if style issues exist
-
-#### 📝 **Manual Commands**
-
-**Backend (Python) Code Formatting:**
-```bash
+```powershell
 cd backend
-
-# Auto-format everything (recommended)
-./format-code.bat  # Windows
-./format-code.sh   # Linux/macOS
-
-# Or run tools individually:
-black .                    # Code formatting
-isort .                    # Import sorting  
-flake8 . --config=.flake8  # Linting
+..\.venv\Scripts\python.exe -m flask --app app init-db
+..\.venv\Scripts\python.exe app.py
 ```
 
-**Frontend (TypeScript) Code Quality:**
-```bash
+In a second terminal:
+
+```powershell
 cd frontend
+npm ci
+npm run dev
+```
 
-# Check linting
+Open `http://localhost:5173`. Vite proxies `/api` to `http://localhost:5000`.
+The app creates no demo users or privileged accounts automatically. Registration
+always creates an EMPLOYEE. Privileged account provisioning needs a trusted
+administrative process until the employee-management increment implements it.
+
+On macOS/Linux, activate `.venv/bin/activate` and use `python` for the commands above.
+
+## Environment variables
+
+Examples are in `backend/.env.example` and `frontend/.env.example`.
+
+| Variable | Purpose |
+| --- | --- |
+| FLASK_ENV | development, testing or production |
+| MONGO_URI / MONGO_DBNAME | MongoDB connection and explicit database name |
+| SECRET_KEY / JWT_SECRET_KEY | Independent random production secrets, at least 32 characters |
+| FRONTEND_URL | Public frontend origin and base for email links |
+| CORS_ORIGINS | Comma-separated exact allowed origins; no wildcard |
+| JWT_ACCESS_TOKEN_EXPIRES | Access-token lifetime in seconds; default 900 |
+| JWT_REFRESH_TOKEN_EXPIRES | Refresh-token lifetime in seconds; default 604800 |
+| MAIL_* | SMTP configuration for verification and password recovery |
+| VITE_API_URL | Optional frontend build-time API origin; empty uses same-origin /api |
+
+Generate each production secret separately with
+`python -c "import secrets; print(secrets.token_urlsafe(48))"` and store it in the
+host's secret configuration. Never commit real secrets. Development signing keys
+are ephemeral when not configured, so restarting invalidates existing sessions.
+SMTP failure does not reveal verification/reset tokens in API responses.
+
+## Docker setup
+
+The existing definitions are under `config/`, for example
+`docker compose -f config/docker-compose.yml config` to inspect the configuration.
+They are **not yet a self-contained production launch path**: MongoDB is not wired
+in, backend env configuration is required, and the backend image still uses the
+Flask development server. Use manual setup for this increment. Phase 5 will make
+Compose a verified launch path and introduce a production WSGI server. Do not run
+the legacy volume-removal helper commands against a database you want to retain.
+
+## Testing
+
+From the root:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest backend/tests -q
+.\.venv\Scripts\python.exe -m flake8 backend --config=backend/config/.flake8
+cd frontend
+npm test
 npm run lint
-
-# Auto-fix linting issues
-npm run lint -- --fix
-
-# Type checking
-npx tsc --noEmit
+npm run type-check
+npm run build
 ```
 
-#### 🚫 **Enforcement Rules**
+Backend tests replace MongoDB with fresh in-memory mongomock clients and suppress
+SMTP. They exercise application behavior but do not certify MongoDB concurrency,
+index migrations on existing data, or SMTP delivery. Frontend tests cover restored
+sessions, refresh failure, offline logout and API errors. Browser accessibility
+and responsive checks are planned with the application shell.
 
-- **No commits allowed** with unformatted Python code
-- **No pushes allowed** with linting errors
-- **Pull requests automatically receive** formatting fixes
-- **Commit messages must follow** conventional commit format:
-  ```
-  feat: add new feature
-  fix: resolve login bug
-  docs: update API documentation
-  style: format code with black
-  refactor: restructure auth service
-  test: add user authentication tests
-  ```
+CI now installs the test dependencies, runs real frontend tests and propagates
+backend test failures. Docker image publication requires the repository variable
+`DOCKER_PUBLISH_ENABLED=true` and configured credentials. No deployment was run as
+part of this increment. Remaining workflow/deployment cleanup is tracked in the audit.
 
-#### ⚡ **Optional Code Formatting**
+## Project structure
 
-We provide optional formatting tools if you want to clean up your code:
-
-```bash
-# Windows
-./tools/code-quality/format-code.bat
-
-# Linux/Mac  
-./tools/code-quality/format-code.sh
+```text
+backend/      Flask app, auth routes/services, user model, tests
+frontend/     React components/pages/theme, Redux, shared API client, tests
+config/       Existing Compose configurations and MongoDB initialization script
+.github/      Existing CI and security workflows
+docs/         Audit, implementation notes and development documentation
+scripts/      Legacy development/deployment helper scripts
+deployment/   Platform deployment configuration
 ```
 
-**Note:** These tools are completely optional - you can commit and push without using them!
+## Security and current boundaries
 
-### Contribution Process
+Permissions are enforced on the backend using current database roles, not token
+role claims or hidden buttons. Public registration cannot set a role. CORS is an
+origin policy, not a substitute for authentication. The API currently uses bearer
+headers rather than automatically attached auth cookies, so cookie CSRF defenses
+will be needed if the transport changes.
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/name`
-3. **Format your code** using the tools above
-4. Commit changes: `git commit -m 'Add feature'`
-5. Push branch: `git push origin feature/name`
-6. Submit pull request
+Tokens use tab-scoped sessionStorage and are verified before protected pages
+render. Old persistent localStorage credentials are removed. JavaScript can still
+read these tokens; an HttpOnly cookie session design with CSRF protection remains
+future work. Logout/password changes revoke refresh tokens; existing access tokens
+can remain valid until their 15-minute expiry. Deactivation is checked on every
+protected request. TLS and trusted reverse-proxy configuration belong to deployment.
+Rate limits trust the server remote address, not forwarded headers supplied by a
+client. Deployments behind a proxy currently share its IP quota.
 
-**Note:** All pull requests must pass automated code quality checks including Black formatting, import sorting, linting, and security scans.
+## Future improvements
 
-## 📄 License
-
-© 2025 CoreConnect. All rights reserved.
-
----
-
-**Made with ❤️ for modern workforce management**
+Follow the five-phase plan: organization/employee domain and permissions first,
+then workforce workflows, professional UI, scoped AI tools, and verified delivery.
+Keep additions incremental and preserve existing accounts and database data.

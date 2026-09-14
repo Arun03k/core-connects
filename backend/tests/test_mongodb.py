@@ -10,7 +10,6 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytest
-
 from app import create_app
 from models.user import User
 from utils.auth_utils import generate_token, verify_token
@@ -127,7 +126,7 @@ class TestAuthEndpoints:
             "/api/auth/register",
             json={
                 "email": "register@example.com",
-                "password": "password123",
+                "password": "StrongP@ss839!",
                 "username": "registertest",
                 "first_name": "Register",
                 "last_name": "Test",
@@ -137,8 +136,8 @@ class TestAuthEndpoints:
         assert response.status_code == 201
         data = json.loads(response.data)
         assert data["status"] == "success"
-        assert "token" in data
-        assert data["user"]["email"] == "register@example.com"
+        assert "accessToken" in data["data"]
+        assert data["data"]["user"]["email"] == "register@example.com"
 
     def test_login_endpoint(self, client, app):
         """Test user login endpoint"""
@@ -161,8 +160,8 @@ class TestAuthEndpoints:
         assert response.status_code == 200
         data = json.loads(response.data)
         assert data["status"] == "success"
-        assert "token" in data
-        assert data["user"]["email"] == "login@example.com"
+        assert "accessToken" in data["data"]
+        assert data["data"]["user"]["email"] == "login@example.com"
 
     def test_login_invalid_credentials(self, client):
         """Test login with invalid credentials"""

@@ -99,14 +99,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-  # Create a status check that GitHub can use for branch protection
-  deployment-readiness:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    
-    steps:
-    - uses: actions/checkout@v4
-    
     - name: Verify Deployment Authorization
       run: |
         if [ "${{ github.event_name }}" = "pull_request" ]; then

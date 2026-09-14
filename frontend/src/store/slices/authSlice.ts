@@ -1,3 +1,4 @@
+import { authStorage } from '../utils/tokenUtils';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { 
   loginUser, 
@@ -8,7 +9,8 @@ import {
   forgotPassword,
   resetPassword,
   verifyEmail,
-  resendVerification
+  resendVerification,
+  restoreSession
 } from '../thunks';
 
 export interface User {
@@ -34,19 +36,21 @@ export interface AuthState {
   user: User | null;
   tokens: AuthTokens | null;
   isAuthenticated: boolean;
+  sessionStatus: "idle" | "checking" | "ready";
+  sessionRequestId: string | null;
   isLoading: boolean;
   error: string | null;
   emailVerificationSent: boolean;
   passwordResetSent: boolean;
 }
 
-// Load initial state from localStorage
+// Load initial state from sessionStorage
 const loadInitialState = (): Partial<AuthState> => {
   try {
-    const accessToken = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-    const expiresIn = localStorage.getItem('tokenExpiresIn');
-    const user = localStorage.getItem('user');
+    const accessToken = authStorage.getItem('accessToken');
+    const refreshToken = authStorage.getItem('refreshToken');
+    const expiresIn = authStorage.getItem('tokenExpiresIn');
+    const user = authStorage.getItem('user');
     
     if (accessToken && refreshToken && user) {
       return {
@@ -57,16 +61,16 @@ const loadInitialState = (): Partial<AuthState> => {
           tokenType: 'Bearer'
         },
         user: JSON.parse(user),
-        isAuthenticated: true,
+        isAuthenticated: false,
       };
     }
   } catch (error) {
-    console.error('Failed to load auth state from localStorage:', error);
+    console.error('Failed to load auth state from sessionStorage:', error);
     // Clear corrupted data
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('tokenExpiresIn');
-    localStorage.removeItem('user');
+    authStorage.removeItem('accessToken');
+    authStorage.removeItem('refreshToken');
+    authStorage.removeItem('tokenExpiresIn');
+    authStorage.removeItem('user');
   }
   
   return {
@@ -79,6 +83,8 @@ const loadInitialState = (): Partial<AuthState> => {
 const initialState: AuthState = {
   ...loadInitialState(),
   isLoading: false,
+  sessionStatus: "idle",
+  sessionRequestId: null,
   error: null,
   emailVerificationSent: false,
   passwordResetSent: false,
@@ -96,12 +102,14 @@ const authSlice = createSlice({
     },
     updateTokens: (state, action: PayloadAction<AuthTokens>) => {
       state.tokens = action.payload;
-      // Update localStorage
-      localStorage.setItem('accessToken', action.payload.accessToken);
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
-      localStorage.setItem('tokenExpiresIn', action.payload.expiresIn.toString());
+      // Update sessionStorage
+      authStorage.setItem('accessToken', action.payload.accessToken);
+      authStorage.setItem('refreshToken', action.payload.refreshToken);
+      authStorage.setItem('tokenExpiresIn', action.payload.expiresIn.toString());
     },
     clearAuth: (state) => {
+      state.sessionRequestId = null;
+      state.sessionStatus = 'ready';
       state.user = null;
       state.tokens = null;
       state.isAuthenticated = false;
@@ -109,38 +117,65 @@ const authSlice = createSlice({
       state.emailVerificationSent = false;
       state.passwordResetSent = false;
       
-      // Clear localStorage
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('tokenExpiresIn');
-      localStorage.removeItem('user');
+      // Clear sessionStorage
+      authStorage.removeItem('accessToken');
+      authStorage.removeItem('refreshToken');
+      authStorage.removeItem('tokenExpiresIn');
+      authStorage.removeItem('user');
     },
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
-        localStorage.setItem('user', JSON.stringify(state.user));
+        authStorage.setItem('user', JSON.stringify(state.user));
       }
     }
   },
   extraReducers: (builder) => {
+    builder
+      .addCase(restoreSession.pending, (state, action) => { state.sessionStatus = 'checking'; state.sessionRequestId = action.meta.requestId; })
+      .addCase(restoreSession.fulfilled, (state, action) => {
+        if (state.sessionRequestId !== action.meta.requestId) return;
+        state.sessionRequestId = null;
+        state.sessionStatus = 'ready';
+        state.user = action.payload?.user ?? null;
+        state.tokens = action.payload?.tokens ?? null;
+        state.isAuthenticated = Boolean(action.payload);
+        if (action.payload) {
+          authStorage.setItem('accessToken', action.payload.tokens.accessToken);
+          authStorage.setItem('user', JSON.stringify(action.payload.user));
+        }
+      })
+      .addCase(restoreSession.rejected, (state, action) => {
+        if (state.sessionRequestId !== action.meta.requestId) return;
+        state.sessionRequestId = null;
+        state.sessionStatus = 'ready';
+        state.user = null;
+        state.tokens = null;
+        state.isAuthenticated = false;
+        state.error = action.payload || 'Please sign in again.';
+        for (const key of ['accessToken', 'refreshToken', 'tokenExpiresIn', 'user']) authStorage.removeItem(key);
+      });
     // Login
     builder
       .addCase(loginUser.pending, (state) => {
+        state.sessionRequestId = null;
+        state.sessionStatus = 'ready';
         state.isLoading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
+        state.sessionStatus = 'ready';
         state.user = action.payload.user;
         state.tokens = action.payload.tokens;
         state.error = null;
         
-        // Store in localStorage
-        localStorage.setItem('accessToken', action.payload.tokens.accessToken);
-        localStorage.setItem('refreshToken', action.payload.tokens.refreshToken);
-        localStorage.setItem('tokenExpiresIn', action.payload.tokens.expiresIn.toString());
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
+        // Store in sessionStorage
+        authStorage.setItem('accessToken', action.payload.tokens.accessToken);
+        authStorage.setItem('refreshToken', action.payload.tokens.refreshToken);
+        authStorage.setItem('tokenExpiresIn', action.payload.tokens.expiresIn.toString());
+        authStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -149,16 +184,18 @@ const authSlice = createSlice({
         state.tokens = null;
         state.error = action.payload as string;
         
-        // Clear localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresIn');
-        localStorage.removeItem('user');
+        // Clear sessionStorage
+        authStorage.removeItem('accessToken');
+        authStorage.removeItem('refreshToken');
+        authStorage.removeItem('tokenExpiresIn');
+        authStorage.removeItem('user');
       });
 
     // Signup
     builder
       .addCase(signupUser.pending, (state) => {
+        state.sessionRequestId = null;
+        state.sessionStatus = 'ready';
         state.isLoading = true;
         state.error = null;
         state.emailVerificationSent = false;
@@ -166,16 +203,17 @@ const authSlice = createSlice({
       .addCase(signupUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isAuthenticated = true;
+        state.sessionStatus = 'ready';
         state.user = action.payload.user;
         state.tokens = action.payload.tokens;
         state.error = null;
         state.emailVerificationSent = action.payload.emailSent || false;
         
-        // Store in localStorage
-        localStorage.setItem('accessToken', action.payload.tokens.accessToken);
-        localStorage.setItem('refreshToken', action.payload.tokens.refreshToken);
-        localStorage.setItem('tokenExpiresIn', action.payload.tokens.expiresIn.toString());
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
+        // Store in sessionStorage
+        authStorage.setItem('accessToken', action.payload.tokens.accessToken);
+        authStorage.setItem('refreshToken', action.payload.tokens.refreshToken);
+        authStorage.setItem('tokenExpiresIn', action.payload.tokens.expiresIn.toString());
+        authStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -185,16 +223,18 @@ const authSlice = createSlice({
         state.error = action.payload as string;
         state.emailVerificationSent = false;
         
-        // Clear localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresIn');
-        localStorage.removeItem('user');
+        // Clear sessionStorage
+        authStorage.removeItem('accessToken');
+        authStorage.removeItem('refreshToken');
+        authStorage.removeItem('tokenExpiresIn');
+        authStorage.removeItem('user');
       });
 
     // Logout
     builder
       .addCase(logoutUser.pending, (state) => {
+        state.sessionRequestId = null;
+        state.sessionStatus = 'ready';
         state.isLoading = true;
       })
       .addCase(logoutUser.fulfilled, (state) => {
@@ -206,11 +246,11 @@ const authSlice = createSlice({
         state.emailVerificationSent = false;
         state.passwordResetSent = false;
         
-        // Clear localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresIn');
-        localStorage.removeItem('user');
+        // Clear sessionStorage
+        authStorage.removeItem('accessToken');
+        authStorage.removeItem('refreshToken');
+        authStorage.removeItem('tokenExpiresIn');
+        authStorage.removeItem('user');
       })
       .addCase(logoutUser.rejected, (state) => {
         // Even if logout fails on server, clear local state
@@ -222,11 +262,11 @@ const authSlice = createSlice({
         state.emailVerificationSent = false;
         state.passwordResetSent = false;
         
-        // Clear localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresIn');
-        localStorage.removeItem('user');
+        // Clear sessionStorage
+        authStorage.removeItem('accessToken');
+        authStorage.removeItem('refreshToken');
+        authStorage.removeItem('tokenExpiresIn');
+        authStorage.removeItem('user');
       });
 
     // Verify token
@@ -240,8 +280,8 @@ const authSlice = createSlice({
         state.user = action.payload;
         state.error = null;
         
-        // Update user in localStorage
-        localStorage.setItem('user', JSON.stringify(action.payload));
+        // Update user in sessionStorage
+        authStorage.setItem('user', JSON.stringify(action.payload));
       })
       .addCase(verifyToken.rejected, (state) => {
         state.isLoading = false;
@@ -250,11 +290,11 @@ const authSlice = createSlice({
         state.tokens = null;
         state.error = null;
         
-        // Clear localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresIn');
-        localStorage.removeItem('user');
+        // Clear sessionStorage
+        authStorage.removeItem('accessToken');
+        authStorage.removeItem('refreshToken');
+        authStorage.removeItem('tokenExpiresIn');
+        authStorage.removeItem('user');
       });
 
     // Refresh token
@@ -268,9 +308,9 @@ const authSlice = createSlice({
           state.tokens.accessToken = action.payload.accessToken;
           state.tokens.expiresIn = action.payload.expiresIn;
           
-          // Update localStorage
-          localStorage.setItem('accessToken', action.payload.accessToken);
-          localStorage.setItem('tokenExpiresIn', action.payload.expiresIn.toString());
+          // Update sessionStorage
+          authStorage.setItem('accessToken', action.payload.accessToken);
+          authStorage.setItem('tokenExpiresIn', action.payload.expiresIn.toString());
         }
       })
       .addCase(refreshToken.rejected, (state) => {
@@ -280,11 +320,11 @@ const authSlice = createSlice({
         state.tokens = null;
         state.error = 'Session expired. Please login again.';
         
-        // Clear localStorage
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('tokenExpiresIn');
-        localStorage.removeItem('user');
+        // Clear sessionStorage
+        authStorage.removeItem('accessToken');
+        authStorage.removeItem('refreshToken');
+        authStorage.removeItem('tokenExpiresIn');
+        authStorage.removeItem('user');
       });
 
     // Forgot password
@@ -331,7 +371,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         if (state.user) {
           state.user.isVerified = true;
-          localStorage.setItem('user', JSON.stringify(state.user));
+          authStorage.setItem('user', JSON.stringify(state.user));
         }
         state.error = null;
       })

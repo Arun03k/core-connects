@@ -1,334 +1,137 @@
-"""
-Enhanced authentication middleware with rate limiting and security features
-"""
+"""Central authentication, role policies and shared atomic rate limits."""
 
+import hashlib
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from functools import wraps
 
-from flask import jsonify, request
-
+from core.responses import APIResponse
+from flask import request
 from models.user import User
+from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 from utils.auth_utils import verify_token
 from utils.database import get_db
 
 logger = logging.getLogger(__name__)
+ROLES = frozenset({"ADMIN", "HR", "MANAGER", "EMPLOYEE"})
 
 
-class AuthMiddleware:
-    """Enhanced authentication middleware"""
+def user_role(user):
+    role = str(user.get("role", "EMPLOYEE")).upper()
+    return role if role in ROLES else "EMPLOYEE"
 
-    def __init__(self):
-        self.user_model = User()
-        self.db = None
 
-    def _get_collection(self, collection_name: str):
-        """Get database collection"""
-        if self.db is None:
-            self.db = get_db()
-        return self.db[collection_name]
-
-    def _get_client_ip(self, request):
-        """Get client IP address"""
-        # Check for forwarded IP first (behind proxy/load balancer)
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        if forwarded_for:
-            return forwarded_for.split(",")[0].strip()
-
-        # Check other common headers
-        real_ip = request.headers.get("X-Real-IP")
-        if real_ip:
-            return real_ip
-
-        # Fall back to remote_addr
-        return request.environ.get("REMOTE_ADDR", "unknown")
-
-    def rate_limit(
-        self, max_requests: int = 60, window_minutes: int = 1, per: str = "ip"
-    ):
-        """Rate limiting decorator"""
-
-        def decorator(f):
-            @wraps(f)
-            def decorated_function(*args, **kwargs):
-                try:
-                    # Get identifier for rate limiting
-                    if per == "ip":
-                        identifier = self._get_client_ip(request)
-                    elif per == "user":
-                        # Get user from token if available
-                        auth_header = request.headers.get("Authorization")
-                        if auth_header and auth_header.startswith("Bearer "):
-                            token = auth_header[7:]
-                            payload = verify_token(token)
-                            if payload:
-                                identifier = payload.get(
-                                    "user_id", self._get_client_ip(request)
-                                )
-                            else:
-                                identifier = self._get_client_ip(request)
-                        else:
-                            identifier = self._get_client_ip(request)
-                    else:
-                        identifier = self._get_client_ip(request)
-
-                    # Get current window
-                    now = datetime.now(timezone.utc)
-                    window_start = now - timedelta(minutes=window_minutes)
-
-                    # Check rate limit
-                    rate_limits = self._get_collection("rate_limits")
-
-                    # Count requests in current window
-                    request_count = rate_limits.count_documents(
-                        {
-                            "identifier": identifier,
-                            "endpoint": request.endpoint,
-                            "timestamp": {"$gte": window_start},
-                        }
-                    )
-
-                    if request_count >= max_requests:
-                        logger.warning(
-                            f"Rate limit exceeded for {identifier} on {request.endpoint}"
-                        )
-                        return (
-                            jsonify(
-                                {
-                                    "status": "error",
-                                    "message": "Rate limit exceeded. Please try again later.",
-                                    "errors": {"rateLimit": "Too many requests"},
-                                }
-                            ),
-                            429,
-                        )
-
-                    # Record this request
-                    rate_limits.insert_one(
-                        {
-                            "identifier": identifier,
-                            "endpoint": request.endpoint,
-                            "timestamp": now,
-                            "ip_address": self._get_client_ip(request),
-                            "user_agent": request.headers.get("User-Agent", ""),
-                        }
-                    )
-
-                    # Clean up old records (optional, can be done via background job)
-                    cutoff_time = now - timedelta(hours=24)
-                    rate_limits.delete_many({"timestamp": {"$lt": cutoff_time}})
-
-                    return f(*args, **kwargs)
-
-                except Exception as e:
-                    logger.error(f"Rate limiting error: {str(e)}")
-                    # On error, allow the request to proceed
-                    return f(*args, **kwargs)
-
-            return decorated_function
-
-        return decorator
-
-    def enhanced_token_required(self, f):
-        """Enhanced token validation with additional security checks"""
-
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            token = None
-
-            # Get token from Authorization header
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.startswith("Bearer "):
-                token = auth_header[7:]
-
-            if not token:
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Authentication token is missing",
-                            "errors": {"token": "Token is required"},
-                        }
-                    ),
-                    401,
-                )
-
-            # Verify token
-            payload = verify_token(token)
-            if not payload:
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Token is invalid or expired",
-                            "errors": {"token": "Invalid or expired token"},
-                        }
-                    ),
-                    401,
-                )
-
-            # Additional security checks
-            if payload.get("type") != "access":
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Invalid token type",
-                            "errors": {"token": "Invalid token type"},
-                        }
-                    ),
-                    401,
-                )
-
-            # Get user from database
-            try:
-                user = self.user_model.find_by_id(payload["user_id"])
-                if not user:
-                    return (
-                        jsonify(
-                            {
-                                "status": "error",
-                                "message": "User not found",
-                                "errors": {"user": "User not found"},
-                            }
-                        ),
-                        401,
-                    )
-
-                if not user.get("is_active"):
-                    return (
-                        jsonify(
-                            {
-                                "status": "error",
-                                "message": "Account is deactivated",
-                                "errors": {"user": "Account is deactivated"},
-                            }
-                        ),
-                        401,
-                    )
-
-                # Add user to request context
-                request.current_user = user
-                request.current_token_payload = payload
-
-                # Log access for security monitoring
-                self._log_access(user, request)
-
-            except Exception as e:
-                logger.error(f"User verification error: {str(e)}")
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Failed to verify user",
-                            "errors": {"server": "Internal server error"},
-                        }
-                    ),
-                    500,
-                )
-
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    def _log_access(self, user, request):
-        """Log user access for security monitoring"""
+def enhanced_token_required(function):
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        scheme, _, token = request.headers.get("Authorization", "").partition(" ")
+        payload = verify_token(token) if scheme.lower() == "bearer" and token else None
+        if not payload or payload.get("type") != "access":
+            return APIResponse.error("Authentication required", 401, "UNAUTHORIZED")
         try:
-            access_logs = self._get_collection("access_logs")
-            access_logs.insert_one(
-                {
-                    "user_id": str(user["_id"]),
-                    "email": user["email"],
-                    "endpoint": request.endpoint,
-                    "method": request.method,
-                    "ip_address": self._get_client_ip(request),
-                    "user_agent": request.headers.get("User-Agent", ""),
-                    "timestamp": datetime.now(timezone.utc),
-                }
+            user = User().find_by_id(payload["user_id"])
+        except Exception:
+            logger.warning("authentication_store_unavailable")
+            return APIResponse.error(
+                "Authentication unavailable", 503, "SERVICE_UNAVAILABLE"
             )
-        except Exception as e:
-            logger.error(f"Access logging error: {str(e)}")
+        if not user or not user.get("is_active"):
+            return APIResponse.error("Account is unavailable", 401, "UNAUTHORIZED")
+        request.current_user = user
+        request.current_token_payload = payload
+        return function(*args, **kwargs)
 
-    def admin_required(self, f):
-        """Require admin role (can be extended for role-based access)"""
+    return wrapped
 
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            user = getattr(request, "current_user", None)
 
-            if not user:
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Authentication required",
-                            "errors": {"auth": "Authentication required"},
-                        }
-                    ),
-                    401,
+def roles_required(*roles):
+    allowed = {role.upper() for role in roles}
+    if not allowed <= ROLES:
+        raise ValueError("Unknown role in permission policy")
+
+    def decorate(function):
+        @enhanced_token_required
+        @wraps(function)
+        def wrapped(*args, **kwargs):
+            if user_role(request.current_user) not in allowed:
+                return APIResponse.error("Access denied", 403, "FORBIDDEN")
+            return function(*args, **kwargs)
+
+        return wrapped
+
+    return decorate
+
+
+admin_required = roles_required("ADMIN")
+
+
+def verified_email_required(function):
+    @enhanced_token_required
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        if not request.current_user.get("is_verified"):
+            return APIResponse.error(
+                "Email verification required", 403, "EMAIL_NOT_VERIFIED"
+            )
+        return function(*args, **kwargs)
+
+    return wrapped
+
+
+def rate_limit(max_requests=60, window_minutes=1, per="ip"):
+    """Fixed-window Mongo counters. Client-supplied forwarded headers are untrusted."""
+
+    def decorate(function):
+        @wraps(function)
+        def wrapped(*args, **kwargs):
+            if request.method == "OPTIONS":
+                return function(*args, **kwargs)
+            seconds = window_minutes * 60
+            now = int(datetime.now(timezone.utc).timestamp())
+            window = now // seconds
+            identity = request.remote_addr or "unknown"
+            key = hashlib.sha256(
+                f"{identity}:{request.endpoint}:{window}".encode()
+            ).hexdigest()
+            try:
+                collection = get_db().rate_limits
+                update = {
+                    "$inc": {"count": 1},
+                    "$setOnInsert": {
+                        "key": key,
+                        "expires_at": datetime.fromtimestamp(
+                            (window + 1) * seconds, timezone.utc
+                        ),
+                    },
+                }
+                try:
+                    counter = collection.find_one_and_update(
+                        {"_id": key},
+                        update,
+                        upsert=True,
+                        return_document=ReturnDocument.AFTER,
+                    )
+                except DuplicateKeyError:
+                    counter = collection.find_one_and_update(
+                        {"_id": key},
+                        {"$inc": {"count": 1}},
+                        return_document=ReturnDocument.AFTER,
+                    )
+            except Exception:
+                logger.warning("rate_limit_store_unavailable")
+                return APIResponse.error(
+                    "Service temporarily unavailable", 503, "SERVICE_UNAVAILABLE"
                 )
-
-            # Check if user has admin role
-            user_role = user.get("role", "user")
-            if user_role != "admin":
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Admin access required",
-                            "errors": {"permission": "Admin access required"},
-                        }
-                    ),
-                    403,
+            if counter["count"] > max_requests:
+                response, status = APIResponse.error(
+                    "Too many requests. Please try again later.", 429, "RATE_LIMITED"
                 )
+                response.headers["Retry-After"] = str((window + 1) * seconds - now)
+                return response, status
+            # Handler exceptions must never cause a second invocation.
+            return function(*args, **kwargs)
 
-            return f(*args, **kwargs)
+        return wrapped
 
-        return decorated_function
-
-    def verified_email_required(self, f):
-        """Require verified email address"""
-
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            user = getattr(request, "current_user", None)
-
-            if not user:
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Authentication required",
-                            "errors": {"auth": "Authentication required"},
-                        }
-                    ),
-                    401,
-                )
-
-            if not user.get("is_verified", False):
-                return (
-                    jsonify(
-                        {
-                            "status": "error",
-                            "message": "Email verification required",
-                            "errors": {
-                                "verification": "Please verify your email address"
-                            },
-                        }
-                    ),
-                    403,
-                )
-
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-
-# Create global middleware instance
-auth_middleware = AuthMiddleware()
-
-# Export decorators for easy import
-rate_limit = auth_middleware.rate_limit
-enhanced_token_required = auth_middleware.enhanced_token_required
-admin_required = auth_middleware.admin_required
-verified_email_required = auth_middleware.verified_email_required
+    return decorate

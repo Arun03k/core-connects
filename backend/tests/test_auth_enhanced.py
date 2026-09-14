@@ -10,7 +10,6 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
-
 from app import create_app
 from services.auth_service import AuthService
 from utils.password_utils import password_validator
@@ -39,7 +38,7 @@ class TestAuthenticationSystem:
 
     def test_password_validation_strong(self):
         """Test strong password validation"""
-        strong_password = "StrongP@ss123!"
+        strong_password = "StrongP@ss839!"
         is_valid, message = password_validator.validate_password(strong_password)
         assert is_valid is True
 

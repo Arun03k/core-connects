@@ -9,10 +9,11 @@
     "lint": "eslint . --config config/eslint.config.js",
     "lint:fix": "eslint . --config config/eslint.config.js --fix",
     "preview": "vite preview",
-    "type-check": "tsc --project config/tsconfig.json --noEmit",
+    "type-check": "tsc -b config/tsconfig.json --pretty false",
     "vercel-build": "npm run build",
     "fix-json": "node scripts/fix-json.cjs",
-    "postinstall": "npm run fix-json"
+    "postinstall": "npm run fix-json",
+    "test": "vitest run"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -39,6 +40,7 @@
     "globals": "^16.3.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "^4.1.11"
   }
 }

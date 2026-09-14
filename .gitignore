@@ -67,3 +67,10 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+
+# Local runtimes and generated test output
+.venv/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
