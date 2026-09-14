@@ -56,3 +56,6 @@ helpers. See PROJECT_AUDIT.md for the dependency order.
 - The Vite build still warns about the large main bundle; route-level splitting
   remains in the UI/performance phase. Mongomock emits upstream UTC deprecation
   warnings under the local Python runtime.
+
+The merge preparation also removes a duplicated deployment-readiness job key
+that prevented the Status Checks workflow from being scheduled by GitHub.
